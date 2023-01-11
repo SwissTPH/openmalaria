@@ -20,6 +20,7 @@
  */
 
 #include "Global.h"
+#include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
 #include "Population.h"
@@ -239,6 +240,7 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
 
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     PerHostAnophParams::scaleEntoAvailability(species, (P_A1 / populationSize) * availFactor);
+    initAvail = (P_A1 / populationSize) * availFactor;
 
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
@@ -288,29 +290,20 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
  * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
  * @param EIPDuration parameter from MosqTransmission (used for an estimation)
  */
-void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> FSCoefficInit, double EIRRotateAngleInit, double targetEIRInit, double propInfectious, double propInfected)
+void AnophelesModel::initEIR(const vector<double> &initEIR365, vector<double> FSCoefficInit, double EIRRotateAngleInit, double propInfectious, double propInfected)
 {
     FSCoeffic = FSCoefficInit;
     EIRRotateAngle = EIRRotateAngleInit;
+    speciesEIR = initEIR365;
 
-    double targetEIR = targetEIRInit;
-
-    // EIR for this species, with index 0 refering to value over first interval
-    std::vector<double> speciesEIR(sim::oneYear());
-
-    // Now we rescale to get an EIR of targetEIR.
-    // Calculate current sum as is usually done.
-    vectors::expIDFT(speciesEIR, FSCoeffic, EIRRotateAngle);
-    // And scale (also acts as a unit conversion):
-    FSCoeffic[0] += log(targetEIR / vectors::sum(speciesEIR));
-
-    // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    vectors::expIDFT(speciesEIR, FSCoeffic, EIRRotateAngle);
+    partialInitEIR.resize(sim::stepsPerYear(), 0.0);
 
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
     for (SimTime i = sim::zero(); i < sim::oneYear(); i = i + sim::oneDay())
-        initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
+    {
+        partialInitEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += initEIR365[i];
+    }
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
         cout << "Annual EIR for " << mosq.name << ": " << vectors::sum(speciesEIR) << endl;
@@ -334,6 +327,7 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
     // Probability of a mosquito not finding a host this day:
     double tsP_A = exp(-leaveRate * mosq.seekingDuration);
     double availDivisor = (1.0 - tsP_A) / leaveRate; // α_d
+
     // Input per-species EIR is the mean EIR experienced by a human adult.
     // We use sumPFindBite below to get required S_v.
     double sumPFindBite = sigma_f * availDivisor;
@@ -349,15 +343,11 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
 
     // -----  Calculate required S_v based on desired EIR  -----
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
+    initSvFromEIR = nHumans * meanPopAvail / sumPFindBite;
 
-    // We scale FSCoeffic to give us S_v instead of EIR.
-    // Log-values: adding log is same as exponentiating, multiplying and taking
-    // the log again.
-
-    double EIRtoS_v = nHumans * meanPopAvail / sumPFindBite;
-
-    FSCoeffic[0] += log(EIRtoS_v);
-    vectors::expIDFT(forcedS_v, FSCoeffic, EIRRotateAngle);
+    // We estimate forcedS_v from EIR
+    forcedS_v = speciesEIR;
+    vectors::scale(forcedS_v, initSvFromEIR);
 
     N_v.resize(N_v_length, numeric_limits<double>::quiet_NaN());
     O_v.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN());
@@ -817,6 +807,44 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
 }
 
 // -----  Summary and intervention functions  -----
+void AnophelesModel::changeEIRIntervention(const scnXml::NonVector &nonVectorData)
+{
+    assert(nonVectorData.getEIRDaily().present()); // XML loading code should enforce this
+    const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily();
+
+    // const scnXml::DailyValues &seasM = seasonality.getDailyValues().get();
+    // const scnXml::DailyValues::ValueSequence &daily = seasM.getValue();
+
+    // The minimum EIR allowed in the array. The product of the average EIR and a constant.
+    double minEIR = 0.01 * averageEIR(nonVectorData);
+
+    if (daily.size() < static_cast<size_t>(sim::oneYear()))
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues insufficient daily data for a year");
+
+    vector<int> nDays(sim::inSteps(sim::fromDays(daily.size() - 1)) + 1, 0);
+
+    interventionEIR.assign(nDays.size(), 0.0);
+
+    size_t required_days = static_cast<size_t>((sim::endDate() - sim::startDate()) + 1);
+
+    if (daily.size() < required_days)
+        throw util::xml_scenario_error("Insufficient intervention phase EIR values provided");
+
+    for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
+    {
+        double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
+
+        // istep is the time period to which the day is assigned.
+        size_t istep = sim::inSteps(mpcday);
+        nDays[istep]++;
+        interventionEIR[istep] += EIRdaily;
+    }
+    // divide by number of records assigned to each interval (usually one per day)
+    for (size_t i = 0; i < interventionEIR.size(); ++i)
+    {
+        interventionEIR[i] *= sim::oneTS() / static_cast<double>(nDays[i]);
+    }
+}
 
 void AnophelesModel::uninfectVectors()
 {

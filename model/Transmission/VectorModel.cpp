@@ -380,15 +380,50 @@ SimTime VectorModel::initIterate()
 
 void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
 {
+
     auto ag = human.monAgeGroup().i();
     auto cs = human.cohortSet();
     PerHost &host = human.perHostTransmission;
     host.update(human);
-    if (simulationMode == forcedEIR)
+    if(simulationMode == transientEIRknown)
     {
-        double eir = initialisationEIR[sim::moduloYearSteps(sim::ts0())] * host.relativeAvailabilityHetAge(ageYears);
-        mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
-        EIR.assign(1, eir);
+        EIR.assign(1, 0.0);
+
+        assert(simulationMode == forcedEIR);
+        for (size_t i = 0; i < speciesIndex.size(); ++i)
+        {
+            /* Calculates EIR per individual (hence N_i == 1).
+             *
+             * See comment in AnophelesModel::advancePeriod for method. */
+            double eir = species[i]->getInterventionEIR() * host.relativeAvailabilityAge(ageYears) * host.entoAvailabilityHetVecItv(i);
+            mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
+            // cout << host.availBite(i) << endl;
+            // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
+            EIR[0] += eir;
+        }
+    }
+    else if (simulationMode == forcedEIR)
+    {
+        // double eir = initialisationEIR[sim::moduloYearSteps(sim::ts0())] * host.relativeAvailabilityHetAge(ageYears);
+
+        // cout << "global: " << eir << " " <<  endl;
+        // mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
+        // EIR.assign(1, eir);
+
+        EIR.assign(1, 0.0);
+
+        assert(simulationMode == forcedEIR);
+        for (size_t i = 0; i < speciesIndex.size(); ++i)
+        {
+            /* Calculates EIR per individual (hence N_i == 1).
+             *
+             * See comment in AnophelesModel::advancePeriod for method. */
+            double eir = species[i]->getInitPartialEIR() * host.relativeAvailabilityAge(ageYears) * host.entoAvailabilityHetVecItv(i);
+            mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
+            // cout << host.availBite(i) << endl;
+            // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
+            EIR[0] += eir;
+        }
     }
     else
     {
@@ -486,6 +521,20 @@ void VectorModel::deployVectorTrap(size_t instance, double number, SimTime lifes
         species[i]->deployVectorTrap(m_rng, i, instance, number, lifespan);
     }
 }
+
+void VectorModel::changeEIRIntervention(const scnXml::NonVector &nonVectorData)
+{
+    if((simulationMode != forcedEIR) && (simulationMode != transientEIRknown))
+        throw util::xml_scenario_error("changeEIR intervention can only be used in forced EIR mode");
+
+    simulationMode = transientEIRknown;
+
+    if(speciesIndex.size() != 1)
+        throw util::xml_scenario_error("changeEIR intervention can only be used with a single anopheles species");
+
+    species[0]->changeEIRIntervention(nonVectorData);
+}
+
 void VectorModel::uninfectVectors()
 {
     for (size_t i = 0; i < speciesIndex.size(); ++i)

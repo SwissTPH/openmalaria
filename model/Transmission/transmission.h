@@ -28,10 +28,14 @@
 #include "Transmission/Anopheles/SimpleMPDAnophelesModel.h"
 #include "Transmission/Anopheles/AnophelesModelFitter.h"
 
+#include <vector>
+
 namespace OM
 {
 namespace Transmission
 {
+    using namespace OM::util;
+
 inline SimulationMode readMode(const string &str)
 {
     if (str == "forced")
@@ -62,7 +66,7 @@ inline bool anophelesCompare(const scnXml::AnophelesParams &a1, const scnXml::An
     return (a1.getSeasonality().getAnnualEIR().get() > a2.getSeasonality().getAnnualEIR().get());
 }
 
-inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::AnophelesParams &anoph, vector<double>& initialisationEIR, int populationSize)
+inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::AnophelesParams &anoph, vector<double>& initialisationEIR, int populationSize, int interventionMode)
 {
     Anopheles::AnophelesModel *anophModel;
 
@@ -111,8 +115,9 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
     if (seasonality.getInput() != "EIR")
         throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
 
+    vector<double> initEIR365;
     vector<double> FSCoeffic;
-    double EIRRotateAngle;
+    double EIRRotateAngle = 0;
     double targetEIR = seasonality.getAnnualEIR().get();
     if (seasonality.getFourierSeries().present())
     {
@@ -130,50 +135,125 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         // According to spec, EIR for first day of year (rather than EIR at the
         // exact start of the year) is generated with t=0 in Fourier series.
         EIRRotateAngle = seasFC.getEIRRotateAngle();
+
+        // EIR for this species, with index 0 refering to value over first interval
+        initEIR365.resize(sim::oneYear(), 0.0);
+
+        // Now we rescale to get an EIR of targetEIR.
+        // Calculate current sum as is usually done.
+        vectors::expIDFT(initEIR365, FSCoeffic, EIRRotateAngle);
+        // And scale (also acts as a unit conversion):
+        FSCoeffic[0] += log(targetEIR / vectors::sum(initEIR365));
+
+        // Calculate forced EIR for pre-intervention phase from FSCoeffic:
+        vectors::expIDFT(initEIR365, FSCoeffic, EIRRotateAngle);
     }
     else if (seasonality.getMonthlyValues().present())
     {
         const scnXml::MonthlyValues &seasM = seasonality.getMonthlyValues().get();
-        if (seasM.getSmoothing() != "fourier")
-            throw util::xml_scenario_error(
-                "entomology.anopheles.seasonality.monthlyValues.smoothing: only fourier supported at the moment");
-
-        const size_t N_m = 12;
-        const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
-        assert(seq.size() == N_m); // enforced by schema
-        vector<double> months(N_m);
-        double sum = 0.0;
-        for (size_t i = 0; i < N_m; ++i)
+        if (seasM.getSmoothing() == "fourier")
         {
-            months[i] = seq[i];
-            sum += months[i];
+            const size_t N_m = 12;
+            const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
+            assert(seq.size() == N_m); // enforced by schema
+            vector<double> months(N_m);
+            double sum = 0.0;
+            for (size_t i = 0; i < N_m; ++i)
+            {
+                months[i] = seq[i];
+                sum += months[i];
+            }
+            // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
+            double min = sum / 1000.0;
+            for (size_t i = 0; i < N_m; ++i)
+            {
+                if (months[i] < min) months[i] = min;
+            }
+
+            FSCoeffic.assign(5, 0.0);
+            // TODO: determine whether to use Fourier Series Coefficient method or
+            // Discrete Fourier Transform. Former is designed for integrals (which
+            // roughly what we have?), the latter for discrete values. DFT doesn't
+            // work well when number of intervals changes?
+            util::vectors::logFourierCoefficients(months, FSCoeffic);
+
+            // The above places the value for the first month at angle 0, so
+            // effectively the first month starts at angle -2*pi/24 radians.
+            // The value for the first day of the year should start 2*pi/(365*2)
+            // radians later, so adjust EIRRotateAngle to compensate.
+
+            // Change this to 0 later?
+            EIRRotateAngle = M_PI * (1.0 / 12.0 - 1.0 / 365.0);
+
+            // EIR for this species, with index 0 refering to value over first interval
+            initEIR365.resize(sim::oneYear());
+
+            // Now we rescale to get an EIR of targetEIR.
+            // Calculate current sum as is usually done.
+            vectors::expIDFT(initEIR365, FSCoeffic, EIRRotateAngle);
+            // And scale (also acts as a unit conversion):
+            FSCoeffic[0] += log(targetEIR / vectors::sum(initEIR365));
+
+            // Calculate forced EIR for pre-intervention phase from FSCoeffic:
+            vectors::expIDFT(initEIR365, FSCoeffic, EIRRotateAngle);
         }
-        // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
-        double min = sum / 1000.0;
-        for (size_t i = 0; i < N_m; ++i)
+        else if(seasM.getSmoothing() == "none")
         {
-            if (months[i] < min) months[i] = min;
+            if (interventionMode != forcedEIR)
+            {
+                throw util::xml_scenario_error(
+                    "entomology.anopheles.seasonality.monthlyValues.smoothing: smoothing mode \"none\" is not allowed with monthly EIR values");
+            }
         }
-
-        FSCoeffic.assign(5, 0.0);
-        // TODO: determine whether to use Fourier Series Coefficient method or
-        // Discrete Fourier Transform. Former is designed for integrals (which
-        // roughly what we have?), the latter for discrete values. DFT doesn't
-        // work well when number of intervals changes?
-        util::vectors::logFourierCoefficients(months, FSCoeffic);
-
-        // The above places the value for the first month at angle 0, so
-        // effectively the first month starts at angle -2*pi/24 radians.
-        // The value for the first day of the year should start 2*pi/(365*2)
-        // radians later, so adjust EIRRotateAngle to compensate.
-
-        // Change this to 0 later?
-        EIRRotateAngle = M_PI * (1.0 / 12.0 - 1.0 / 365.0);
+        else
+        {
+            if (interventionMode != forcedEIR)
+            {
+                throw util::xml_scenario_error(
+                    "entomology.anopheles.seasonality.monthlyValues.smoothing: unknown smoothing mode");
+            }
+        }
     }
     else
     {
         assert(seasonality.getDailyValues().present()); // XML loading code should enforce this
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
+
+        if (interventionMode != forcedEIR)
+        {
+            throw util::xml_scenario_error(
+                "entomology.anopheles.seasonality.dailyValues: daily values are only allowed with forced EIR");
+        }
+
+        const scnXml::DailyValues &seasM = seasonality.getDailyValues().get();
+        const scnXml::DailyValues::ValueSequence &daily = seasM.getValue();
+
+        // The minimum EIR allowed in the array. The product of the average EIR and a constant.
+        double minEIR = 0.01 * averageEIR(seasM);
+
+        if (daily.size() < static_cast<size_t>(sim::oneYear()))
+            throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues insufficient daily data for a year");
+
+        // EIR for this species, with index 0 refering to value over first interval
+        initEIR365.resize(sim::oneYear(), 0.0);
+        vector<int> nDays(sim::oneYear(), 0.0);
+        
+        for (SimTime d = sim::zero(), endDay = daily.size(); d < endDay; d = d + sim::oneDay())
+        {
+            double EIRdaily = std::max(static_cast<double>(daily[d]), minEIR);
+
+            // Index 0 of initialisationEIR refers to the EIR affecting the
+            // first day(s) of the year. Correspondingly, the first 1 or 5 values
+            // of EIRDaily affect this (1- or 5-day) time-step.
+            size_t i = mod_nn(d, sim::oneYear());
+
+            nDays[i] += 1;
+            initEIR365[i] += EIRdaily;
+        }
+
+        // Calculate total annual EIR
+        // divide by number of records assigned to each interval (usually one per day)
+        for (SimTime d = sim::zero(); d < sim::oneYear(); d = d + sim::oneDay())
+            initEIR365[d] *= 1.0 / static_cast<double>(nDays[d]);
     }
 
     if (!seasonality.getAnnualEIR().present())
@@ -224,7 +304,10 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
 
     anophModel->initialise(i, mosqParams);
     anophModel->initAvailability(i, nhhs, populationSize);
-    anophModel->initEIR(initialisationEIR, FSCoeffic, EIRRotateAngle, targetEIR, propInfectious, propInfected);
+    anophModel->initEIR(initEIR365, FSCoeffic, EIRRotateAngle, propInfectious, propInfected);
+
+    for (SimTime i = sim::zero(); i < sim::oneYear(); i = i + sim::oneDay())
+        initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += initEIR365[i];
 
     return anophModel;
 }
@@ -258,7 +341,7 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
 
         PerHostAnophParams::init(anoph.getMosq());
 
-        Anopheles::AnophelesModel *anophModel = createAnophelesModel(i, anoph, initialisationEIR, populationSize);
+        Anopheles::AnophelesModel *anophModel = createAnophelesModel(i, anoph, initialisationEIR, populationSize, interventionMode);
         Anopheles::AnophelesModelFitter *fitter = new Anopheles::AnophelesModelFitter(*anophModel);
 
         species.push_back(std::unique_ptr<Anopheles::AnophelesModel>(anophModel));
@@ -269,9 +352,9 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
     if (interventionMode == forcedEIR)
     {
         // We don't need these anymore (now we have initialisationEIR); free memory
-        numSpecies = 0;
-        species.clear();
-        speciesIndex.clear();
+        // numSpecies = 0;
+        // species.clear();
+        // speciesIndex.clear();
     }
 
     return new VectorModel(initialisationEIR, interventionMode, std::move(species), std::move(speciesFitters), speciesIndex, populationSize);

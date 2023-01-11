@@ -248,7 +248,8 @@ int main(int argc, char* argv[])
          * (iv)        the survey times defined in Survey() */
         if(!startedFromCheckpoint)
         {
-            endTime = estEndTime;
+            // reset endTime and estEndTime to their exact value after initIterate()
+            estEndTime = endTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
             sim::s_interv = sim::zero();
             population->preMainSimInit();
             transmission->summarize(); // Only to reset TransmissionModel::inoculationsPerAgeGroup

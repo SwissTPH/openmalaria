@@ -222,19 +222,6 @@ public:
     }
 
 private:
-    double averageEIR(const scnXml::NonVector &nonVectorData)
-    {
-        // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
-        double valaverageEIR = 0.0;
-        size_t i = 0;
-        for (const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily(); i < daily.size(); ++i)
-        {
-            valaverageEIR += (double)daily[i];
-        }
-        if (i == 0) throw util::xml_scenario_error("no EIRDaily values given"); // pedantic check
-        return valaverageEIR / i;
-    }
-
     virtual void checkpoint(istream &stream)
     {
         TransmissionModel::checkpoint(stream);

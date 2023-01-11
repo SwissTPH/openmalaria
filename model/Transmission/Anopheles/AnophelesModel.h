@@ -30,8 +30,6 @@
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
-#include "rotate.h"
-
 #include <vector>
 #include <limits>
 
@@ -229,12 +227,14 @@ public:
      */
     void initAvailability(size_t species, const vector<NhhParams> &nhhs, int populationSize);
 
-    void initEIR(vector<double>& initialisationEIR, vector<double> FSCoefficInit, double EIRRotateAngleInit, double targetEIR, double propInfectious, double propInfected);
+    void initEIR(const vector<double>& initEIR365, vector<double> FSCoefficInit, double EIRRotateAngleInit, double propInfectious, double propInfected);
 
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
     inline void scaleEIR( double factor ){
         FSCoeffic[0] += log( factor );
+        vectors::scale(partialInitEIR, factor);
+        vectors::scale(speciesEIR, factor);
     }
 
     virtual void scale(double factor)
@@ -285,6 +285,10 @@ public:
     void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
+    inline double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
+    //@}
+
+    /// Intermediatary from vector model equations used to calculate EIR
     inline const vector<double>& getPartialEIR() const{ return partialEIR; }
     //@}
 
@@ -333,6 +337,12 @@ public:
                    bool isDynamic,
                    vector<double>& partialEIR, double EIR_factor);
     
+    /// Intermediatary from vector model equations used to calculate EIR in intervention mode
+    inline double getInterventionEIR() const{ return interventionEIR[sim::inSteps(sim::intervTime())] / initAvail; }
+    //@}
+
+    void changeEIRIntervention(const scnXml::NonVector &nonVectorData);
+
     ///@brief Interventions and reporting
     //@{
     void uninfectVectors();
@@ -394,6 +404,7 @@ public:
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
         initNv0FromSv & stream;
+        initSvFromEIR & stream;
         // (*emergence) & stream;
         // MosqTransmission
         mosq.restDuration & stream;
@@ -426,13 +437,28 @@ public:
     // as above, but modified by fertility factors
     double nhh_sigma_dff;
     //@}
-    
-    /** Per time-step partial calculation of EIR, per genotype.
+
+    /** The initialisationEIR for this species */
+    std::vector<double> partialInitEIR;
+
+    /** The initialisation availDivisor: (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA */
+    double initAvail;
+
+    /** init EIR.
     *
-    * See comment in advancePeriod() for details of how the EIR is calculated.
+    * Doesn't need to be checkpointed (is calculated during initialization). */
+    std::vector<double> speciesEIR;
+
+    /** Per time-step init EIR.
     *
-    * Doesn't need to be checkpointed (is recalculated each step). */
+    * Doesn't need to be checkpointed (is calculated during initialization). */
     std::vector<double> partialEIR;
+
+    /** Per time-step intervention EIR
+    *
+    * Doesn't need to be checkpointed (is calculated during initialization). */
+    std::vector<double> interventionEIR;
+
 
     // Emergence Model
     // -----  parameters (constant after initialisation)  -----
@@ -467,6 +493,10 @@ public:
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
+
+    /** Used to estimate S_v from EIR during initialization 
+     * Should be checkpointed. */
+    double initSvFromEIR;
     
     /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
      * Should be checkpointed. */

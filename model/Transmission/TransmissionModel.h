@@ -57,6 +57,32 @@ namespace Transmission
 {
 class PerHost;
 
+inline double averageEIR(const scnXml::NonVector &nonVectorData)
+{
+    // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
+    double valaverageEIR = 0.0;
+    size_t i = 0;
+    for (const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily(); i < daily.size(); ++i)
+    {
+        valaverageEIR += (double)daily[i];
+    }
+    if (i == 0) throw util::xml_scenario_error("no EIRDaily values given"); // pedantic check
+    return valaverageEIR / i;
+}
+
+inline double averageEIR(const scnXml::DailyValues &vectorData)
+{
+    // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
+    double valaverageEIR = 0.0;
+    size_t i = 0;
+    for (const scnXml::DailyValues::ValueSequence &daily = vectorData.getValue(); i < daily.size(); ++i)
+    {
+        valaverageEIR += (double)daily[i];
+    }
+    if (i == 0) throw util::xml_scenario_error("no daily values given"); // pedantic check
+    return valaverageEIR / i;
+}
+
 /** Variable describing current simulation mode. */
 enum SimulationMode
 {
@@ -187,10 +213,7 @@ public:
      * when the vector model is used this updates mosquito populations. */
     virtual void vectorUpdate(const Population &population){};
 
-    virtual void changeEIRIntervention(const scnXml::NonVector &)
-    {
-        throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
-    }
+    virtual void changeEIRIntervention(const scnXml::NonVector &) = 0;
 
     /** Does per-time-step updates and returns the EIR (inoculation rate per host
      * per time step). Should be called exactly once per time-step (at least,
