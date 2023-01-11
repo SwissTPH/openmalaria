@@ -52,6 +52,8 @@ set (OM_BOXTEST_NAMES
   PEV
   BSV
   TBV
+  DecisionTree5DayDielmo
+  HetVecDailyEIR
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

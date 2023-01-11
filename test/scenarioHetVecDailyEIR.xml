@@ -1,0 +1,561 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_45" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Ifakara Vector Model with daily values" schemaVersion="45" xsi:schemaLocation="http://openmalaria.org/schema/scenario_45 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
+    <ageGroup lowerbound="0.0">
+      <group poppercent="3.474714994" upperbound="1" />
+      <group poppercent="12.76004028" upperbound="5" />
+      <group poppercent="14.52151394" upperbound="10" />
+      <group poppercent="12.75565434" upperbound="15" />
+      <group poppercent="10.83632374" upperbound="20" />
+      <group poppercent="8.393312454" upperbound="25" />
+      <group poppercent="7.001421452" upperbound="30" />
+      <group poppercent="5.800587654" upperbound="35" />
+      <group poppercent="5.102136612" upperbound="40" />
+      <group poppercent="4.182561874" upperbound="45" />
+      <group poppercent="3.339409351" upperbound="50" />
+      <group poppercent="2.986112356" upperbound="55" />
+      <group poppercent="2.555766582" upperbound="60" />
+      <group poppercent="2.332763433" upperbound="65" />
+      <group poppercent="1.77400255" upperbound="70" />
+      <group poppercent="1.008525491" upperbound="75" />
+      <group poppercent="0.74167341" upperbound="80" />
+      <group poppercent="0.271863401" upperbound="85" />
+      <group poppercent="0.161614642" upperbound="90" />
+    </ageGroup>
+  </demography>
+  <monitoring name="Navrongo">
+    <SurveyOptions>
+      <option name="nHost" value="true" />
+      <option name="nPatent" value="true" />
+      <option name="sumlogDens" value="true" />
+      <option name="totalInfs" value="true" />
+      <option name="totalPatentInf" value="true" />
+      <option name="innoculationsPerAgeGroup" value="true" />
+    </SurveyOptions>
+    <surveys diagnostic="standard">
+      <surveyTime>1015d</surveyTime>
+      <surveyTime>1065d</surveyTime>
+      <surveyTime>1120d</surveyTime>
+      <surveyTime>1170d</surveyTime>
+      <surveyTime>1225d</surveyTime>
+      <surveyTime>1275d</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0.0">
+      <group upperbound="0.5" />
+      <group upperbound="1" />
+      <group upperbound="2" />
+      <group upperbound="4" />
+      <group upperbound="6" />
+      <group upperbound="10" />
+      <group upperbound="15" />
+      <group upperbound="20" />
+      <group upperbound="30" />
+      <group upperbound="40" />
+      <group upperbound="60" />
+      <group upperbound="99" />
+    </ageGroup>
+  </monitoring>
+  <interventions name="No Intervention" />
+  <healthSystem>
+    <ImmediateOutcomes name="no Treatment no Mortality">
+      <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ" />
+      <initialACR>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </initialACR>
+      <compliance>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </compliance>
+      <nonCompliersEffective>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1" />
+        </CQ>
+      </treatmentActions>
+      <pSeekOfficialCareUncomplicated1 value="0" />
+      <pSelfTreatUncomplicated value="0" />
+      <pSeekOfficialCareUncomplicated2 value="0" />
+      <pSeekOfficialCareSevere value="0" />
+    </ImmediateOutcomes>
+    <CFR>
+      <group lowerbound="0" value="0" />
+    </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0132" />
+      <group lowerbound="5.0" value="0.005" />
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="forced" name="Navrongo">
+    <vector>
+	  <anopheles mosquito="dummy_vector" propInfected="0.078" propInfectious="0.021">
+        <seasonality annualEIR="1" input="EIR">
+          <dailyValues>
+              <value>0.6731</value>
+              <value>0.630555</value>
+              <value>0.5873750000000001</value>
+              <value>0.84709</value>              
+              <value>1.10617</value>              
+              <value>0.80391</value>              
+              <value>0.502285</value>              
+              <value>0.200025</value>              
+              <value>0.24257</value>              
+              <value>0.285115</value>              
+              <value>0.28829</value>              
+              <value>0.29146500000000003</value>              
+              <value>0.30734</value>              
+              <value>0.32385</value>              
+              <value>0.339725</value>              
+              <value>0.346075</value>              
+              <value>0.35242500000000004</value>              
+              <value>0.307975</value>              
+              <value>0.26289</value>              
+              <value>0.44704</value>              
+              <value>0.631825</value>              
+              <value>0.815975</value>              
+              <value>1.0655299999999999</value>              
+              <value>1.31445</value>              
+              <value>0.770255</value>              
+              <value>0.22605999999999998</value>              
+              <value>0.32004</value>              
+              <value>0.414655</value>              
+              <value>0.5086350000000001</value>              
+              <value>0.273685</value>              
+              <value>0.038735</value>              
+              <value>0.05715</value>              
+              <value>0.075565</value>              
+              <value>0.10160000000000001</value>              
+              <value>0.12827000000000002</value>              
+              <value>0.154305</value>              
+              <value>0.23113999999999998</value>              
+              <value>0.30734</value>              
+              <value>0.272415</value>              
+              <value>0.23749</value>              
+              <value>0.248285</value>              
+              <value>0.259715</value>              
+              <value>0.27051</value>              
+              <value>0.17081500000000002</value>              
+              <value>0.070485</value>              
+              <value>0.32258000000000003</value>              
+              <value>0.574675</value>              
+              <value>0.44068999999999997</value>              
+              <value>0.30607</value>              
+              <value>0.17208500000000002</value>              
+              <value>0.191135</value>              
+              <value>0.210185</value>              
+              <value>0.548005</value>              
+              <value>0.885825</value>              
+              <value>0.77343</value>              
+              <value>0.6604</value>              
+              <value>0.548005</value>              
+              <value>0.2794</value>              
+              <value>0.01016</value>              
+              <value>0.053975</value>              
+              <value>0.09779</value>              
+              <value>0.268605</value>              
+              <value>0.438785</value>              
+              <value>0.6096</value>              
+              <value>0.3975500000000003</value>              
+              <value>0.18478499999999998</value>              
+              <value>0.113665</value>              
+              <value>0.04191</value>              
+              <value>0.028575</value>              
+              <value>0.01524</value>              
+              <value>0.001905</value>              
+              <value>0.027305</value>              
+              <value>0.052070000000000005</value>              
+              <value>0.04572</value>              
+              <value>0.038735</value>              
+              <value>0.055244999999999995</value>              
+              <value>0.071755</value>              
+              <value>0.08826500000000001</value>              
+              <value>0.123825</value>              
+              <value>0.159385</value>              
+              <value>0.19558</value>              
+              <value>0.23113999999999998</value>              
+              <value>0.20891500000000002</value>              
+              <value>0.187325</value>              
+              <value>0.1651</value>              
+              <value>0.08953499999999999</value>              
+              <value>0.013335000000000001</value>              
+              <value>0.036195000000000005</value>              
+              <value>0.05842</value>              
+              <value>0.09525</value>              
+              <value>0.132715</value>              
+              <value>0.169545</value>              
+              <value>0.225425</value>              
+              <value>0.28067000000000003</value>              
+              <value>0.16700500000000001</value>              
+              <value>0.052705</value>              
+              <value>0.04318</value>              
+              <value>0.033655</value>              
+              <value>0.02413</value>              
+              <value>0.012065</value>              
+              <value>0</value>              
+              <value>0</value>              
+              <value>0</value>              
+              <value>0.017145</value>              
+              <value>0.034925</value>              
+              <value>0.052070000000000005</value>              
+              <value>0.040005</value>              
+              <value>0.027305</value>              
+              <value>0.03556</value>              
+              <value>0.04318</value>              
+              <value>0.041275</value>              
+              <value>0.038735</value>              
+              <value>0.03683</value>              
+              <value>0.03429</value>              
+              <value>0.032385</value>              
+              <value>0.03048</value>              
+              <value>0.02794</value>              
+              <value>0.025400000000000002</value>              
+              <value>0.023495</value>              
+              <value>0.020955</value>              
+              <value>0.018415</value>              
+              <value>0.01651</value>              
+              <value>0.01397</value>              
+              <value>0.01143</value>              
+              <value>0.009525</value>              
+              <value>0.006985</value>              
+              <value>0.004445</value>              
+              <value>0.00254</value>              
+              <value>0</value>              
+              <value>0.00508</value>              
+              <value>0.009525</value>              
+              <value>0.01778</value>              
+              <value>0.026670000000000003</value>              
+              <value>0.034925</value>              
+              <value>0.04191</value>              
+              <value>0.048895</value>              
+              <value>0.04953</value>              
+              <value>0.050165</value>              
+              <value>0.055244999999999995</value>              
+              <value>0.05969</value>              
+              <value>0.06477</value>              
+              <value>0.05588</value>              
+              <value>0.046355</value>              
+              <value>0.03683</value>              
+              <value>0.02794</value>              
+              <value>0.018415</value>              
+              <value>0.009525</value>              
+              <value>0</value>              
+              <value>0</value>              
+              <value>0</value>              
+              <value>0.02159</value>              
+              <value>0.04318</value>              
+              <value>0.052705</value>              
+              <value>0.06223</value>              
+              <value>0.071755</value>              
+              <value>0.062865</value>              
+              <value>0.053975</value>              
+              <value>0.045085</value>              
+              <value>0.036195000000000005</value>              
+              <value>0.0762</value>              
+              <value>0.11684</value>              
+              <value>0.156845</value>              
+              <value>0.09017</value>              
+              <value>0.02286</value>              
+              <value>0.02413</value>              
+              <value>0.024765</value>              
+              <value>0.050165</value>              
+              <value>0.0762</value>              
+              <value>0.10160000000000001</value>              
+              <value>0.053975</value>              
+              <value>0.006350000000000001</value>              
+              <value>0.01651</value>              
+              <value>0.026670000000000003</value>              
+              <value>0.03683</value>              
+              <value>0.04699</value>              
+              <value>0.05715</value>              
+              <value>0.03302</value>              
+              <value>0.00889</value>              
+              <value>0.01143</value>              
+              <value>0.013335000000000001</value>              
+              <value>0.028575</value>              
+              <value>0.04381500000000001</value>              
+              <value>0.059055</value>              
+              <value>0.04572</value>              
+              <value>0.032385</value>              
+              <value>0.018415</value>              
+              <value>0.00508</value>              
+              <value>0.037465</value>              
+              <value>0.070485</value>              
+              <value>0.10287</value>              
+              <value>0.079375</value>              
+              <value>0.05588</value>              
+              <value>0.04064</value>              
+              <value>0.024765</value>              
+              <value>0.084455</value>              
+              <value>0.14478000000000002</value>              
+              <value>0.20447</value>              
+              <value>0.10731500000000001</value>              
+              <value>0.01016</value>              
+              <value>0.02794</value>              
+              <value>0.04572</value>              
+              <value>0.062865</value>              
+              <value>0.08064500000000001</value>              
+              <value>0.098425</value>              
+              <value>0.055244999999999995</value>              
+              <value>0.012065</value>              
+              <value>0.01143</value>              
+              <value>0.01016</value>              
+              <value>0.009525</value>              
+              <value>0.008255</value>              
+              <value>0.00762</value>              
+              <value>0.006350000000000001</value>              
+              <value>0.005715</value>              
+              <value>0.031115</value>              
+              <value>0.05588</value>              
+              <value>0.08826500000000001</value>              
+              <value>0.121285</value>              
+              <value>0.15367</value>              
+              <value>0.08636</value>              
+              <value>0.01905</value>              
+              <value>0.03175</value>              
+              <value>0.04445</value>              
+              <value>0.15748</value>              
+              <value>0.269875</value>              
+              <value>0.382905</value>              
+              <value>0.23495</value>              
+              <value>0.08636</value>              
+              <value>0.099695</value>              
+              <value>0.11302999999999999</value>              
+              <value>0.10795</value>              
+              <value>0.10287</value>              
+              <value>0.09779</value>              
+              <value>0.06096</value>              
+              <value>0.023495</value>              
+              <value>0.03683</value>              
+              <value>0.04953</value>              
+              <value>0.04699</value>              
+              <value>0.04381500000000001</value>              
+              <value>0.041275</value>              
+              <value>0.03937</value>              
+              <value>0.0381</value>              
+              <value>0.036195000000000005</value>              
+              <value>0.03429</value>              
+              <value>0.125095</value>              
+              <value>0.216535</value>              
+              <value>0.30734</value>              
+              <value>0.269875</value>              
+              <value>0.231775</value>              
+              <value>0.19431</value>              
+              <value>0.15621</value>              
+              <value>0.7175499999999999</value>              
+              <value>1.279525</value>              
+              <value>1.840865</value>              
+              <value>1.0483850000000001</value>              
+              <value>0.255905</value>              
+              <value>0.2451500000000002</value>              
+              <value>0.234315</value>              
+              <value>0.494665</value>              
+              <value>0.7556499999999999</value>              
+              <value>1.016</value>              
+              <value>0.9277350000000001</value>              
+              <value>0.83947</value>              
+              <value>0.43624500000000005</value>              
+              <value>0.03302</value>              
+              <value>0.7766050000000001</value>              
+              <value>1.519555</value>              
+              <value>2.26314</value>              
+              <value>1.209675</value>              
+              <value>0.15621</value>              
+              <value>0.6870700000000001</value>              
+              <value>1.21793</value>              
+              <value>1.4039849999999998</value>              
+              <value>1.5894050000000002</value>              
+              <value>1.7754599999999998</value>              
+              <value>1.654175</value>              
+              <value>1.53289</value>              
+              <value>1.411605</value>              
+              <value>2.818765</value>              
+              <value>3.32994</value>              
+              <value>3.8411150000000003</value>              
+              <value>4.35229</value>              
+              <value>2.553335</value>              
+              <value>0.753745</value>              
+              <value>0.866775</value>              
+              <value>0.9798049999999999</value>              
+              <value>2.15011</value>              
+              <value>4.670425000000001</value>              
+              <value>7.190105</value>              
+              <value>3.931285</value>              
+              <value>0.672465</value>              
+              <value>1.463675</value>              
+              <value>2.25425</value>              
+              <value>2.7876499999999997</value>              
+              <value>3.3210500000000005</value>              
+              <value>3.8544500000000004</value>              
+              <value>2.6130250000000004</value>              
+              <value>1.3716000000000002</value>              
+              <value>2.3317200000000002</value>              
+              <value>3.29184</value>              
+              <value>4.233545</value>              
+              <value>5.17525</value>              
+              <value>6.116955</value>              
+              <value>4.8850549999999995</value>              
+              <value>3.653155</value>              
+              <value>4.57585000000001</value>              
+              <value>5.498465</value>              
+              <value>6.421755</value>              
+              <value>7.34445000000001</value>              
+              <value>8.267065</value>              
+              <value>6.122035</value>              
+              <value>3.977005</value>              
+              <value>6.15315</value>              
+              <value>8.329295</value>              
+              <value>7.4803</value>              
+              <value>6.63067</value>              
+              <value>5.781675000000001</value>              
+              <value>4.73837</value>              
+              <value>3.6944299999999997</value>              
+              <value>4.7396400000000005</value>              
+              <value>5.78485</value>              
+              <value>8.175625</value>              
+              <value>10.565764999999999</value>              
+              <value>12.95654</value>              
+              <value>8.951595</value>              
+              <value>4.946015</value>              
+              <value>4.841875</value>              
+              <value>4.737735000000001</value>              
+              <value>4.633595</value>              
+              <value>4.5294550000000005</value>              
+              <value>4.42468</value>              
+              <value>4.32054</value>              
+              <value>4.2164</value>              
+              <value>4.11226</value>              
+              <value>4.00812</value>              
+              <value>3.90398</value>              
+              <value>3.79984</value>              
+              <value>3.6957000000000004</value>              
+              <value>3.5909250000000004</value>              
+              <value>3.486785</value>              
+              <value>3.382645</value>              
+              <value>3.278505</value>            
+              <value>3.174365</value>              
+              <value>3.070225</value>              
+              <value>2.966085</value>              
+              <value>2.861945</value>              
+              <value>2.75717</value>              
+              <value>2.6530299999999998</value>              
+              <value>2.54889</value>              
+              <value>2.44475</value>              
+              <value>2.34061</value>              
+              <value>2.2364699999999997</value>              
+              <value>2.13233</value>              
+              <value>2.02819</value>              
+              <value>1.9234149999999999</value>              
+              <value>1.8192750000000002</value>              
+              <value>1.715135</value>              
+              <value>1.610995</value>              
+              <value>1.506855</value>              
+              <value>1.4027150000000002</value>              
+              <value>1.298575</value>              
+              <value>1.194435</value>              
+              <value>1.08966</value>              
+              <value>0.9855200000000001</value>              
+              <value>0.8813799999999999</value>              
+              <value>0.77724</value>              
+          </dailyValues>
+        </seasonality>
+		<mosq minInfectedThreshold="0.001">
+		  <mosqRestDuration value="3"/>
+		  <extrinsicIncubationPeriod value="10"/> <!-- As eipDuration was 10 in nonforced model -->
+		  <mosqLaidEggsSameDayProportion value="0.616"/>
+		  <mosqSeekingDuration value="0.33"/>
+		  <mosqSurvivalFeedingCycleProbability value="0.623"/>
+		  <availability distr="lognormal" CV="5" />
+		  <mosqProbBiting mean="0.95" variance="0"/>
+		  <mosqProbFindRestSite mean="0.95" variance="0"/>
+		  <mosqProbResting mean="0.99" variance="0"/>
+		  <mosqProbOvipositing value="0.88"/>
+		  <mosqHumanBloodIndex value="0.98"/>
+	    </mosq>
+      </anopheles>
+    </vector>
+  </entomology>
+  <diagnostics>
+    <diagnostic name="standard" units="Other">
+      <deterministic minDensity="40" />
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <deterministic minDensity="40" />
+    </diagnostic>
+  </diagnostics>
+ <model>
+    <ModelOptions>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <!-- repeated parameter *IS* required, otherwise interpolation will
+        make parameter continually increase and the "adult age" will be wrong. -->
+      </availabilityToMosquitoes>
+    </human>
+    <parameters interval="5" iseed="1" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.385853233699891"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.173598698525799"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.31132510304451"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.334652723897705"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001039"/>
+      <parameter include="false" name="alpha" number="14" value="142601.912520000012591"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.539046599999999"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.599999999976717"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.302437899999973"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    </parameters>
+  </model>
+</om:scenario>
