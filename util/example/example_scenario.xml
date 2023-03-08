@@ -90,7 +90,7 @@
             <component id="GVI_example">
                 <GVI>
                     <!-- Exponential decay with a half-life of 3 years, see: https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions -->
-                    <decay function="exponential" L="3y"/>
+                    <decay function="multiply" f1="exponential" f2="step"/>
                     <anophelesParams mosquito="gambiae_ss">
                         <deterrency value="0.7696"/>
                         <postprandialKillingEffect value="0.0544"/>
