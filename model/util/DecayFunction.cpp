@@ -144,9 +144,7 @@ public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
         invLambda( log(2.0) / readLToDays(elt) )
-    {
-        util::streamValidate(invLambda);
-    }
+    {}
     
     double getBaseTMult() const{
         return invLambda;
@@ -241,6 +239,50 @@ private:
     double invL, k;
 };
 
+class BiphasicDecayFunction : public BaseHetDecayFunction {
+public:
+    BiphasicDecayFunction( const scnXml::DecayFunction& elt ) :
+        BaseHetDecayFunction( elt )
+    {
+        if( !elt.getInitial_efficacy().present() )
+            throw util::xml_scenario_error( "biphasic decay function: attribute initial_efficacy required" );
+        if( !elt.getRho().present() )
+            throw util::xml_scenario_error( "biphasic decay function: attribute rho required" );
+        if( !elt.getHalflife_long().present() )
+            throw util::xml_scenario_error( "biphasic decay function: attribute halflife_long required" );
+        if( !elt.getHalflife_short().present() )
+            throw util::xml_scenario_error( "biphasic decay function: attribute halflife_short required" );
+
+        initial_efficacy = elt.getInitial_efficacy().get();
+        rho = elt.getRho().get();
+        halflife_long = UnitParse::durationToDays(elt.getHalflife_long().get(), UnitParse::YEARS);
+        halflife_short = UnitParse::durationToDays(elt.getHalflife_short().get(), UnitParse::YEARS);
+
+        invL1 = log(2.0) / halflife_short;
+        invL2 = log(2.0) / halflife_long;
+    }
+    
+    double getBaseTMult() const{
+        return 1.0;
+    }
+    double eval(double effectiveAge) const{
+        return initial_efficacy * (
+            rho * exp(-effectiveAge * invL1) 
+            + (1.0 - rho) * exp(-effectiveAge * invL2)
+        );
+    }
+    
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
+        throw util::xml_scenario_error( "biphasic decay function: sampleAgeOfDecay not implemented" );
+    }
+    
+private:
+    double invL1, invL2;
+    double initial_efficacy;
+    double rho;
+    double halflife_long;
+    double halflife_short;
+};
 
 // -----  interface / static functions  -----
 
@@ -263,6 +305,8 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
+    }else if( func == "biphasic" ){
+        return unique_ptr<DecayFunction>(new BiphasicDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }

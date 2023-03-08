@@ -145,6 +145,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      <xs:enumeration value="weibull"/>
      <xs:enumeration value="hill"/>
      <xs:enumeration value="smooth-compact"/>
+     <xs:enumeration value="biphasic"/>
     </xs:restriction>
    </xs:simpleType>
   </xs:attribute>
@@ -197,6 +198,35 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           between 0 and 1.
 </xs:documentation>
     <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="initial_efficacy" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Efficacy between 0 and 1.
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="rho" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Proportion between 0 and 1, proportion of the response that is short-lived.</xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_short" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of short lived component (default to years).
+
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_long" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of long lived component (default to years).
+
+        </xs:documentation>
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>
