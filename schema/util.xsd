@@ -114,6 +114,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
    <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
   </xs:annotation>
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+   <xs:element name="decay" type="om:DecayFunction"/>
+  </xs:sequence>
   <xs:attribute name="function" use="required">
    <xs:annotation>
     <xs:documentation>
