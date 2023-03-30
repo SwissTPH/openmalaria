@@ -23,11 +23,10 @@
 #define Hmod_Output_Continuous
 
 #include "Global.h"
-#include <FastDelegate.h>
 #include <string>
 #include "Host/Human.h"
 
-using fastdelegate::MakeDelegate;
+#include <functional>
 
 namespace scnXml{ class Monitoring; }
 namespace OM {
@@ -70,9 +69,9 @@ namespace mon {
 	 * @param outputCb A callback function, which when called, outputs its
 	 * data to the passed stream, with each entry preceeded by '\t'.
 	 */
-        void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
-        /// As above, except that the called delegate is passed a reference to the Population object
-        void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const vector<Host::Human>&, ostream&>);
+    void registerCallback (string optName, string titles, function<void(ostream&)> f);
+
+    void registerCallback (string optName, string titles, function<void(const vector<Host::Human>&, ostream&)> f);
 	
 	/// Generate time-step's output. Called at beginning of time step.
         /// Passed population since some callbacks use this to generate output.

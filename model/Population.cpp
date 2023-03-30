@@ -40,6 +40,7 @@
 
 namespace OM
 {
+    using namespace std::placeholders;
     using namespace OM::util;
     using Transmission::TransmissionModel;
 
@@ -75,34 +76,23 @@ Population::Population(size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
     using mon::Continuous;
-    Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
+    Continuous.registerCallback( "hosts", "\thosts", std::bind( &Population::ctsHosts, this, _1 ) );
     // Age groups are currently hard-coded.
     ctsDemogAgeGroups.insert(ctsDemogAgeGroups.end(), { 1.0, 5.0, 10.0, 15.0, 25.0 });
     ostringstream ctsDemogTitle;
     for( double ubound : ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
-    Continuous.registerCallback( "host demography", ctsDemogTitle.str(),
-        MakeDelegate( this, &Population::ctsHostDemography ) );
-    Continuous.registerCallback( "recent births", "\trecent births",
-        MakeDelegate( this, &Population::ctsRecentBirths ) );
-    Continuous.registerCallback( "patent hosts", "\tpatent hosts",
-        MakeDelegate( this, &Population::ctsPatentHosts ) );
-    Continuous.registerCallback( "immunity h", "\timmunity h",
-        MakeDelegate( this, &Population::ctsImmunityh ) );
-    Continuous.registerCallback( "immunity Y", "\timmunity Y",
-        MakeDelegate( this, &Population::ctsImmunityY ) );
-    Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y",
-        MakeDelegate( this, &Population::ctsMedianImmunityY ) );
-    Continuous.registerCallback( "human age availability",
-        "\thuman age availability",
-        MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
-    Continuous.registerCallback( "ITN coverage", "\tITN coverage",
-        MakeDelegate( this, &Population::ctsITNCoverage ) );
-    Continuous.registerCallback( "IRS coverage", "\tIRS coverage",
-        MakeDelegate( this, &Population::ctsIRSCoverage ) );
-    Continuous.registerCallback( "GVI coverage", "\tGVI coverage",
-        MakeDelegate( this, &Population::ctsGVICoverage ) );
+    Continuous.registerCallback( "host demography", ctsDemogTitle.str(), std::bind( &Population::ctsHostDemography, this, _1 ) );
+    Continuous.registerCallback( "recent births", "\trecent births", std::bind( &Population::ctsRecentBirths, this, _1 ) );
+    Continuous.registerCallback( "patent hosts", "\tpatent hosts", std::bind( &Population::ctsPatentHosts, this, _1 ) );
+    Continuous.registerCallback( "immunity h", "\timmunity h", std::bind( &Population::ctsImmunityh, this, _1 ) );
+    Continuous.registerCallback( "immunity Y", "\timmunity Y", std::bind( &Population::ctsImmunityY, this, _1 ) );
+    Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y", std::bind( &Population::ctsMedianImmunityY, this, _1 ) );
+    Continuous.registerCallback( "human age availability", "\thuman age availability", std::bind( &Population::ctsMeanAgeAvailEffect, this, _1 ) );
+    Continuous.registerCallback( "ITN coverage", "\tITN coverage", std::bind( &Population::ctsITNCoverage, this, _1 ) );
+    Continuous.registerCallback( "IRS coverage", "\tIRS coverage", std::bind( &Population::ctsIRSCoverage, this, _1 ) );
+    Continuous.registerCallback( "GVI coverage", "\tGVI coverage", std::bind( &Population::ctsGVICoverage, this, _1 ) );
     // "nets owned" replaced by "ITN coverage"
 //     Continuous.registerCallback( "nets owned", "\tnets owned",
 //         MakeDelegate( this, &Population::ctsNetsOwned ) );

@@ -45,6 +45,8 @@
 #include <cfloat>
 #include <gsl/gsl_vector.h>
 
+using namespace std::placeholders;
+
 namespace OM
 {
 class Summary;
@@ -142,11 +144,10 @@ protected:
         opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
 
         using mon::Continuous;
-        Continuous.registerCallback("input EIR", "\tinput EIR", MakeDelegate(this, &TransmissionModel::ctsCbInputEIR));
-        Continuous.registerCallback("simulated EIR", "\tsimulated EIR", MakeDelegate(this, &TransmissionModel::ctsCbSimulatedEIR));
-        Continuous.registerCallback("human infectiousness", "\thuman infectiousness", MakeDelegate(this, &TransmissionModel::ctsCbKappa));
-        Continuous.registerCallback("num transmitting humans", "\tnum transmitting humans",
-                                    MakeDelegate(this, &TransmissionModel::ctsCbNumTransmittingHumans));
+        Continuous.registerCallback("input EIR", "\tinput EIR", std::bind(&TransmissionModel::ctsCbInputEIR, this, _1));
+        Continuous.registerCallback("simulated EIR", "\tsimulated EIR", std::bind(&TransmissionModel::ctsCbSimulatedEIR, this, _1));
+        Continuous.registerCallback("human infectiousness", "\thuman infectiousness", std::bind(&TransmissionModel::ctsCbKappa, this, _1));
+        Continuous.registerCallback("num transmitting humans", "\tnum transmitting humans", std::bind(&TransmissionModel::ctsCbNumTransmittingHumans, this, _1));
     }
 
 public:

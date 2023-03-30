@@ -115,7 +115,6 @@ include_directories (SYSTEM
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
-  ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
   # ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (

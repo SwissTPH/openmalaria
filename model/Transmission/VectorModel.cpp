@@ -237,22 +237,24 @@ VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<st
     }
 
     using mon::Continuous;
-    Continuous.registerCallback("N_v0", ctsNv0.str(), MakeDelegate(this, &VectorModel::ctsCbN_v0));
-    Continuous.registerCallback("P_A", ctsPA.str(), MakeDelegate(this, &VectorModel::ctsCbP_A));
-    Continuous.registerCallback("P_Amu", ctsPAmu.str(), MakeDelegate(this, &VectorModel::ctsCbP_Amu));
-    Continuous.registerCallback("P_A1", ctsPA1.str(), MakeDelegate(this, &VectorModel::ctsCbP_A1));
-    Continuous.registerCallback("P_Ah", ctsPAh.str(), MakeDelegate(this, &VectorModel::ctsCbP_Ah));
-    Continuous.registerCallback("P_df", ctsPdf.str(), MakeDelegate(this, &VectorModel::ctsCbP_df));
-    Continuous.registerCallback("P_dif", ctsPdif.str(), MakeDelegate(this, &VectorModel::ctsCbP_dif));
-    Continuous.registerCallback("N_v", ctsNv.str(), MakeDelegate(this, &VectorModel::ctsCbN_v));
-    Continuous.registerCallback("O_v", ctsOv.str(), MakeDelegate(this, &VectorModel::ctsCbO_v));
-    Continuous.registerCallback("S_v", ctsSv.str(), MakeDelegate(this, &VectorModel::ctsCbS_v));
+    Continuous.registerCallback("N_v0", ctsNv0.str(), std::bind( &VectorModel::ctsCbN_v0, this, _1));
+    Continuous.registerCallback("P_A", ctsPA.str(), std::bind( &VectorModel::ctsCbP_A, this, _1));
+    Continuous.registerCallback("P_Amu", ctsPAmu.str(), std::bind( &VectorModel::ctsCbP_Amu, this, _1));
+    Continuous.registerCallback("P_A1", ctsPA1.str(), std::bind( &VectorModel::ctsCbP_A1, this, _1));
+    Continuous.registerCallback("P_Ah", ctsPAh.str(), std::bind( &VectorModel::ctsCbP_Ah, this, _1));
+    Continuous.registerCallback("P_df", ctsPdf.str(), std::bind( &VectorModel::ctsCbP_df, this, _1));
+    Continuous.registerCallback("P_dif", ctsPdif.str(), std::bind( &VectorModel::ctsCbP_dif, this, _1));
+    Continuous.registerCallback("N_v", ctsNv.str(), std::bind( &VectorModel::ctsCbN_v, this, _1));
+    Continuous.registerCallback("O_v", ctsOv.str(), std::bind( &VectorModel::ctsCbO_v, this, _1));
+    Continuous.registerCallback("S_v", ctsSv.str(), std::bind( &VectorModel::ctsCbS_v, this, _1));
+
     // availability to mosquitoes relative to other humans, excluding age factor
-    Continuous.registerCallback("alpha", ctsAlpha.str(), MakeDelegate(this, &VectorModel::ctsCbAlpha));
-    Continuous.registerCallback("P_B", ctsPB.str(), MakeDelegate(this, &VectorModel::ctsCbP_B));
-    Continuous.registerCallback("P_C*P_D", ctsPCD.str(), MakeDelegate(this, &VectorModel::ctsCbP_CD));
-    Continuous.registerCallback("resource availability", ctsRA.str(), MakeDelegate(this, &VectorModel::ctsCbResAvailability));
-    Continuous.registerCallback("resource requirements", ctsRR.str(), MakeDelegate(this, &VectorModel::ctsCbResRequirements));
+    Continuous.registerCallback("alpha", ctsAlpha.str(), std::bind( &VectorModel::ctsCbAlpha, this, _1, _2));
+    Continuous.registerCallback("P_B", ctsPB.str(), std::bind( &VectorModel::ctsCbP_B, this, _1, _2));
+    Continuous.registerCallback("P_C*P_D", ctsPCD.str(), std::bind( &VectorModel::ctsCbP_CD, this, _1, _2));
+
+    Continuous.registerCallback("resource availability", ctsRA.str(), std::bind( &VectorModel::ctsCbResAvailability, this, _1));
+    Continuous.registerCallback("resource requirements", ctsRR.str(), std::bind( &VectorModel::ctsCbResRequirements, this, _1));
 }
 
 VectorModel::~VectorModel() {}

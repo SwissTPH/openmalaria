@@ -128,7 +128,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
 
 // -----  other static methods  -----
 
-void InfectionIncidenceModel::ctsReportNewInfections (ostream& stream){
+void InfectionIncidenceModel::ctsReportNewInfections (const vector<Host::Human> &, ostream& stream){
     stream << '\t' << ctsNewInfections;
     ctsNewInfections = 0;
 }
