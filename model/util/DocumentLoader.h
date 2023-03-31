@@ -44,10 +44,6 @@ public:
     * Throws on failure. */
     void loadDocument(std::string);
     
-    /** Save any changes which occurred to the document, if
-        * documentChanged is true. */
-    void saveDocument();
-    
     /** Get the base scenario element.
         *
         * Is an operator for brevity: InputData().getModel()...
