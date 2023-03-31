@@ -21,40 +21,40 @@
 
 #include "util/DocumentLoader.h"
 #include "util/errors.h"
-
-#include <iostream>
-#include <sstream>
 #include <fstream>
-#include <map>
 
-namespace OM { namespace util {
+namespace OM
+{ 
+    namespace util
+    {
+        unique_ptr<scnXml::Scenario> loadScenario(std::string lXmlFile)
+        {
+            // Opening by filename causes a schema lookup in the scenario file's dir,
+            // which does always work. Opening with a stream uses the working directory.
+            
+            // Note that the schema location can be set manually by passing properties,
+            // but we won't necessarily have the right schema version associated with
+            // the XML file in that case.
+            ifstream fileStream(lXmlFile.c_str(), ios::binary);
+            if (!fileStream.good())
+            {
+                string msg = "Error: unable to open " + lXmlFile;
+                throw util::xml_scenario_error(msg);
+            }
+            unique_ptr<scnXml::Scenario> scenario = scnXml::parseScenario (fileStream);
+            fileStream.close ();
 
-void DocumentLoader::loadDocument (std::string lXmlFile){
-    xmlFileName = lXmlFile;
-    //Parses the document
-    
-    // Opening by filename causes a schema lookup in the scenario file's dir,
-    // which does always work. Opening with a stream uses the working directory.
-    
-    // Note that the schema location can be set manually by passing properties,
-    // but we won't necessarily have the right schema version associated with
-    // the XML file in that case.
-    ifstream fileStream (lXmlFile.c_str(), ios::binary);
-    if (!fileStream.good()){
-	string msg = "Error: unable to open "+lXmlFile;
-	throw util::xml_scenario_error (msg);
+            int scenarioVersion = scenario->getSchemaVersion();
+
+            if (scenarioVersion < SCHEMA_VERSION) {
+                // Don't bother aborting. Mostly if something really is incompatible
+                // loading will not succeed anyway.
+                cerr<<"Warning: "<<lXmlFile<<" uses an old schema version (latest is "<<SCHEMA_VERSION<<")."<<endl;
+            }
+            else if (scenarioVersion > SCHEMA_VERSION)
+                throw util::xml_scenario_error ("Error: new schema version unsupported");
+
+            return scenario;
+        }
     }
-    scenario = scnXml::parseScenario (fileStream);
-    fileStream.close ();
-    int scenarioVersion = scenario->getSchemaVersion();
-    if (scenarioVersion < SCHEMA_VERSION) {
-        // Don't bother aborting. Mostly if something really is incompatible
-        // loading will not succeed anyway.
-        cerr<<"Warning: "<<lXmlFile<<" uses an old schema version (latest is "
-            <<SCHEMA_VERSION<<")."<<endl;
-    }
-    if (scenarioVersion > SCHEMA_VERSION)
-        throw util::xml_scenario_error ("Error: new schema version unsupported");
-}
-}
 }

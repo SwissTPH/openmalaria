@@ -30,51 +30,14 @@
 #include <string>
 #include <memory>
 
-namespace OM { namespace util {
+namespace OM
+{ 
+    namespace util
+    {
+        static const int SCHEMA_VERSION = 45;
 
-class DocumentLoader {
-public:
-    /// Current schema version.
-    static const int SCHEMA_VERSION = 45;
-    
-    DocumentLoader () : documentChanged(false) {}
-    
-    /** @brief Reads the document in the xmlFile
-    * 
-    * Throws on failure. */
-    void loadDocument(std::string);
-    
-    /** Get the base scenario element.
-        *
-        * Is an operator for brevity: InputData().getModel()...
-        */
-    inline const scnXml::Scenario& document() {
-        return *scenario;
+        unique_ptr<scnXml::Scenario> loadScenario(std::string lXmlFile);
     }
+}
 
-    /** Get a mutable version of scenario element.
-    *
-    * This is the only entry point for changing the scenario document.
-    * 
-    * You should set "documentChanged = true;" if you want your changes saved. */
-    inline scnXml::Scenario& getMutableScenario() {
-        return *scenario;
-    }
-
-    /** Set true if the xml document has been changed and should be saved.
-        *
-        * Note that the document will be saved between initialisation and
-        * running the main simulation, so only changes added during init will
-        * be saved. (This avoids worrying about checkpointing.) */
-    bool documentChanged;
-
-private:
-    /// Sometimes used to save changes to the xml.
-    std::string xmlFileName;
-    
-    /** @brief The xml data structure. */
-    unique_ptr<scnXml::Scenario> scenario;
-};
-
-} }
 #endif

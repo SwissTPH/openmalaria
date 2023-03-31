@@ -126,44 +126,41 @@ int main(int argc, char* argv[])
     try {
         util::set_gsl_handler();
         
-        util::DocumentLoader documentLoader;
         scenarioFile = util::CommandLine::parse (argc, argv);
-        scenarioFile = util::CommandLine::lookupResource (scenarioFile);
-        documentLoader.loadDocument(scenarioFile);
-        
-        const scnXml::Scenario &scenario = documentLoader.document();
-        const scnXml::Model &model = scenario.getModel();
-        const scnXml::Monitoring &monitoring = documentLoader.document().getMonitoring();
+        unique_ptr<scnXml::Scenario> scenario = util::loadScenario(scenarioFile);
+
+        const scnXml::Model &model = scenario->getModel();
+        const scnXml::Monitoring &monitoring = scenario->getMonitoring();
         
         // 1) elements with no dependencies on other elements initialised here:
-        sim::init( scenario );  // also reads survey dates
+        sim::init( *scenario );  // also reads survey dates
         Parameters parameters( model.getParameters() );     // depends on nothing
-        WithinHost::Genotypes::init( scenario );
+        WithinHost::Genotypes::init( *scenario );
         
         util::master_RNG.seed( model.getParameters().getIseed(), 0 ); // Init RNG with Iseed
         util::ModelOptions::init( model.getModelOptions() );
         
         // 2) elements depending on only elements initialised in (1):
-        WithinHost::diagnostics::init( parameters, scenario ); // Depends on Parameters
-        mon::initReporting( scenario ); // Reporting init depends on diagnostics and monitoring
-        Host::Human::init( parameters, scenario );
-        Host::NeonatalMortality::init( scenario.getModel().getClinical() );
-        AgeStructure::init( scenario.getDemography() );
+        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters
+        mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
+        Host::Human::init( parameters, *scenario );
+        Host::NeonatalMortality::init( scenario->getModel().getClinical() );
+        AgeStructure::init( scenario->getDemography() );
         
         // 3) elements depending on other elements; dependencies on (1) are not mentioned:
         // Transmission model initialisation depends on Transmission::PerHost and
         // genotypes (both from Human, from Population::init()) and
         // mon::AgeGroup (from Surveys.init()):
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
-        size_t popSize = scenario.getDemography().getPopSize();
+        size_t popSize = scenario->getDemography().getPopSize();
         std::unique_ptr<Population> population = unique_ptr<Population>(population::createPopulation(popSize));
-        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario.getEntomology(), popSize));
+        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario->getEntomology(), popSize));
 
         // Depends on transmission model (for species indexes):
         // MDA1D may depend on health system (too complex to verify)
-        interventions::InterventionManager::init(scenario.getInterventions(), *population, *transmission );
-        Clinical::ClinicalModel::setHS( scenario.getHealthSystem() ); // Depends on interventions, PK/PD (from humanPop)
-        mon::initCohorts( scenario.getMonitoring() ); // Depends on interventions
+        interventions::InterventionManager::init(scenario->getInterventions(), *population, *transmission );
+        Clinical::ClinicalModel::setHS( scenario->getHealthSystem() ); // Depends on interventions, PK/PD (from humanPop)
+        mon::initCohorts( scenario->getMonitoring() ); // Depends on interventions
         
         // ———  End of static data initialisation  ———
         checkpointFileName = util::CommandLine::getCheckpointName();
