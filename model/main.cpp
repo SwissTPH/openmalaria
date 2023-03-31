@@ -40,6 +40,8 @@
 #include "Parameters.h"
 #include "checkpoint.h"
 
+#include "Host/NeonatalMortality.h"
+
 #include <cerrno>
 
 namespace OM {
@@ -144,7 +146,9 @@ int main(int argc, char* argv[])
         // 2) elements depending on only elements initialised in (1):
         WithinHost::diagnostics::init( parameters, scenario ); // Depends on Parameters
         mon::initReporting( scenario ); // Reporting init depends on diagnostics and monitoring
-        Population::init( parameters, scenario );
+        Host::Human::init( parameters, scenario );
+        Host::NeonatalMortality::init( scenario.getModel().getClinical() );
+        AgeStructure::init( scenario.getDemography() );
         
         // 3) elements depending on other elements; dependencies on (1) are not mentioned:
         // Transmission model initialisation depends on Transmission::PerHost and

@@ -45,15 +45,6 @@ namespace OM
     using Transmission::TransmissionModel;
 
 // -----  Population: static data / methods  -----
-
-void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
-{
-    Host::Human::init( parameters, scenario );
-    Host::NeonatalMortality::init( scenario.getModel().getClinical() );
-    
-    AgeStructure::init( scenario.getDemography() );
-}
-
 void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);

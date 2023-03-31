@@ -40,9 +40,6 @@ namespace OM {
 class Population
 {
 public:
-    /// Call static inits of sub-models
-    static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
-
     /// Checkpointing for static data members
     static void staticCheckpoint (istream& stream);
     static void staticCheckpoint (ostream& stream); ///< ditto
