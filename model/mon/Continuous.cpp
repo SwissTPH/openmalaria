@@ -48,10 +48,10 @@ namespace OM {
         streamoff streamOff;
         streampos streamStart;
 
-        map<string, tuple<string, std::function<void(const vector<Host::Human>&, ostream&)>> > registered;
+        map<string, tuple<string, std::function<void(Population&, ostream&)>> > registered;
 
         // List that we report.
-        vector< tuple<string, std::function<void(const vector<Host::Human>&, ostream&)>> > toReport;
+        vector< tuple<string, std::function<void(Population&, ostream&)>> > toReport;
 
         SimTime ctsPeriod = sim::zero();
 
@@ -153,16 +153,22 @@ namespace OM {
 
         void ContinuousType::registerCallback (string optName, string titles, function<void(ostream&)> f){
             assert(registered.count(optName) == 0); // name clash/registered twice?
-            function<void(const vector<Host::Human>&, ostream&)> _f = [f](const vector<Host::Human>&, ostream& ostream){ f(ostream); };
+            function<void(const Population&, ostream&)> _f = [f](const Population&, ostream& ostream){ f(ostream); };
             registered[optName] = {titles, _f};
         }
 
-        void ContinuousType::registerCallback (string optName, string titles, function<void(const vector<Host::Human>&, ostream&)> f){
+        void ContinuousType::registerCallback (string optName, string titles, function<void(const vector<Host::Human> &, ostream&)> f){
+            assert(registered.count(optName) == 0); // name clash/registered twice?
+            function<void(const Population&, ostream&)> _f = [f](const Population &p, ostream& ostream){ f(p.getHumans(), ostream); };
+            registered[optName] = {titles, _f};
+        }
+
+        void ContinuousType::registerCallback (string optName, string titles, function<void(Population &, ostream&)> f){
             assert(registered.count(optName) == 0); // name clash/registered twice?
             registered[optName] = {titles, f};
         }
 
-        void ContinuousType::update (const vector<Host::Human>& population){
+        void ContinuousType::update (Population &population){
             if( ctsPeriod == sim::zero() )
                 return;	// output disabled
             if( !duringInit ){
@@ -184,6 +190,7 @@ namespace OM {
             }
             for( size_t i = 0; i < toReport.size(); ++i )
                 std::get<1>(toReport[i])( population, ctsOStream );
+
             // We must flush often to avoid temporarily outputting partial lines
             // (resulting in incorrect real-time graphs).
             ctsOStream << mon::lineEnd << flush;

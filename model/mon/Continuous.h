@@ -24,6 +24,7 @@
 
 #include "Global.h"
 #include <string>
+#include "Population.h"
 #include "Host/Human.h"
 
 #include <functional>
@@ -71,11 +72,13 @@ namespace mon {
 	 */
     void registerCallback (string optName, string titles, function<void(ostream&)> f);
 
-    void registerCallback (string optName, string titles, function<void(const vector<Host::Human>&, ostream&)> f);
+    void registerCallback (string optName, string titles, function<void(const vector<Host::Human> &, ostream&)> f);
+
+    void registerCallback (string optName, string titles, function<void(Population &, ostream&)> f);
 	
 	/// Generate time-step's output. Called at beginning of time step.
         /// Passed population since some callbacks use this to generate output.
-	void update (const vector<Host::Human> &population);
+	void update (Population &population);
         
     private:
         void checkpoint(ostream& stream);

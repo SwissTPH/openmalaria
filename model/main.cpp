@@ -80,7 +80,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
 
         // Monitoring. sim::now() gives time of end of last step,
         // and is when reporting happens in our time-series.
-        Continuous.update( population.getHumans() );
+        Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
             population.newSurvey();
             transmission.summarize();
