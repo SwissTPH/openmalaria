@@ -93,9 +93,9 @@ void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt
     }
     
     if( !elt.getCV().present() ){
+        cout << "error!" << endl;
         throw util::xml_scenario_error( "attribute \"CV\" required for sampled value when distr is not const" );
     }
-    
     if( elt.getDistr() == "lognormal" ){
         setMeanCV( mean, elt.getCV().get() );
     }else{
@@ -144,18 +144,29 @@ double LognormalSampler::sample(LocalRng& rng) const{
 
 void BetaSampler::setParamsMV( double mean, double variance ){
     if( variance > 0.0 ){
-        double c = mean / (1.0 - mean);
-        double cp1 = c + 1.0;
-        double s = cp1*cp1*variance;
-        b = (s - c) / (s*cp1);
-        a = c*b;
-    }else{
+        // double c = mean / (1.0 - mean);
+        // double cp1 = c + 1.0;
+        // double s = cp1*cp1*variance;
+        // b = (s - c) / (s*cp1);
+        // a = c*b;
+        
+        if (variance >= mean * (1.0 - mean))
+            throw util::xml_scenario_error("BetaSampler::setParamsMV: require variance < mean(1.0 - mean)");
+
+        double c = mean * ((1.0 - mean) / variance) - 1.0;
+        a = mean * c;
+        b = c - a;
+    }else if (variance == 0.0)
+    {
+        // Not using the Beta distirbution, we simply return the mean when sampling
         if( variance != 0.0 ){
-            throw TRACED_EXCEPTION_DEFAULT("BetaSampler::setParamsMV: require variance ≥ 0");
+            throw util::xml_scenario_error("BetaSampler::setParamsMV: require variance ≥ 0");
         }
         a = mean;
         b = 0.0;
     }
+    else
+        throw util::xml_scenario_error("BetaSampler::setParamsMV: require variance ≥ 0");
 }
 double BetaSampler::sample(LocalRng& rng) const{
     if( b == 0.0 ){
