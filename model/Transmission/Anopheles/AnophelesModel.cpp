@@ -282,6 +282,12 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
     const double mu1 = (1.0 - (initP_A + P_A1 + P_Ah)) / (1.0 - initP_A);
     const double mu2 = -log(initP_A) / mosq.seekingDuration;
     mosq.seekingDeathRate = mu1 * mu2;
+
+    if (mosq.seekingDeathRate <= 0)
+        throw xml_scenario_error("Anopheles::init mosq.seekingDeathRate is <= 0. \
+The probability of a mosquito surviving the entire feeding cycle \
+should be less than the product of the probabilities of a \
+mosquito surviving biting, finding a resting site, resting and ovipositing.");
 }
 
 /** Called by initialise function to init variables directly related to EIR
