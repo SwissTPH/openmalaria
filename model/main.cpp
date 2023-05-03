@@ -109,8 +109,10 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         Host::NeonatalMortality::update (population.humans);
         
         for (Host::Human& human : population.humans)
+        {
             if (human.dateOfBirth + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
                 Host::human::update(human, transmission);
+        }
        
         population.regularize();
         

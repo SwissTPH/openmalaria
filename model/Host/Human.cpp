@@ -209,23 +209,8 @@ namespace human
         }
     }
 
-    void update(Human &human, Transmission::TransmissionModel& transmission)
+    void updateCohortSet(Human &human)
     {
-        // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
-        SimTime age0 = human.age(sim::ts0());
-        if (human.clinicalModel->isDead(age0)) {
-            human.toRemove = true;
-            return;
-        }
-        
-        util::streamValidate( age0 );
-        // Age at  the end of the update period. In most cases
-        // the difference between this and age at the start is not especially
-        // important in the model design, but since we parameterised with
-        // ageYears1 we should stick with it.
-        double ageYears1 = sim::inYears(human.age(sim::ts1()));
-        // monitoringAgeGroup is the group for the start of the time step.
-        human.monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
         for( auto expIt = human.subPopExp.begin(), expEnd = human.subPopExp.end(); expIt != expEnd; ) {
             if( !(expIt->second >= sim::ts0()) ){       // membership expired
@@ -239,18 +224,41 @@ namespace human
                 ++expIt;
             }
         }
-        // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-        double EIR = transmission.getEIR( human, age0, ageYears1, EIR_per_genotype );
+    }
+
+    void update(Human &human, Transmission::TransmissionModel& transmission)
+    {
+        // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
+        SimTime age0 = human.age(sim::ts0());
+        if (human.clinicalModel->isDead(age0)) {
+            human.toRemove = true;
+            return;
+        }
+        
+        util::streamValidate( age0 );
+
+        // monitoringAgeGroup is the group for the start of the time step.
+        human.monitoringAgeGroup.update( age0 );
+        
+        updateCohortSet(human);
+
+        // Age at  the end of the update period. In most cases
+        // the difference between this and age at the start is not especially
+        // important in the model design, but since we parameterised with
+        // age1 we should stick with it.
+        double age1 = sim::inYears(human.age(sim::ts1()));
+
+        // age1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
+        double EIR = transmission.getEIR( human, age0, age1, EIR_per_genotype );
 
         int nNewInfs = human.infIncidence->numNewInfections( human, EIR );
         
-        // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-        human.withinHostModel->update(human, human.rng, nNewInfs, EIR_per_genotype, ageYears1);
-        
+        // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
+        human.withinHostModel->update(human, human.rng, nNewInfs, EIR_per_genotype, age1);
         human.infIncidence->reportNumNewInfections(human, nNewInfs);
         
-        // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
-        human.clinicalModel->update( human, ageYears1, age0 == sim::zero() );
+        // age1 used to get case fatality and sequelae probabilities, determine pathogenesis
+        human.clinicalModel->update( human, age1, age0 == sim::zero() );
         human.clinicalModel->updateInfantDeaths( age0 );
     }
 }

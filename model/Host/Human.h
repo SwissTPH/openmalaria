@@ -51,75 +51,74 @@ namespace Host {
  * Still contains some data, but most is now contained in sub-models. */
 class Human {
 public:
-  /** Initialise all variables of a human datatype.
-   * 
-   * @param dateOfBirth date of birth (usually start of next time step) */
-  Human(SimTime dateOfBirth);
-  
-  /// Allow move construction
-  Human(Human&&) = default;
-  Human& operator=(Human&&) = default;
+    /** Initialise all variables of a human datatype.
+    * 
+    * @param dateOfBirth date of birth (usually start of next time step) */
+    Human(SimTime dateOfBirth);
 
-  /// Disable copying
-  Human(const Human&) = delete;
-  Human& operator=(const Human&) = delete;
-  
+    /// Allow move construction
+    Human(Human&&) = default;
+    Human& operator=(Human&&) = default;
+
+    /// Disable copying
+    Human(const Human&) = delete;
+    Human& operator=(const Human&) = delete;
+
     /** Get human's age with respect to some time. */
     inline SimTime age( SimTime time )const{ return time - dateOfBirth; }
-    /** Date of birth. */
 
-  /** Return true if human is a member of the sub-population.
-   * 
-   * @param id Sub-population identifier. */
-  inline bool isInSubPop( interventions::ComponentId id )const{
-      auto it = subPopExp.find( id );
-      if( it == subPopExp.end() ) return false;       // no history of membership
-      else return it->second > sim::nowOrTs0();   // added: has expired?
-  }
-  
-  /** Contains per-species vector data (VectorModel only). */
-  Transmission::PerHost perHostTransmission;
-  
-  /** The WithinHostModel models parasite density and immunity */
-  unique_ptr<WithinHost::WHInterface> withinHostModel;
-  
-  /** The InfectionIncidenceModel translates per-host EIR into new infections */
-  unique_ptr<InfectionIncidenceModel> infIncidence;
-  
-  /** The ClinicalModel encapsulates pathogenesis (sickness status),
-   * case management (medicating drugs)
-   * and clinical outcomes (morbidity, reporting). */
-  unique_ptr<Clinical::ClinicalModel> clinicalModel;
- 
-  util::LocalRng rng;
-  
-  SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
+    /** Return true if human is a member of the sub-population.
+    * 
+    * @param id Sub-population identifier. */
+    inline bool isInSubPop( interventions::ComponentId id ) const {
+        auto it = subPopExp.find( id );
+        if( it == subPopExp.end() ) return false;   // no history of membership
+        else return it->second > sim::nowOrTs0();   // added: has expired?
+    }
 
-  bool toRemove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
-  
-  /** Vaccines */
-  interventions::PerHumanVaccine vaccine;
-  
-  /** Made persistant to save a lookup each time step (significant performance improvement) */
-  mon::AgeGroup monitoringAgeGroup;
+    /** Contains per-species vector data (VectorModel only). */
+    Transmission::PerHost perHostTransmission;
 
-  /** Cache, updated when human is added to or removed from a sub-population */
-  uint32_t cohortSet;
-  
-  /** The next continuous distribution in the series */
-  uint32_t nextCtsDist;
-  
-  /** This lists sub-populations of which the human is a member together with
-   * expiry time.
-   * 
-   * Definition: a human is in sub-population p if subPopExp.contains(p) and,
-   * for t=subPopExp[p], t > sim::now() (at the time of intervention
-   * deployment) or t > sim::ts0() (equiv t >= sim::ts1()) during human update.
-   * 
-   * NOTE: this discrepancy is because intervention deployment effectively
-   * happens at the end of a time step and we want a duration of 1 time step to
-   * mean 1 intervention deployment (that where the human becomes a member) and
-   * 1 human update (the next). */
+    /** The WithinHostModel models parasite density and immunity */
+    unique_ptr<WithinHost::WHInterface> withinHostModel;
+
+    /** The InfectionIncidenceModel translates per-host EIR into new infections */
+    unique_ptr<InfectionIncidenceModel> infIncidence;
+
+    /** The ClinicalModel encapsulates pathogenesis (sickness status),
+    * case management (medicating drugs)
+    * and clinical outcomes (morbidity, reporting). */
+    unique_ptr<Clinical::ClinicalModel> clinicalModel;
+
+    util::LocalRng rng;
+
+    SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
+
+    bool toRemove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
+
+    /** Vaccines */
+    interventions::PerHumanVaccine vaccine;
+
+    /** Made persistant to save a lookup each time step (significant performance improvement) */
+    mon::AgeGroup monitoringAgeGroup;
+
+    /** Cache, updated when human is added to or removed from a sub-population */
+    uint32_t cohortSet;
+
+    /** The next continuous distribution in the series */
+    uint32_t nextCtsDist;
+
+    /** This lists sub-populations of which the human is a member together with
+    * expiry time.
+    * 
+    * Definition: a human is in sub-population p if subPopExp.contains(p) and,
+    * for t=subPopExp[p], t > sim::now() (at the time of intervention
+    * deployment) or t > sim::ts0() (equiv t >= sim::ts1()) during human update.
+    * 
+    * NOTE: this discrepancy is because intervention deployment effectively
+    * happens at the end of a time step and we want a duration of 1 time step to
+    * mean 1 intervention deployment (that where the human becomes a member) and
+    * 1 human update (the next). */
     //TODO(optimisation): it might be better to instead store for each
     // ComponentId of interest the set of humans who are members
     std::map<interventions::ComponentId,SimTime> subPopExp;
