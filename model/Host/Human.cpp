@@ -20,7 +20,6 @@
  */
 
 #include "Host/Human.h"
-#include "Host/HumanHet.h"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/WithinHost/WHInterface.h"
@@ -38,7 +37,74 @@ namespace OM { namespace Host {
     using namespace OM::util;
     using interventions::ComponentId;
 
+struct HumanHet {
+    /* Human heterogeneity; affects:
+     * comorbidityFactor (stored in PathogenesisModel)
+     * treatmentSeekingFactor (stored in CaseManagementModel)
+     * availabilityFactor (stored in Transmission::PerHost) */
+    double comorbidityFactor;
+    double treatmentSeekingFactor;
+    double availabilityFactor;
+
+    HumanHet() : comorbidityFactor(1.0), treatmentSeekingFactor(1.0), availabilityFactor(1.0) {}
+};
+
 // -----  Non-static functions: creation/destruction, checkpointing  -----
+HumanHet hetSample(util::LocalRng& rng)
+{
+    HumanHet het;
+    if(util::ModelOptions::option (util::TRANS_HET)){
+        het.availabilityFactor = 0.2;
+        if( rng.bernoulli(0.5) ){
+            het.availabilityFactor = 1.8;
+        }
+    }
+    if(util::ModelOptions::option (util::COMORB_HET)){
+        het.comorbidityFactor = 0.2;
+        if( rng.bernoulli(0.5) ){
+            het.comorbidityFactor = 1.8;
+        }
+    }
+    if(util::ModelOptions::option (util::TREAT_HET)){
+        het.treatmentSeekingFactor = 0.2;
+        if( rng.bernoulli(0.5) ){
+            het.treatmentSeekingFactor = 1.8;
+        }
+    }
+    if(util::ModelOptions::option (util::TRANS_TREAT_HET)){
+        het.treatmentSeekingFactor = 0.2;
+        het.availabilityFactor = 1.8;
+        if( rng.bernoulli(0.5) ){
+            het.treatmentSeekingFactor = 1.8;
+            het.availabilityFactor = 0.2;
+        }
+    }else if(util::ModelOptions::option (util::COMORB_TREAT_HET)){
+        if( rng.bernoulli(0.5) ){
+            het.comorbidityFactor = 1.8;
+            het.treatmentSeekingFactor = 0.2;
+        }else{
+            het.comorbidityFactor = 0.2;
+            het.treatmentSeekingFactor = 1.8;
+        }
+    }else if(util::ModelOptions::option (util::COMORB_TRANS_HET)){
+        het.availabilityFactor = 1.8;
+        het.comorbidityFactor = 1.8;
+        if( rng.bernoulli(0.5) ){
+            het.availabilityFactor = 0.2;
+            het.comorbidityFactor = 0.2;
+        }
+    }else if(util::ModelOptions::option (util::TRIPLE_HET)){
+        het.availabilityFactor = 1.8;
+        het.comorbidityFactor = 1.8;
+        het.treatmentSeekingFactor = 0.2;
+        if( rng.bernoulli(0.5) ){
+            het.availabilityFactor = 0.2;
+            het.comorbidityFactor = 0.2;
+            het.treatmentSeekingFactor = 1.8;
+        }
+    }
+    return het;
+}
 
 // Create new human
 Human::Human(SimTime dateOfBirth) :
@@ -52,11 +118,12 @@ Human::Human(SimTime dateOfBirth) :
     // Initial humans are created at time 0 and may have dateOfBirth in past. Otherwise dateOfBirth must be now.
     assert( dateOfBirth == sim::nowOrTs1() || (sim::now() == sim::zero() && dateOfBirth < sim::now()) );
     
-    HumanHet het = HumanHet::sample(rng);
+    HumanHet het = hetSample(rng);
+
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( rng, het.comorbidityFactor );
-    auto iiFactor = infIncidence->getAvailabilityFactor(rng, 1.0);
+    double iiFactor = infIncidence->getAvailabilityFactor(rng, 1.0);
     perHostTransmission.initialise (rng, het.availabilityFactor * iiFactor);
-    clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
+    clinicalModel = Clinical::ClinicalModel::createClinicalModel(het.treatmentSeekingFactor);
 }
 
 // -----  Non-static functions: per-time-step update  -----
@@ -174,7 +241,7 @@ namespace human
         }
         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
         double EIR = transmission.getEIR( human, age0, ageYears1, EIR_per_genotype );
-        
+
         int nNewInfs = human.infIncidence->numNewInfections( human, EIR );
         
         // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)

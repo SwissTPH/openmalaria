@@ -42,7 +42,6 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Host/Human.h"
-#include "Host/HumanHet.h"
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/WithinHost/WHInterface.h"
 
