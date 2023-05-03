@@ -87,10 +87,6 @@ public:
   }
   //@}
   
-  /// Main human update method.
-  void update(Transmission::TransmissionModel& transmission);
-  //@}
-  
   ///@brief Deploy "intervention" functions
   //@{
   /** Add the human to an intervention component's sub-population for the given
@@ -176,52 +172,41 @@ public:
   static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
     
 public:
-  /** @brief Models
-   *
-   * These contain various sub-models used by Humans. */
-  //@{
-  /// Contains per-species vector data (VectorModel only).
+  /** Contains per-species vector data (VectorModel only). */
   Transmission::PerHost perHostTransmission;
   
-  /// The WithinHostModel models parasite density and immunity
+  /** The WithinHostModel models parasite density and immunity */
   unique_ptr<WithinHost::WHInterface> withinHostModel;
   
-private:
-  /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
-  /// Param 'dummy' isn't used but is just to allow overloading against usual constructor
-  Human(SimTime dateOfBirth, int dummy);
-  
-  /// The InfectionIncidenceModel translates per-host EIR into new infections
+  /** The InfectionIncidenceModel translates per-host EIR into new infections */
   unique_ptr<InfectionIncidenceModel> infIncidence;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
    * and clinical outcomes (morbidity, reporting). */
   unique_ptr<Clinical::ClinicalModel> clinicalModel;
-  //@}
-  
+ 
   LocalRng m_rng;
   
   SimTime m_DOB = sim::never();        // date of birth; humans are always born at the end of a time step
+
   bool m_remove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
   
-  /// Vaccines
+  /** Vaccines */
   interventions::PerHumanVaccine _vaccine;
   
-  ///@brief Cached values used by monitoring
-  //@{
-  /// Made persistant to save a lookup each time step (significant performance improvement)
+  /** Made persistant to save a lookup each time step (significant performance improvement) */
   mon::AgeGroup monitoringAgeGroup;
-  /// Cache, updated when human is added to or removed from a sub-population
+  /** Cache, updated when human is added to or removed from a sub-population */
   uint32_t m_cohortSet;
-  //@}
   
-  /// The next continuous distribution in the series
+  /** The next continuous distribution in the series */
   uint32_t nextCtsDist;
   
   //TODO(optimisation): it might be better to instead store for each
   // ComponentId of interest the set of humans who are members
   typedef std::map<interventions::ComponentId,SimTime> SubPopT;
+
   /** This lists sub-populations of which the human is a member together with
    * expiry time.
    * 
@@ -234,9 +219,19 @@ private:
    * mean 1 intervention deployment (that where the human becomes a member) and
    * 1 human update (the next). */
   SubPopT m_subPopExp;
+
+private:
+    /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
+    /// Param 'dummy' isn't used but is just to allow overloading against usual constructor
+    Human(SimTime dateOfBirth, int dummy);
   
-  friend class ::UnittestUtil;
+    friend class ::UnittestUtil;
 };
+
+namespace human
+{
+    void update(Human &human, Transmission::TransmissionModel& transmission);
+}
 
 } }
 #endif

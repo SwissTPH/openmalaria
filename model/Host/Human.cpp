@@ -93,50 +93,6 @@ Human::Human(SimTime dateOfBirth, int dummy) :
 
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
-void Human::update(Transmission::TransmissionModel& transmission) {
-    // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
-    SimTime age0 = age(sim::ts0());
-    if (clinicalModel->isDead(age0)) {
-        m_remove = true;
-        return;
-    }
-    
-    util::streamValidate( age0 );
-    // Age at  the end of the update period. In most cases
-    // the difference between this and age at the start is not especially
-    // important in the model design, but since we parameterised with
-    // ageYears1 we should stick with it.
-    double ageYears1 = sim::inYears(age(sim::ts1()));
-    // monitoringAgeGroup is the group for the start of the time step.
-    monitoringAgeGroup.update( age0 );
-    // check sub-pop expiry
-    for( auto expIt = m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; ) {
-        if( !(expIt->second >= sim::ts0()) ){       // membership expired
-            // don't flush reports
-            // report removal due to expiry
-            mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
-            m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
-            // erase element, but continue iteration
-            expIt = m_subPopExp.erase( expIt );
-        }else{
-            ++expIt;
-        }
-    }
-    // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-    double EIR = transmission.getEIR( *this, age0, ageYears1,
-            EIR_per_genotype );
-    int nNewInfs = infIncidence->numNewInfections( *this, EIR );
-    
-    // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-    withinHostModel->update(*this, m_rng, nNewInfs, EIR_per_genotype, ageYears1);
-    
-    infIncidence->reportNumNewInfections(*this, nNewInfs);
-    
-    // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
-    clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
-    clinicalModel->updateInfantDeaths( age0 );
-}
-
 void Human::addInfection(){
     withinHostModel->importInfection(m_rng);
 }
@@ -193,6 +149,54 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
 
 void Human::flushReports (){
     clinicalModel->flushReports();
+}
+
+namespace human
+{
+    void update(Human &human, Transmission::TransmissionModel& transmission)
+    {
+        // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
+        SimTime age0 = human.age(sim::ts0());
+        if (human.clinicalModel->isDead(age0)) {
+            human.m_remove = true;
+            return;
+        }
+        
+        util::streamValidate( age0 );
+        // Age at  the end of the update period. In most cases
+        // the difference between this and age at the start is not especially
+        // important in the model design, but since we parameterised with
+        // ageYears1 we should stick with it.
+        double ageYears1 = sim::inYears(human.age(sim::ts1()));
+        // monitoringAgeGroup is the group for the start of the time step.
+        human.monitoringAgeGroup.update( age0 );
+        // check sub-pop expiry
+        for( auto expIt = human.m_subPopExp.begin(), expEnd = human.m_subPopExp.end(); expIt != expEnd; ) {
+            if( !(expIt->second >= sim::ts0()) ){       // membership expired
+                // don't flush reports
+                // report removal due to expiry
+                mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, human, 1 );
+                human.m_cohortSet = mon::updateCohortSet( human.m_cohortSet, expIt->first, false );
+                // erase element, but continue iteration
+                expIt = human.m_subPopExp.erase( expIt );
+            }else{
+                ++expIt;
+            }
+        }
+        // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
+        double EIR = transmission.getEIR( human, age0, ageYears1,
+                EIR_per_genotype );
+        int nNewInfs = human.infIncidence->numNewInfections( human, EIR );
+        
+        // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
+        human.withinHostModel->update(human, human.m_rng, nNewInfs, EIR_per_genotype, ageYears1);
+        
+        human.infIncidence->reportNumNewInfections(human, nNewInfs);
+        
+        // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
+        human.clinicalModel->update( human, ageYears1, age0 == sim::zero() );
+        human.clinicalModel->updateInfantDeaths( age0 );
+    }
 }
 
 } }

@@ -83,6 +83,7 @@ void Population::regularize()
 
     for (auto it = humans.begin(); it != humans.end();) {
         bool isDead = it->remove();
+        
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
@@ -147,6 +148,7 @@ namespace population
         if (humans.size() != population.populationSize)
             throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
     }
+
     void checkpoint (Population &population, ostream& stream)
     {
         population.populationSize & stream;

@@ -41,6 +41,7 @@
 #include "checkpoint.h"
 
 #include "Host/NeonatalMortality.h"
+#include "Host/Human.h"
 
 #include <cerrno>
 
@@ -107,7 +108,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         
         for (Host::Human& human : population.humans)
             if (human.getDateOfBirth() + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
-                human.update(transmission);
+                Host::human::update(human, transmission);
        
         population.regularize();
         
