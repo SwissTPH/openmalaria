@@ -35,6 +35,8 @@
 namespace OM
 {
 
+namespace checkpoint
+{
 /** @brief checkpointing functions
 *
 * readCheckpoint/writeCheckpoint prepare to read/write the file,
@@ -130,7 +132,7 @@ void checkpoint (ostream& stream, SimTime &endTime, SimTime &estEndTime, Populat
         throw util::checkpoint_error ("stream write error");
 }
 
-void writeCheckpoint(const bool startedFromCheckpoint, const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission)
+void write(const bool startedFromCheckpoint, const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission)
 {
     // We alternate between two checkpoints, in case program is closed while writing.
     const int NUM_CHECKPOINTS = 2;
@@ -168,7 +170,7 @@ void writeCheckpoint(const bool startedFromCheckpoint, const string &checkpointF
     }
 }
 
-void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission)
+void read(const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission)
 {
     int checkpointNum = readCheckpointNum(checkpointFileName);
     
@@ -183,6 +185,8 @@ void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime 
     in.close();
   
     cerr << sim::inSteps(sim::now()) << "t loaded checkpoint" << endl;
+}
+
 }
 
 }
