@@ -46,8 +46,66 @@ namespace OM
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(size_t populationSize) : populationSize (populationSize){}
+Population::Population(size_t populationSize) : populationSize (populationSize) {}
 
+void Population::createInitialHumans()
+{
+    /* We create a whole population here, regardless of whether humans can
+    survive until start of vector init (vector model needs a whole population
+    structure in any case). However, we don't update humans known not to survive
+    until vector init, which saves computation and memory (no infections). */
+    
+    int cumulativePop = 0;
+    for(size_t iage_prev = AgeStructure::getMaxTStepsPerLife(), iage = iage_prev - 1;
+         iage_prev > 0; iage_prev = iage, iage -= 1 )
+    {
+        int targetPop = AgeStructure::targetCumPop( iage, populationSize );
+        while (cumulativePop < targetPop) {
+            SimTime dob = sim::zero() - sim::fromTS(iage);
+            util::streamValidate( dob );
+            humans.push_back( Host::Human (dob) );
+            ++cumulativePop;
+        }
+    }
+    
+    // Vector setup dependant on human population structure (we *want* to
+    // include all humans, whether they'll survive to vector init phase or not).
+    assert( sim::now() == sim::zero() );      // assumed below
+}
+
+void Population::regularize()
+{
+    //NOTE: other parts of code are not set up to handle changing population size. Also
+    // populationSize is assumed to be the _actual and exact_ population size by other code.
+    //targetPop is the population size at time t allowing population growth
+    //int targetPop = (int) (populationSize * exp( AgeStructure::rho * sim::ts1().inSteps() ));
+    int cumPop = 0;
+
+    for (auto it = humans.begin(); it != humans.end();) {
+        bool isDead = it->remove();
+        // if (Actual number of people so far > target population size for this age)
+        // "outmigrate" some to maintain population shape
+        //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
+        // Also see targetPop = ... comment above
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(it->age(sim::ts1())), populationSize);
+        
+        if( isDead || outmigrate ){
+            it = humans.erase (it);
+            continue;
+        }
+        ++cumPop;
+        ++it;
+    } // end of per-human updates
+
+    // increase population size to targetPop
+    recentBirths += (populationSize - cumPop);
+    while (cumPop < (int)populationSize) {
+        // humans born at end of this time step = beginning of next, hence ts1
+        humans.push_back( Host::Human (sim::ts1()) );
+        ++cumPop;
+    }
+}
+    
 namespace population
 {
     Population *createPopulation(size_t populationSize)
@@ -98,108 +156,6 @@ namespace population
         for(Host::Human &human : humans)
             human & stream;
     }
-
-    void createInitialHumans(Population &population)
-    {
-        const int populationSize = population.populationSize;
-        auto &humans = population.humans;
-
-        /* We create a whole population here, regardless of whether humans can
-        survive until start of vector init (vector model needs a whole population
-        structure in any case). However, we don't update humans known not to survive
-        until vector init, which saves computation and memory (no infections). */
-        
-        int cumulativePop = 0;
-        for(size_t iage_prev = AgeStructure::getMaxTStepsPerLife(), iage = iage_prev - 1;
-             iage_prev > 0; iage_prev = iage, iage -= 1 )
-        {
-            int targetPop = AgeStructure::targetCumPop( iage, populationSize );
-            while (cumulativePop < targetPop) {
-                SimTime dob = sim::zero() - sim::fromTS(iage);
-                util::streamValidate( dob );
-                humans.push_back( Host::Human (dob) );
-                ++cumulativePop;
-            }
-        }
-        
-        // Vector setup dependant on human population structure (we *want* to
-        // include all humans, whether they'll survive to vector init phase or not).
-        assert( sim::now() == sim::zero() );      // assumed below
-    }
-
-
-    // -----  non-static methods: simulation loop  -----
-
-    void update(Population &population, Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
-        const int populationSize = population.populationSize;
-        int &recentBirths = population.recentBirths;
-        auto &humans = population.humans;
-
-        // This should only use humans being updated: otherwise too small a proportion
-        // will be infected. However, we don't have another number to use instead.
-        // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
-        // (until humans old enough to be pregnate get updated and can be infected).
-        Host::NeonatalMortality::update (humans);
-        
-        // Update each human in turn
-        for (Host::Human& human : humans) {
-            // Update human, and remove if too old.
-            // We only need to update humans who will survive past the end of the
-            // "one life span" init phase (this is an optimisation). lastPossibleTS
-            // is the time step they die at (some code still runs on this step).
-            SimTime lastPossibleTS = human.getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
-            if (lastPossibleTS >= firstVecInitTS)
-                human.update(transmission);
-        }
-        
-        //NOTE: other parts of code are not set up to handle changing population size. Also
-        // populationSize is assumed to be the _actual and exact_ population size by other code.
-        //targetPop is the population size at time t allowing population growth
-        //int targetPop = (int) (populationSize * exp( AgeStructure::rho * sim::ts1().inSteps() ));
-        int targetPop = populationSize;
-        int cumPop = 0;
-
-        for (auto it = humans.begin(); it != humans.end();) {
-            bool isDead = it->remove();
-            // if (Actual number of people so far > target population size for this age)
-            // "outmigrate" some to maintain population shape
-            //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
-            // Also see targetPop = ... comment above
-            bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(it->age(sim::ts1())), targetPop);
-            
-            if( isDead || outmigrate ){
-                it = humans.erase (it);
-                continue;
-            }
-            ++cumPop;
-            ++it;
-        } // end of per-human updates
-
-        // increase population size to targetPop
-        recentBirths += (targetPop - cumPop);
-        while (cumPop < targetPop) {
-            // humans born at end of this time step = beginning of next, hence ts1
-            humans.push_back( Host::Human (sim::ts1()) );
-            ++cumPop;
-        }
-    }
-
-
-    // -----  non-static methods: reporting  -----
-
-    void newSurvey (Population &population)
-    {
-        for(Host::Human &human : population.humans) {
-            human.summarize();
-        }
-    }
-
-    void flushReports (Population &population)
-    {
-        for(Host::Human &human : population.humans) {
-            human.flushReports();
-        }
-    }  
 
     void ctsHosts (Population &population, ostream& stream){
         // this option is intended for debugging human initialization; normally this should equal populationSize.

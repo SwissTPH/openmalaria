@@ -84,7 +84,8 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         // and is when reporting happens in our time-series.
         Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
-            population::newSurvey(population);
+            for(Host::Human &human : population.humans)
+                human.summarize();
             transmission.summarize();
             mon::concludeSurvey();
         }
@@ -100,7 +101,15 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         // This needs the whole population (it is an approximation before all humans are updated).
         transmission.vectorUpdate(population.humans);
         
-        population::update(population, transmission, humanWarmupLength);
+        // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
+        // (until humans old enough to be pregnate get updated and can be infected).
+        Host::NeonatalMortality::update (population.humans);
+        
+        for (Host::Human& human : population.humans)
+            if (human.getDateOfBirth() + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
+                human.update(transmission);
+       
+        population.regularize();
         
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
@@ -207,7 +216,7 @@ int main(int argc, char* argv[])
         else
         {
             Continuous.init( monitoring, false );
-            population::createInitialHumans(*population);
+            population->createInitialHumans();
             transmission->init2(population->humans);
         
             // ofstream humanFile ("humans.txt");
@@ -280,7 +289,8 @@ int main(int argc, char* argv[])
        
         cerr << '\r' << flush;  // clean last line of progress-output
         
-        population::flushReports(*population);        // ensure all Human instances report past events
+        for(Host::Human &human : population->humans)
+            human.flushReports();
         mon::writeSurveyData();
         
     # ifdef OM_STREAM_VALIDATOR

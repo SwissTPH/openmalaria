@@ -27,14 +27,8 @@
 #include "Host/Human.h"
 
 #include <vector>
-#include <fstream>
-#include <utility>  // pair
 
-namespace scnXml{
-    class Scenario;
-}
 namespace OM {
-    class Parameters;
 
 //! The simulated human population
 class Population
@@ -42,66 +36,53 @@ class Population
 public:
     Population(size_t populationSize);
 
-    //! Size of the human population
+    /** Creates the initial population of Humans */
+    void createInitialHumans();
+
+    /** Remove dead humans, outmigrate others and introduce babies to
+     * while keeping the population size and demography distirbution unchanged. */
+    void regularize();
+
+    /** Size of the human population */
     size_t populationSize;
     
-    ///@brief Variables for continuous reporting
-    //@{
+    /** Variables for continuous reporting */
     vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
     
-    /// Births since last continuous output
+    /** Births since last continuous output */
     int recentBirths = 0;
-    //@}
     
-    /** The simulated human population
-     *
-     * The list of all humans, ordered from oldest to youngest. */
+    /** The simulated human population */
     vector<Host::Human> humans;
 };
 
-    namespace population
-    {
-        Population *createPopulation(size_t populationSize);
+namespace population
+{
+    Population *createPopulation(size_t populationSize);
 
-        void checkpoint(Population &population, istream& stream);
-        void checkpoint(Population &population, ostream& stream);
+    void checkpoint(Population &population, istream& stream);
+    void checkpoint(Population &population, ostream& stream);
 
-        /** Creates the initial population of Humans according to cumAgeProp. */
-        void createInitialHumans(Population &population);
+    /// Delegate to print the number of hosts
+    void ctsHosts (Population &population, ostream& stream);
+    /// Delegate to print cumulative numbers of hosts under various age limits
+    void ctsHostDemography (Population &population, ostream& stream);
+    /// Delegate to print the number of births since last count
+    void ctsRecentBirths (Population &population, ostream& stream);
+    /// Delegate to print the number of patent hosts
+    void ctsPatentHosts (Population &population, ostream& stream);
+    /// Delegate to print immunity's cumulativeh parameter
+    void ctsImmunityh (Population &population, ostream& stream);
+    /// Delegate to print immunity's cumulativeY parameter (mean across population)
+    void ctsImmunityY (Population &population, ostream& stream);
+    /// Delegate to print immunity's cumulativeY parameter (median across population)
+    void ctsMedianImmunityY (Population &population, ostream& stream);
+    /// Delegate to print the mean age-based availability reduction of each human relative to an adult
+    void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
+    void ctsITNCoverage (Population &population, ostream& stream);
+    void ctsIRSCoverage (Population &population, ostream& stream);
+    void ctsGVICoverage (Population &population, ostream& stream);
+}
 
-        //! Updates all individuals in the list for one time-step
-        /*!  Also updates the population-level measures such as infectiousness, and
-             the age-distribution by c outmigrating or creating new births if
-             necessary */
-        void update( Population &population, Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
-
-        //! Makes a survey
-        void newSurvey(Population &population);
-
-        /// Flush anything pending report. Should only be called just before destruction.
-        void flushReports(Population &population);
-
-        /// Delegate to print the number of hosts
-        void ctsHosts (Population &population, ostream& stream);
-        /// Delegate to print cumulative numbers of hosts under various age limits
-        void ctsHostDemography (Population &population, ostream& stream);
-        /// Delegate to print the number of births since last count
-        void ctsRecentBirths (Population &population, ostream& stream);
-        /// Delegate to print the number of patent hosts
-        void ctsPatentHosts (Population &population, ostream& stream);
-        /// Delegate to print immunity's cumulativeh parameter
-        void ctsImmunityh (Population &population, ostream& stream);
-        /// Delegate to print immunity's cumulativeY parameter (mean across population)
-        void ctsImmunityY (Population &population, ostream& stream);
-        /// Delegate to print immunity's cumulativeY parameter (median across population)
-        void ctsMedianImmunityY (Population &population, ostream& stream);
-        /// Delegate to print the mean age-based availability reduction of each human relative to an adult
-        void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
-        void ctsITNCoverage (Population &population, ostream& stream);
-        void ctsIRSCoverage (Population &population, ostream& stream);
-        void ctsGVICoverage (Population &population, ostream& stream);
-        /// Delegate to print the mean hole index of all bed nets
-        //     void ctsNetHoleIndex (ostream& stream);
-    }
 }
 #endif
