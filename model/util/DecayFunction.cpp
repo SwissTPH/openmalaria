@@ -50,21 +50,14 @@ public:
     }
 };
 
-class ConstantDecayFunction : public DecayFunction {
+class ConstantDecayFunction : public BaseHetDecayFunction {
 public:
     ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
-        DecayFunction( elt )
+        BaseHetDecayFunction( elt )
     {}
 
-    DecayFunctionHet hetSample (LocalRng& rng) const{
-        DecayFunctionHet ret;
-        ret.timeFactorHet = 1.0;
-        return ret;
-    }
-    DecayFunctionHet hetSample (NormalSample sample) const{
-        DecayFunctionHet ret;
-        ret.timeFactorHet = 1.0;
-        return ret;
+    double getBaseTimeFactorHet() const{
+        return 1.0;
     }
     
     double eval(double effectiveAge) const{
