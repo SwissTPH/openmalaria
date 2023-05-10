@@ -42,11 +42,11 @@ public:
     
     virtual double getBaseTMult() const =0;
     
-    DecayFuncHet hetSample (LocalRng& rng) const{
-        return DecayFuncHet(het.sample(rng) * getBaseTMult());
+    DecayFunctionHet hetSample (LocalRng& rng) const{
+        return DecayFunctionHet(het.sample(rng) * getBaseTMult());
     }
-    DecayFuncHet hetSample (NormalSample sample) const{
-        return DecayFuncHet(het.sample(sample) * getBaseTMult());
+    DecayFunctionHet hetSample (NormalSample sample) const{
+        return DecayFunctionHet(het.sample(sample) * getBaseTMult());
     }
 };
 
@@ -56,20 +56,20 @@ public:
         DecayFunction( elt )
     {}
 
-    DecayFuncHet hetSample (LocalRng& rng) const{
-        DecayFuncHet ret;
+    DecayFunctionHet hetSample (LocalRng& rng) const{
+        DecayFunctionHet ret;
         ret.tMult = 1.0;
         return ret;
     }
-    DecayFuncHet hetSample (NormalSample sample) const{
-        DecayFuncHet ret;
+    DecayFunctionHet hetSample (NormalSample sample) const{
+        DecayFunctionHet ret;
         ret.tMult = 1.0;
         return ret;
     }
     
     double eval(double effectiveAge) const{
         // Note: we now require all decay functions to return 0 when time > 0
-        // and the DecayFuncHet is default-constructed. So const *after deployment*.
+        // and the DecayFunctionHet is default-constructed. So const *after deployment*.
         if( effectiveAge == numeric_limits<double>::infinity() )
             return 0.0;
         return 1.0;

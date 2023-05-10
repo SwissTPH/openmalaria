@@ -97,7 +97,7 @@ private:
     SimTime timeLastDeployment = sim::never();
     /// Efficacy at last deployment (undecayed)
     vector<double> perGenotypeInitialEfficacy;
-    util::DecayFuncHet hetSample;
+    util::DecayFunctionHet hetSample;
     
     friend class PerHumanVaccine;
 };

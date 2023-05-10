@@ -168,7 +168,7 @@ struct TrapParams {
 struct TrapData {
     size_t instance; // index in trapParams
     double initialAvail; // initial availability (avail per trap * num traps)
-    DecayFuncHet availHet; // parameter for decay of availability
+    DecayFunctionHet availHet; // parameter for decay of availability
     SimTime deployTime = sim::never(); // deploy time (for decay function)
     SimTime expiry = sim::never(); // date at which this intervention should be deleted
 };

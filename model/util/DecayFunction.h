@@ -41,13 +41,13 @@ namespace util {
  *
  * The default constructor only sets an NaN value; new instances must be
  * sampled by DecayFunction::hetSample() before use. */
-class DecayFuncHet {
+class DecayFunctionHet {
     double tMult;
-    DecayFuncHet(double tMult): tMult(tMult) {}
+    DecayFunctionHet(double tMult): tMult(tMult) {}
 public:
     /** Default value: should make all eval() calls return 0 (i.e. infinitely
      * old deployment). */
-    DecayFuncHet() : tMult( numeric_limits<double>::infinity() ) {}
+    DecayFunctionHet() : tMult( numeric_limits<double>::infinity() ) {}
     
     inline double getTMult() const{
         return tMult;
@@ -62,11 +62,11 @@ public:
     friend class BaseHetDecayFunction;
     friend class ConstantDecayFunction;
  };
-
+ 
 /** An interface for a few types of decay function (some of which may also be
  * suitible survival functions).
  *
- * Heterogeneity is implemented by passing a DecayFuncHet object to the eval
+ * Heterogeneity is implemented by passing a DecayFunctionHet object to the eval
  * function; this should be sampled by the same DecayFunction.
  *****************************************************************************/
 class DecayFunction
@@ -91,29 +91,29 @@ public:
      * the intervention.
      * 
      * @param age Age of intervention/decayed property
-     * @param sample A DecayFuncHet value sampled for the intervention and
+     * @param sample A DecayFunctionHet value sampled for the intervention and
      *  individual.
      * 
      * NOTE: As it is, values are calculated for the end of the time-period
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    inline double eval( SimTime age, DecayFuncHet sample )const{
+    inline double eval( SimTime age, DecayFunctionHet sample )const{
         if(complement)
             return 1.0 - eval( age * sample.getTMult() );
         else
             return eval( age * sample.getTMult() );
     }
     
-    /** Sample a DecayFuncHet value (should be stored per individual).
+    /** Sample a DecayFunctionHet value (should be stored per individual).
      * 
-     * Note that a DecayFuncHet is needed to call eval() even if heterogeneity
+     * Note that a DecayFunctionHet is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual DecayFuncHet hetSample (LocalRng& rng) const =0;
+    virtual DecayFunctionHet hetSample (LocalRng& rng) const =0;
     
-    /** Generate a DecayFuncHet value from an existing sample. */
-    virtual DecayFuncHet hetSample (NormalSample sample) const =0;
+    /** Generate a DecayFunctionHet value from an existing sample. */
+    virtual DecayFunctionHet hetSample (NormalSample sample) const =0;
     
     /** Say you have a population of objects which each have two states:
      * decayed and not decayed. If you want to use a DecayFunction to model

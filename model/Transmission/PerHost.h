@@ -36,7 +36,7 @@ using Anopheles::PerHostAnophParams;
 using Anopheles::PerHostAnoph;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
-using util::DecayFuncHet;
+using util::DecayFunctionHet;
 using util::LocalRng;
 
 class HumanVectorInterventionComponent;

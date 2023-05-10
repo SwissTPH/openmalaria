@@ -30,7 +30,7 @@
 namespace OM {
 namespace interventions {
     using util::DecayFunction;
-    using util::DecayFuncHet;
+    using util::DecayFunctionHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using util::LocalRng;
@@ -271,7 +271,7 @@ private:
     // these parameters are sampled from log-normal per net, but thereafter constant:
     double holeRate;	// rate at which new holes are created (holes/time-step)
     double ripRate;		// rate at which holes are enlarged (rips/hole/time-step)
-    DecayFuncHet insecticideDecayHet;
+    DecayFunctionHet insecticideDecayHet;
 };
 
 } }
