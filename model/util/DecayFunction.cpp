@@ -40,13 +40,13 @@ public:
         het.setMeanCV( 1.0, elt.getCV() );
     }
     
-    virtual double getBaseTMult() const =0;
+    virtual double getBaseTimeFactorHet() const =0;
     
     DecayFunctionHet hetSample (LocalRng& rng) const{
-        return DecayFunctionHet(het.sample(rng) * getBaseTMult());
+        return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
     }
     DecayFunctionHet hetSample (NormalSample sample) const{
-        return DecayFunctionHet(het.sample(sample) * getBaseTMult());
+        return DecayFunctionHet(het.sample(sample) * getBaseTimeFactorHet());
     }
 };
 
@@ -58,12 +58,12 @@ public:
 
     DecayFunctionHet hetSample (LocalRng& rng) const{
         DecayFunctionHet ret;
-        ret.tMult = 1.0;
+        ret.timeFactorHet = 1.0;
         return ret;
     }
     DecayFunctionHet hetSample (NormalSample sample) const{
         DecayFunctionHet ret;
-        ret.tMult = 1.0;
+        ret.timeFactorHet = 1.0;
         return ret;
     }
     
@@ -93,7 +93,7 @@ public:
         invL( 1.0 / readLToDays(elt) )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return invL;
     }
     double eval(double effectiveAge) const{
@@ -119,7 +119,7 @@ public:
         invL( 1.0 / readLToDays(elt) )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return invL;
     }
     double eval(double effectiveAge) const{
@@ -146,7 +146,7 @@ public:
         invLambda( log(2.0) / readLToDays(elt) )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return invLambda;
     }
     double eval(double effectiveAge) const{
@@ -169,7 +169,7 @@ public:
         k( elt.getK() )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return constOverLambda;
     }
     double eval(double effectiveAge) const{
@@ -197,7 +197,7 @@ public:
         k( elt.getK() )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return invL;
     }
     double eval(double effectiveAge) const{
@@ -220,7 +220,7 @@ public:
         k( elt.getK() )
     {}
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return invL;
     }
     double eval(double effectiveAge) const{
@@ -262,7 +262,7 @@ public:
         invL2 = log(2.0) / halflife_long;
     }
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return 1.0;
     }
     double eval(double effectiveAge) const{

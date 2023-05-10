@@ -42,21 +42,21 @@ namespace util {
  * The default constructor only sets an NaN value; new instances must be
  * sampled by DecayFunction::hetSample() before use. */
 class DecayFunctionHet {
-    double tMult;
-    DecayFunctionHet(double tMult): tMult(tMult) {}
+    double timeFactorHet;
+    DecayFunctionHet(double timeFactorHet): timeFactorHet(timeFactorHet) {}
 public:
     /** Default value: should make all eval() calls return 0 (i.e. infinitely
      * old deployment). */
-    DecayFunctionHet() : tMult( numeric_limits<double>::infinity() ) {}
+    DecayFunctionHet() : timeFactorHet( numeric_limits<double>::infinity() ) {}
     
-    inline double getTMult() const{
-        return tMult;
+    inline double getTimeFactorHet() const{
+        return timeFactorHet;
     }
     
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        tMult & stream;
+        timeFactorHet & stream;
     }
     
     friend class BaseHetDecayFunction;
@@ -100,9 +100,9 @@ public:
      * interventions being effective for a month or more. */
     inline double eval( SimTime age, DecayFunctionHet sample )const{
         if(complement)
-            return 1.0 - eval( age * sample.getTMult() );
+            return 1.0 - eval( age * sample.getTimeFactorHet() );
         else
-            return eval( age * sample.getTMult() );
+            return eval( age * sample.getTimeFactorHet() );
     }
     
     /** Sample a DecayFunctionHet value (should be stored per individual).
