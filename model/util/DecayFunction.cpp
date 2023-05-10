@@ -32,6 +32,54 @@
 namespace OM {
 namespace util {
 
+class BaseHetDecayFunction : public DecayFunction {
+    LognormalSampler het;
+public:
+    BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
+        DecayFunction( elt )
+    {
+        het.setMeanCV( 1.0, elt.getCV() );
+    }
+    
+    virtual double getBaseTMult() const =0;
+    
+    DecayFunctionHet hetSample (LocalRng& rng) const{
+        return DecayFunctionHet(het.sample(rng) * getBaseTMult());
+    }
+    DecayFunctionHet hetSample (NormalSample sample) const{
+        return DecayFunctionHet(het.sample(sample) * getBaseTMult());
+    }
+};
+
+class ConstantDecayFunction : public DecayFunction {
+public:
+    ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
+        DecayFunction( elt )
+    {}
+
+    DecayFunctionHet hetSample (LocalRng& rng) const{
+        DecayFunctionHet ret;
+        ret.tMult = 1.0;
+        return ret;
+    }
+    DecayFunctionHet hetSample (NormalSample sample) const{
+        DecayFunctionHet ret;
+        ret.tMult = 1.0;
+        return ret;
+    }
+    
+    double eval(double effectiveAge) const{
+        // Note: we now require all decay functions to return 0 when time > 0
+        // and the DecayFunctionHet is default-constructed. So const *after deployment*.
+        if( effectiveAge == numeric_limits<double>::infinity() )
+            return 0.0;
+        return 1.0;
+    }
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
+        return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
+    }
+};
+
 double readLToDays( const scnXml::DecayFunction& elt ){
     if( !elt.getL().present() ){
         throw util::xml_scenario_error( "decay function: attribute L required" );

@@ -35,6 +35,7 @@ namespace Transmission {
 
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
+using util::DecayFunctionHet;
 using util::LocalRng;
 
 class HumanVectorInterventionComponent;

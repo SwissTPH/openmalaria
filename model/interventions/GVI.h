@@ -30,6 +30,7 @@
 
 namespace OM { namespace interventions {
     using util::DecayFunction;
+    using util::DecayFunctionHet;
     using util::LognormalSampler;
     using util::LocalRng;
     using Transmission::PerHostInterventionData;
@@ -129,7 +130,7 @@ protected:
     
 private:
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    unique_ptr<DecayFunction> decayHet;
+    DecayFunctionHet decayHet;
 };
 
 } }

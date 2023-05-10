@@ -29,6 +29,7 @@
 namespace OM {
 namespace interventions {
     using util::DecayFunction;
+    using util::DecayFunctionHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using util::LocalRng;
@@ -193,7 +194,7 @@ private:
     double initialInsecticide;	// units: mg/m²
     
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    unique_ptr<DecayFunction> insecticideDecayHet;
+    DecayFunctionHet insecticideDecayHet;
 };
 
 } }

@@ -84,7 +84,7 @@ private:
     double initial;
     
     /** Description of larviciding decay. */
-    unique_ptr<util::DecayFunction> het;
+    util::DecayFunctionHet het;
     
     /** Time of larviciding deployment. */
     SimTime deploy_t = sim::never();
