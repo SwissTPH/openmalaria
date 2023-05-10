@@ -41,13 +41,13 @@ public:
         het.setMeanCV( 1.0, elt.getCV() );
     }
     
-    virtual double getBaseTMult() const =0;
+    virtual double getBaseTimeFactorHet() const =0;
     
     DecayFunctionHet hetSample (LocalRng& rng) const{
-        return DecayFunctionHet(het.sample(rng) * getBaseTMult());
+        return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
     }
     DecayFunctionHet hetSample (NormalSample sample) const{
-        return DecayFunctionHet(het.sample(sample) * getBaseTMult());
+        return DecayFunctionHet(het.sample(sample) * getBaseTimeFactorHet());
     }
 };
 
@@ -59,12 +59,12 @@ public:
 
     DecayFunctionHet hetSample (LocalRng& rng) const{
         DecayFunctionHet ret;
-        ret.tMult = 1.0;
+        ret.timeFactorHet = 1.0;
         return ret;
     }
     DecayFunctionHet hetSample (NormalSample sample) const{
         DecayFunctionHet ret;
-        ret.tMult = 1.0;
+        ret.timeFactorHet = 1.0;
         return ret;
     }
     
@@ -94,12 +94,8 @@ public:
         hetFactor(0.0)
     {}
     
-    double compute(double effectiveAge) const {
-        // Note: we now require all decay functions to return 0 when time > 0
-        // and the DecayFunction is default-constructed. So const *after deployment*.
-        if( effectiveAge * hetFactor == numeric_limits<double>::infinity() )
-            return 0.0;
-        return 1.0;
+    double getBaseTimeFactorHet() const{
+        return invL;
     }
     SimTime sampleAgeOfDecay (LocalRng& rng) const {
         return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
@@ -153,10 +149,12 @@ public:
         hetFactor(0.0)
     {}
     
-    double compute(double effectiveAge) const{
-        // cout << "Linear " << effectiveAge << " " << invL << " " << hetFactor <<endl;
-        if( effectiveAge * invL * hetFactor < 1.0 ){
-            return 1.0 - effectiveAge * invL * hetFactor;
+    double getBaseTimeFactorHet() const{
+        return invL;
+    }
+    double eval(double effectiveAge) const{
+        if( effectiveAge < 1.0 ){
+            return 1.0 - effectiveAge;
         }else{
             return 0.0;
         }
@@ -184,8 +182,11 @@ public:
         invLambda( log(2.0) / readLToDays(elt) )
     {}
     
-    double compute(double effectiveAge) const{
-        return exp( -effectiveAge * invL * hetFactor);
+    double getBaseTimeFactorHet() const{
+        return invLambda;
+    }
+    double eval(double effectiveAge) const{
+        return exp( -effectiveAge );
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -211,8 +212,11 @@ public:
         hetFactor(0.0)
     {}
     
-    double compute(double effectiveAge) const{
-        double p = -pow(effectiveAge * constOverLambda * hetFactor, k);
+    double getBaseTimeFactorHet() const{
+        return constOverLambda;
+    }
+    double eval(double effectiveAge) const{
+        double p = -pow(effectiveAge, k);
         if(p < -700.0)
             return 0.0;
         else
@@ -242,8 +246,11 @@ public:
         hetFactor(0.0)
     {}
     
-    double compute(double effectiveAge) const{
-        return 1.0 / (1.0 + pow(effectiveAge * invL * hetFactor, k));
+    double getBaseTimeFactorHet() const{
+        return invL;
+    }
+    double eval(double effectiveAge) const{
+        return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -268,10 +275,13 @@ public:
         k( elt.getK() ),
         hetFactor(0.0)
     {}
-
-    double compute(double effectiveAge) const{
-        if( effectiveAge * invL * hetFactor < 1.0 ){
-            return exp( k - k / (1.0 - pow(effectiveAge * invL * hetFactor, 2.0)) );
+    
+    double getBaseTimeFactorHet() const{
+        return invL;
+    }
+    double eval(double effectiveAge) const{
+        if( effectiveAge < 1.0 ){
+            return exp( k - k / (1.0 - pow(effectiveAge, 2.0)) );
         }else{
             return 0.0;
         }
@@ -314,7 +324,7 @@ public:
         invL2 = log(2.0) / halflife_long;
     }
     
-    double getBaseTMult() const{
+    double getBaseTimeFactorHet() const{
         return 1.0;
     }
     double eval(double effectiveAge) const{
