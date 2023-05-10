@@ -36,7 +36,7 @@
     <monitoring name="monthly surveys" startDate="1970-01-01">
         <!-- Specify the desired outputs here, the full list is available at:
         https://github.com/SwissTPH/openmalaria/wiki/MonitoringOptions#survey-measures -->
-        <SurveyOptions onlyNewEpisode="true">
+        <SurveyOptions>
             <option name="nHost"/>          <!-- id 0 -->
             <option name="nInfect"/>        <!-- id 1 -->
             <option name="nPatent"/>        <!-- id 3 -->
