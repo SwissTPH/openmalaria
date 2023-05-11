@@ -141,7 +141,6 @@ SimTime DescriptiveInfection::infectionDuration(LocalRng& rng) {
 
 
 // ———  time-step updates  ———
-
 void DescriptiveInfection::determineDensities(
         LocalRng& rng,
         double cumulativeh,
@@ -161,11 +160,11 @@ void DescriptiveInfection::determineDensities(
         
         int32_t infAge = min( sim::inSteps(infage), maxDurationTS );
         int32_t infDur = min( sim::inSteps(m_duration), maxDurationTS );
-        m_density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
+        m_density=max (meanLogParasiteCount[infAge][infDur], 0.0);
         
         // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
         // Note that in published and current implementations Dx is zero.
-        m_density = pow(m_density, immSurvFact);
+        m_density = m_density * immSurvFact;
         
         //Perturb m_density using a lognormal
         double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));
@@ -178,7 +177,7 @@ void DescriptiveInfection::determineDensities(
         */
         if (stdlog > 0.0000001) {
             // Calculate the expected density on the day of sampling:
-            double meanlog = log(m_density) - stdlog*stdlog / 2.0;
+            double meanlog = m_density - stdlog*stdlog / 2.0;
             m_density = rng.log_normal(meanlog, stdlog);
             // Calculate additional samples for T-1 days (T=days per step):
             if( true /*sim::oneTS() > 1, always true for this model*/ ){
