@@ -64,8 +64,11 @@ public:
      * also 0 if no decay function or initial value was set,
      * otherwise between zero and the inital value). */
     inline double current_value (SimTime time) const{
-        if( decay.get() == 0 || het == nullptr) return 0.0;  // decay wasn't set: the always return 0
-        else return initial * het->eval( time - deploy_t );
+        if( decay.get() == 0 ) return 0.0;  // decay wasn't set: the always return 0
+        if (het.sample == nullptr)
+            cout << "nullptr" <<endl;
+        double a= initial * het.eval( time - deploy_t );
+        return a;
     }
     
     /** Checkpointing: only checkpoint parameters which change after initial

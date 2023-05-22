@@ -32,6 +32,12 @@
 namespace OM {
 namespace util {
 
+/** Default value: should make all eval() calls return 0 (i.e. infinitely
+ * old deployment). */
+DecayFunctionHet::DecayFunctionHet() :  timeFactorHet(numeric_limits<double>::infinity()), sample(new NullDecayFunction()) {}
+
+
+
 class BaseHetDecayFunction : public DecayFunction {
     LognormalSampler het;
 public:
@@ -43,11 +49,15 @@ public:
     
     virtual double getBaseTimeFactorHet() const =0;
     
+    virtual DecayFunctionHet _sample(double s) const = 0;
+
     DecayFunctionHet hetSample (LocalRng& rng) const{
-        return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
+        //return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
+        return _sample(het.sample(rng) * getBaseTimeFactorHet());
     }
     DecayFunctionHet hetSample (NormalSample sample) const{
-        return DecayFunctionHet(het.sample(sample) * getBaseTimeFactorHet());
+        //return DecayFunctionHet(het.sample(sample) * getBaseTimeFactorHet());
+        return _sample(het.sample(sample) * getBaseTimeFactorHet());
     }
 };
 
@@ -70,6 +80,11 @@ public:
     }
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
+    }
+
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<ConstantDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
 };
 
@@ -124,10 +139,10 @@ public:
         return sim::roundToTSFromDays( 1.0 / invL );
     }
 
-    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<StepDecayFunction> copy = make_unique<StepDecayFunction>(*this);
-        copy->hetFactor = hetFactor;
-        return move(copy);
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<StepDecayFunction>(*this);
+                cout << "creating LinearDecayFunction" << endl;
+        return DecayFunctionHet(s, copy);
     }
     
 private:
@@ -158,10 +173,9 @@ public:
         return sim::roundToTSFromDays(rng.uniform_01() / invL);
     }
 
-    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<LinearDecayFunction> copy = make_unique<LinearDecayFunction>(*this);
-        copy->hetFactor = hetFactor;
-        return move(copy);
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<LinearDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
     
 private:
@@ -190,6 +204,11 @@ public:
         unique_ptr<ExponentialDecayFunction> copy = make_unique<ExponentialDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
+    }
+
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<ExponentialDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
     
 private:
@@ -220,10 +239,9 @@ public:
         return sim::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
     }
 
-    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<WeibullDecayFunction> copy = make_unique<WeibullDecayFunction>(*this);
-        copy->hetFactor = hetFactor;
-        return move(copy);
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<WeibullDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
     
 private:
@@ -250,10 +268,9 @@ public:
         return sim::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
     }
 
-    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<HillDecayFunction> copy = make_unique<HillDecayFunction>(*this);
-        copy->hetFactor = hetFactor;
-        return move(copy);
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<HillDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
     
 private:
@@ -284,60 +301,59 @@ public:
         return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
     }
 
-    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<SmoothCompactDecayFunction> copy = make_unique<SmoothCompactDecayFunction>(*this);
-        copy->hetFactor = hetFactor;
-        return move(copy);
+    DecayFunctionHet _sample(double s) const {
+        shared_ptr<DecayFunction> copy = make_shared<SmoothCompactDecayFunction>(*this);
+        return DecayFunctionHet(s, copy);
     }
     
 private:
     double invL, k, hetFactor;
 };
 
-class BiphasicDecayFunction : public BaseHetDecayFunction {
-public:
-    BiphasicDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt )
-    {
-        if( !elt.getInitial_efficacy().present() )
-            throw util::xml_scenario_error( "biphasic decay function: attribute initial_efficacy required" );
-        if( !elt.getRho().present() )
-            throw util::xml_scenario_error( "biphasic decay function: attribute rho required" );
-        if( !elt.getHalflife_long().present() )
-            throw util::xml_scenario_error( "biphasic decay function: attribute halflife_long required" );
-        if( !elt.getHalflife_short().present() )
-            throw util::xml_scenario_error( "biphasic decay function: attribute halflife_short required" );
+// class BiphasicDecayFunction : public BaseHetDecayFunction<BiphasicDecayFunction> {
+// public:
+//     BiphasicDecayFunction( const scnXml::DecayFunction& elt ) :
+//         BaseHetDecayFunction( elt )
+//     {
+//         if( !elt.getInitial_efficacy().present() )
+//             throw util::xml_scenario_error( "biphasic decay function: attribute initial_efficacy required" );
+//         if( !elt.getRho().present() )
+//             throw util::xml_scenario_error( "biphasic decay function: attribute rho required" );
+//         if( !elt.getHalflife_long().present() )
+//             throw util::xml_scenario_error( "biphasic decay function: attribute halflife_long required" );
+//         if( !elt.getHalflife_short().present() )
+//             throw util::xml_scenario_error( "biphasic decay function: attribute halflife_short required" );
 
-        initial_efficacy = elt.getInitial_efficacy().get();
-        rho = elt.getRho().get();
-        halflife_long = UnitParse::durationToDays(elt.getHalflife_long().get(), UnitParse::YEARS);
-        halflife_short = UnitParse::durationToDays(elt.getHalflife_short().get(), UnitParse::YEARS);
+//         initial_efficacy = elt.getInitial_efficacy().get();
+//         rho = elt.getRho().get();
+//         halflife_long = UnitParse::durationToDays(elt.getHalflife_long().get(), UnitParse::YEARS);
+//         halflife_short = UnitParse::durationToDays(elt.getHalflife_short().get(), UnitParse::YEARS);
 
-        invL1 = log(2.0) / halflife_short;
-        invL2 = log(2.0) / halflife_long;
-    }
+//         invL1 = log(2.0) / halflife_short;
+//         invL2 = log(2.0) / halflife_long;
+//     }
     
-    double getBaseTimeFactorHet() const{
-        return 1.0;
-    }
-    double eval(double effectiveAge) const{
-        return initial_efficacy * (
-            rho * exp(-effectiveAge * invL1) 
-            + (1.0 - rho) * exp(-effectiveAge * invL2)
-        );
-    }
+//     double getBaseTimeFactorHet() const{
+//         return 1.0;
+//     }
+//     double eval(double effectiveAge) const{
+//         return initial_efficacy * (
+//             rho * exp(-effectiveAge * invL1) 
+//             + (1.0 - rho) * exp(-effectiveAge * invL2)
+//         );
+//     }
     
-    SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        throw util::xml_scenario_error( "biphasic decay function: sampleAgeOfDecay not implemented" );
-    }
+//     SimTime sampleAgeOfDecay (LocalRng& rng) const{
+//         throw util::xml_scenario_error( "biphasic decay function: sampleAgeOfDecay not implemented" );
+//     }
     
-private:
-    double invL1, invL2;
-    double initial_efficacy;
-    double rho;
-    double halflife_long;
-    double halflife_short;
-};
+// private:
+//     double invL1, invL2;
+//     double initial_efficacy;
+//     double rho;
+//     double halflife_long;
+//     double halflife_short;
+// };
 
 // -----  interface / static functions  -----
 
@@ -360,8 +376,8 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
-    }else if( func == "biphasic" ){
-        return unique_ptr<DecayFunction>(new BiphasicDecayFunction( elt ));
+    // }else if( func == "biphasic" ){
+    //     return unique_ptr<DecayFunction>(new BiphasicDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
