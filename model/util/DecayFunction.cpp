@@ -31,24 +31,22 @@
 namespace OM {
 namespace util {
 
-/** Default value: should make all eval() calls return 0 (i.e. infinitely
+/** Default value: should make all _eval() calls return 0 (i.e. infinitely
  * old deployment). */
-DecayFunctionHet::DecayFunctionHet() :  timeFactorHet(numeric_limits<double>::infinity()), sample(new NullDecayFunction()) {}
-
-
+DecayFunctionHet::DecayFunctionHet() : sample(new NullDecayFunction()) {}
 
 class BaseHetDecayFunction : public DecayFunction {
     LognormalSampler het;
 public:
-    BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
-        DecayFunction( elt )
+    BaseHetDecayFunction( double timeFactorHet, const scnXml::DecayFunction& elt ) :
+        DecayFunction( timeFactorHet, elt.getComplement() )
     {
         het.setMeanCV( 1.0, elt.getCV() );
     }
     
     virtual double getBaseTimeFactorHet() const =0;
     
-    virtual DecayFunctionHet _sample(double s) const = 0;
+    virtual DecayFunctionHet _sample(double s) const =0;
 
     DecayFunctionHet hetSample (LocalRng& rng) const{
         //return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
@@ -63,14 +61,14 @@ public:
 class ConstantDecayFunction : public BaseHetDecayFunction {
 public:
     ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt )
+        BaseHetDecayFunction( 0.0, elt )
     {}
 
     double getBaseTimeFactorHet() const{
         return 1.0;
     }
     
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         // Note: we now require all decay functions to return 0 when time > 0
         // and the DecayFunctionHet is default-constructed. So const *after deployment*.
         if( effectiveAge == numeric_limits<double>::infinity() )
@@ -83,7 +81,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<ConstantDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
 };
 
@@ -97,14 +96,14 @@ double readLToDays( const scnXml::DecayFunction& elt ){
 class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTimeFactorHet() const{
         return invL;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0;
         }else{
@@ -118,8 +117,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<StepDecayFunction>(*this);
-                cout << "creating LinearDecayFunction" << endl;
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -129,14 +128,14 @@ private:
 class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTimeFactorHet() const{
         return invL;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0 - effectiveAge;
         }else{
@@ -151,7 +150,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<LinearDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -161,14 +161,14 @@ private:
 class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         invLambda( log(2.0) / readLToDays(elt) )
     {}
     
     double getBaseTimeFactorHet() const{
         return invLambda;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         return exp( -effectiveAge );
     }
     
@@ -178,7 +178,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<ExponentialDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -188,7 +189,7 @@ private:
 class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         constOverLambda( pow(log(2.0),1.0/elt.getK()) / readLToDays(elt) ),
         k( elt.getK() )
     {}
@@ -196,7 +197,7 @@ public:
     double getBaseTimeFactorHet() const{
         return constOverLambda;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         double p = -pow(effectiveAge, k);
         if(p < -700.0)
             return 0.0;
@@ -210,7 +211,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<WeibullDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -221,7 +223,7 @@ private:
 class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
@@ -229,7 +231,7 @@ public:
     double getBaseTimeFactorHet() const{
         return invL;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
@@ -239,7 +241,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<HillDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -249,7 +252,7 @@ private:
 class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( elt ),
+        BaseHetDecayFunction( 0.0, elt ),
         invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
@@ -257,7 +260,7 @@ public:
     double getBaseTimeFactorHet() const{
         return invL;
     }
-    double eval(double effectiveAge) const{
+    double _eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return exp( k - k / (1.0 - pow(effectiveAge, 2.0)) );
         }else{
@@ -271,7 +274,8 @@ public:
 
     DecayFunctionHet _sample(double s) const {
         shared_ptr<DecayFunction> copy = make_shared<SmoothCompactDecayFunction>(*this);
-        return DecayFunctionHet(s, copy);
+        copy->timeFactorHet = s;
+        return DecayFunctionHet(copy);
     }
     
 private:
@@ -304,7 +308,7 @@ private:
 //     double getBaseTimeFactorHet() const{
 //         return 1.0;
 //     }
-//     double eval(double effectiveAge) const{
+//     double _eval(double effectiveAge) const{
 //         return initial_efficacy * (
 //             rho * exp(-effectiveAge * invL1) 
 //             + (1.0 - rho) * exp(-effectiveAge * invL2)

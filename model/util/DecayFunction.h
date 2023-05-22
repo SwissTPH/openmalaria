@@ -41,8 +41,8 @@ class DecayFunctionHet;
 class DecayFunction
 {
 public:
-    DecayFunction(const scnXml::DecayFunction& elt) :
-        complement(elt.getComplement())
+    DecayFunction(double timeFactorHet = 0, bool complement = false) :
+        timeFactorHet(timeFactorHet), complement(complement)
     {}
 
     virtual ~DecayFunction() {}
@@ -76,14 +76,19 @@ public:
      * @returns Age at which an object should decay. */
     virtual SimTime sampleAgeOfDecay (LocalRng& rng) const =0;
     
-    virtual double eval(double ageDays) const =0;
+    double eval(double ageDays) const {
+        if(complement)
+            return 1.0 - _eval( ageDays * timeFactorHet);
+        else
+            return _eval( ageDays * timeFactorHet);
+    }
 
-    bool complement;
+    double timeFactorHet;
 
 protected:
-    DecayFunction() : complement(false) {}
-    // Protected version. Note that the het sample parameter is needed even
-    // when heterogeneity is not used so don't try calling this without that.
+    virtual double _eval(double ageDays) const =0;
+
+    bool complement;
 };
 
 /** A sample of parameters used to make decay functions heterogenious.
@@ -91,22 +96,17 @@ protected:
  * The default constructor only sets an NaN value; new instances must be
  * sampled by DecayFunction::hetSample() before use. */
 class DecayFunctionHet {
-    double timeFactorHet;
 public:
-    DecayFunctionHet(double timeFactorHet, shared_ptr<DecayFunction> d, bool complement = true): timeFactorHet(timeFactorHet), sample(d) {}
+    DecayFunctionHet(shared_ptr<DecayFunction> d): sample(d) {}
 
     /** Default value: should make all eval() calls return 0 (i.e. infinitely
      * old deployment). */
     DecayFunctionHet();
     
-    inline double getTimeFactorHet() const{
-        return timeFactorHet;
-    }
-    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        timeFactorHet & stream;
+        // timeFactorHet & stream;
     }
 
     /** Return a value in the range [0,1] describing remaining effectiveness of
@@ -122,14 +122,8 @@ public:
      * interventions being effective for a month or more. */
     inline double eval( SimTime age )const
     {
-        if(sample->complement)
-            return 1.0 - sample->eval( age * timeFactorHet);
-        else
-            return sample->eval( age * timeFactorHet);
+        return sample->eval( age );
     }
-    
-    // friend class BaseHetDecayFunction;
-    // friend class ConstantDecayFunction;
 
     // TEMPORARY
     shared_ptr<DecayFunction> sample;
@@ -138,7 +132,7 @@ public:
 class NullDecayFunction : public DecayFunction
 {
 public:
-    virtual double eval(double ageDays) const { return 0.0; }
+    virtual double _eval(double ageDays) const { return 0.0; }
 
     virtual DecayFunctionHet hetSample (LocalRng& rng) const { return DecayFunctionHet(); };
     
@@ -146,7 +140,6 @@ public:
     virtual DecayFunctionHet hetSample (NormalSample sample) const { return DecayFunctionHet(); };
 
     virtual SimTime sampleAgeOfDecay (LocalRng& rng) const { return 0; };
-
 };
 
 
