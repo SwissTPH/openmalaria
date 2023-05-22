@@ -65,8 +65,10 @@ public:
      * otherwise between zero and the inital value). */
     inline double current_value (SimTime time) const{
         if( decay.get() == 0 ) return 0.0;  // decay wasn't set: the always return 0
-        
-        return initial * decay->eval( time - deploy_t, het );
+        if (het.sample == nullptr)
+            cout << "nullptr" <<endl;
+        double a= initial * het.eval( time - deploy_t );
+        return a;
     }
     
     /** Checkpointing: only checkpoint parameters which change after initial

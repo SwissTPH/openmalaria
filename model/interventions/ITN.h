@@ -239,8 +239,7 @@ public:
     }
     inline double getInsecticideContent(const ITNComponent& params)const{
             SimTime age = sim::nowOrTs1() - deployTime;  // implies age 1 TS on first use
-        double effectSurvival = params.insecticideDecay->eval( age,
-                                              insecticideDecayHet );
+        double effectSurvival = insecticideDecayHet.eval( age );
         return initialInsecticide * effectSurvival;
     }
     

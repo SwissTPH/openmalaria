@@ -588,7 +588,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
             continue;
         }
         SimTime age = sim::ts0() - it->deployTime;
-        double decayCoeff = trapParams[it->instance].availDecay->eval(age, it->availHet);
+        double decayCoeff = it->availHet.eval(age);
         leaveRate += it->initialAvail * decayCoeff;
         // sigma_df doesn't change: mosquitoes do not survive traps
         it++;
@@ -815,7 +815,7 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
 // -----  Summary and intervention functions  -----
 void AnophelesModel::changeEIRIntervention(const scnXml::NonVector &nonVectorData)
 {
-    assert(nonVectorData.getEIRDaily().present()); // XML loading code should enforce this
+    // assert(nonVectorData.getEIRDaily().present()); // XML loading code should enforce this
     const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily();
 
     // const scnXml::DailyValues &seasM = seasonality.getDailyValues().get();
