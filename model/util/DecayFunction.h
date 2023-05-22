@@ -85,7 +85,7 @@ public:
     bool complement;
 
 protected:
-    DecayFunction() : complement(true) {}
+    DecayFunction() : complement(false) {}
     // Protected version. Note that the het sample parameter is needed even
     // when heterogeneity is not used so don't try calling this without that.
 };
