@@ -30,7 +30,6 @@
 namespace OM {
 namespace interventions {
     using util::DecayFunction;
-    using util::DecayFunctionHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using util::LocalRng;
@@ -239,7 +238,7 @@ public:
     }
     inline double getInsecticideContent(const ITNComponent& params)const{
             SimTime age = sim::nowOrTs1() - deployTime;  // implies age 1 TS on first use
-        double effectSurvival = insecticideDecayHet.eval( age );
+        double effectSurvival = insecticideDecayHet->eval( age );
         return initialInsecticide * effectSurvival;
     }
     
@@ -270,7 +269,8 @@ private:
     // these parameters are sampled from log-normal per net, but thereafter constant:
     double holeRate;	// rate at which new holes are created (holes/time-step)
     double ripRate;		// rate at which holes are enlarged (rips/hole/time-step)
-    DecayFunctionHet insecticideDecayHet;
+    unique_ptr<DecayFunction> insecticideDecayHet;
+
 };
 
 } }

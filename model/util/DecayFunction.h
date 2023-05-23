@@ -30,8 +30,6 @@
 namespace OM {
 namespace util {
 
-class DecayFunctionHet;
-
 /** An interface for a few types of decay function (some of which may also be
  * suitible survival functions).
  *
@@ -59,10 +57,10 @@ public:
      * Note that a DecayFunctionHet is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual DecayFunctionHet hetSample (LocalRng& rng) const =0;
+    virtual unique_ptr<DecayFunction> hetSample (LocalRng& rng) const =0;
     
     /** Generate a DecayFunctionHet value from an existing sample. */
-    virtual DecayFunctionHet hetSample (NormalSample sample) const =0;
+    virtual unique_ptr<DecayFunction> hetSample (NormalSample sample) const =0;
     
     /** Say you have a population of objects which each have two states:
      * decayed and not decayed. If you want to use a DecayFunction to model
@@ -81,59 +79,27 @@ public:
             return _eval( ageDays );
     }
 
+        /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        // timeFactorHet & stream;
+    }
+
 protected:
     virtual double _eval(double ageDays) const =0;
 
     bool complement;
 };
 
-/** A sample of parameters used to make decay functions heterogenious.
- *
- * The default constructor only sets an NaN value; new instances must be
- * sampled by DecayFunction::hetSample() before use. */
-class DecayFunctionHet {
-public:
-    DecayFunctionHet(unique_ptr<DecayFunction> d): sample(move(d)) {}
-
-    /** Default value: should make all eval() calls return 0 (i.e. infinitely
-     * old deployment). */
-    DecayFunctionHet();
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        // timeFactorHet & stream;
-    }
-
-    /** Return a value in the range [0,1] describing remaining effectiveness of
-     * the intervention.
-     * 
-     * @param age Age of intervention/decayed property
-     * @param sample A DecayFunctionHet value sampled for the intervention and
-     *  individual.
-     * 
-     * NOTE: As it is, values are calculated for the end of the time-period
-     * being updated over. It would be more accurate to return the mean value
-     * over this period (from age-1 to age), but difference should be small for
-     * interventions being effective for a month or more. */
-    inline double eval( SimTime age )const
-    {
-        return sample->eval( age );
-    }
-
-    // TEMPORARY
-    unique_ptr<DecayFunction> sample;
- };
-
 class NullDecayFunction : public DecayFunction
 {
 public:
     virtual double _eval(double ageDays) const { return 0.0; }
 
-    virtual DecayFunctionHet hetSample (LocalRng& rng) const { return DecayFunctionHet(); };
+    virtual unique_ptr<DecayFunction> hetSample (LocalRng& rng) const { return make_unique<NullDecayFunction>(); };
     
     /** Generate a DecayFunctionHet value from an existing sample. */
-    virtual DecayFunctionHet hetSample (NormalSample sample) const { return DecayFunctionHet(); };
+    virtual unique_ptr<DecayFunction> hetSample (NormalSample sample) const { return make_unique<NullDecayFunction>(); };
 
     virtual SimTime sampleAgeOfDecay (LocalRng& rng) const { return 0; };
 };

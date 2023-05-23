@@ -31,10 +31,6 @@
 namespace OM {
 namespace util {
 
-/** Default value: should make all _eval() calls return 0 (i.e. infinitely
- * old deployment). */
-DecayFunctionHet::DecayFunctionHet() : sample(new NullDecayFunction()) {}
-
 class BaseHetDecayFunction : public DecayFunction {
     LognormalSampler het;
 public:
@@ -44,14 +40,14 @@ public:
         het.setMeanCV( 1.0, elt.getCV() );
     }
     
-    virtual DecayFunctionHet _sample(double hetFactor) const =0;
+    virtual unique_ptr<DecayFunction> _sample(double hetFactor) const =0;
 
-    DecayFunctionHet hetSample (LocalRng& rng) const{
-        //return DecayFunctionHet(het.sample(rng) * getBaseTimeFactorHet());
+    unique_ptr<DecayFunction> hetSample (LocalRng& rng) const{
+        //return DecayFunction(het.sample(rng) * getBaseTimeFactorHet());
         return _sample(het.sample(rng));
     }
-    DecayFunctionHet hetSample (NormalSample sample) const{
-        //return DecayFunctionHet(het.sample(sample) * getBaseTimeFactorHet());
+    unique_ptr<DecayFunction> hetSample (NormalSample sample) const{
+        //return DecayFunction(het.sample(sample) * getBaseTimeFactorHet());
         return _sample(het.sample(sample));
     }
 };
@@ -65,19 +61,19 @@ public:
     
     double _eval(double effectiveAge) const{
         // Note: we now require all decay functions to return 0 when time > 0
-        // and the DecayFunctionHet is default-constructed. So const *after deployment*.
+        // and the DecayFunction is default-constructed. So const *after deployment*.
         if( effectiveAge * hetFactor == numeric_limits<double>::infinity() )
             return 0.0;
-        return 1.0 * hetFactor;
+        return 1.0;
     }
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<ConstantDecayFunction> copy = make_unique<ConstantDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
 
 private:
@@ -111,10 +107,10 @@ public:
         return sim::roundToTSFromDays( 1.0 / invL );
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<StepDecayFunction> copy = make_unique<StepDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
@@ -144,10 +140,10 @@ public:
         return sim::roundToTSFromDays(rng.uniform_01() / invL);
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<LinearDecayFunction> copy = make_unique<LinearDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
@@ -171,10 +167,10 @@ public:
         return sim::roundToTSFromDays( -log(rng.uniform_01()) / invL );
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<ExponentialDecayFunction> copy = make_unique<ExponentialDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
@@ -203,10 +199,10 @@ public:
         return sim::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<WeibullDecayFunction> copy = make_unique<WeibullDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
@@ -232,10 +228,10 @@ public:
         return sim::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<HillDecayFunction> copy = make_unique<HillDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
@@ -264,10 +260,10 @@ public:
         return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
     }
 
-    DecayFunctionHet _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> _sample(double hetFactor) const {
         unique_ptr<SmoothCompactDecayFunction> copy = make_unique<SmoothCompactDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(move(copy));
+        return move(copy);
     }
     
 private:
