@@ -93,7 +93,7 @@ protected:
  * sampled by DecayFunction::hetSample() before use. */
 class DecayFunctionHet {
 public:
-    DecayFunctionHet(shared_ptr<DecayFunction> d): sample(d) {}
+    DecayFunctionHet(unique_ptr<DecayFunction> d): sample(move(d)) {}
 
     /** Default value: should make all eval() calls return 0 (i.e. infinitely
      * old deployment). */
@@ -122,7 +122,7 @@ public:
     }
 
     // TEMPORARY
-    shared_ptr<DecayFunction> sample;
+    unique_ptr<DecayFunction> sample;
  };
 
 class NullDecayFunction : public DecayFunction

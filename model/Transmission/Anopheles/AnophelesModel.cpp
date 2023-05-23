@@ -457,7 +457,7 @@ void AnophelesModel::deployVectorTrap(LocalRng &rng, size_t species, size_t inst
     data.availHet = trapParams[instance].availDecay->hetSample(rng);
     data.deployTime = sim::now();
     data.expiry = sim::now() + lifespan;
-    baitedTraps.push_back(data);
+    baitedTraps.push_back(move(data));
 }
 
 // Every sim::oneTS() days:

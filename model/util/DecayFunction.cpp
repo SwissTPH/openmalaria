@@ -75,9 +75,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<ConstantDecayFunction> copy = make_shared<ConstantDecayFunction>(*this);
+        unique_ptr<ConstantDecayFunction> copy = make_unique<ConstantDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
 
 private:
@@ -112,9 +112,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<StepDecayFunction> copy = make_shared<StepDecayFunction>(*this);
+        unique_ptr<StepDecayFunction> copy = make_unique<StepDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
@@ -145,9 +145,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<LinearDecayFunction> copy = make_shared<LinearDecayFunction>(*this);
+        unique_ptr<LinearDecayFunction> copy = make_unique<LinearDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
@@ -172,9 +172,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<ExponentialDecayFunction> copy = make_shared<ExponentialDecayFunction>(*this);
+        unique_ptr<ExponentialDecayFunction> copy = make_unique<ExponentialDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
@@ -204,9 +204,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<WeibullDecayFunction> copy = make_shared<WeibullDecayFunction>(*this);
+        unique_ptr<WeibullDecayFunction> copy = make_unique<WeibullDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
@@ -233,9 +233,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<HillDecayFunction> copy = make_shared<HillDecayFunction>(*this);
+        unique_ptr<HillDecayFunction> copy = make_unique<HillDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
@@ -265,9 +265,9 @@ public:
     }
 
     DecayFunctionHet _sample(double hetFactor) const {
-        shared_ptr<SmoothCompactDecayFunction> copy = make_shared<SmoothCompactDecayFunction>(*this);
+        unique_ptr<SmoothCompactDecayFunction> copy = make_unique<SmoothCompactDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return DecayFunctionHet(copy);
+        return DecayFunctionHet(move(copy));
     }
     
 private:
