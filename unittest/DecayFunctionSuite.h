@@ -28,7 +28,6 @@
 #include "util/DecayFunction.h"
 
 using ::OM::util::DecayFunction;
-using ::OM::util::NullDecayFunction;
 
 class DecayFunctionSuite : public CxxTest::TestSuite
 {
@@ -55,11 +54,8 @@ public:
     void testConstant () {
         dfElt.setFunction( "constant" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        // First test: with a default-constructed DecayFunctionHet and positive age, result should be zero
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
         // Second test: with an appropriately sampled helper value, we should get the results we want
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ) , 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(10 ) ), 1.0 );
         // Third test: time of decay (age plus now) should always be in the future
@@ -69,9 +65,7 @@ public:
     void testStep () {
         dfElt.setFunction( "step" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.0 );
@@ -81,9 +75,7 @@ public:
     void testLinear () {
         dfElt.setFunction( "linear" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 0.4 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.0 );
@@ -92,9 +84,7 @@ public:
     void testExponential () {
         dfElt.setFunction( "exponential" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 0.65975394736842108 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.25 );
@@ -103,7 +93,7 @@ public:
     void testWeibull () {
         dfElt.setFunction( "weibull" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet= df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 0.73631084210526321 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.122306 );
@@ -112,9 +102,7 @@ public:
     void testHill () {
         dfElt.setFunction( "hill" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 0.6936673684210527 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.24805074736842106 );
@@ -123,9 +111,7 @@ public:
     void testSmoothCompact () {
         dfElt.setFunction( "smooth-compact" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        unique_ptr<DecayFunction> dHet = make_unique<NullDecayFunction>();
-        TS_ASSERT_EQUALS( dHet->eval( sim::fromDays(5 ) ), 0.0 );
-        dHet = df->hetSample(m_rng);
+        unique_ptr<DecayFunction> dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( dHet->eval( sim::zero() ), 1.0 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(6 ) ), 0.40656965789473687 );
         TS_ASSERT_APPROX( dHet->eval( sim::fromYearsI(20 ) ), 0.0 );
