@@ -148,7 +148,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      <xs:enumeration value="weibull"/>
      <xs:enumeration value="hill"/>
      <xs:enumeration value="smooth-compact"/>
-     <xs:enumeration value="addition"/>
+     <xs:enumeration value="plus"/>
+     <xs:enumeration value="minus"/>
+     <xs:enumeration value="divides"/>
+     <xs:enumeration value="multiplies"/>
     </xs:restriction>
    </xs:simpleType>
   </xs:attribute>
