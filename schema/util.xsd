@@ -148,7 +148,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      <xs:enumeration value="weibull"/>
      <xs:enumeration value="hill"/>
      <xs:enumeration value="smooth-compact"/>
-     <xs:enumeration value="biphasic"/>
+     <xs:enumeration value="addition"/>
     </xs:restriction>
    </xs:simpleType>
   </xs:attribute>
@@ -203,7 +203,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="initial_efficacy" type="xs:double" use="optional">
+  <xs:attribute name="initialEfficacy" type="xs:double" use="optional" default="1">
    <xs:annotation>
     <xs:documentation>
           biphasic: Efficacy between 0 and 1.
