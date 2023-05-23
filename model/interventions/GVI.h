@@ -30,7 +30,6 @@
 
 namespace OM { namespace interventions {
     using util::DecayFunction;
-    using util::DecayFunctionHet;
     using util::LognormalSampler;
     using util::LocalRng;
     using Transmission::PerHostInterventionData;
@@ -109,7 +108,7 @@ public:
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIComponent& params)const{
         SimTime age = sim::nowOrTs1() - deployTime;  // implies age 1 TS on first use
-        return decayHet.eval( age );
+        return decayHet->eval( age );
     }
     
     virtual void update(Host::Human& human);
@@ -130,7 +129,7 @@ protected:
     
 private:
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    DecayFunctionHet decayHet;
+    unique_ptr<DecayFunction> decayHet;
 };
 
 } }

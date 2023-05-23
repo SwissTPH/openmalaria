@@ -588,7 +588,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
             continue;
         }
         SimTime age = sim::ts0() - it->deployTime;
-        double decayCoeff = it->availHet.eval(age);
+        double decayCoeff = it->availHet->eval(age);
         leaveRate += it->initialAvail * decayCoeff;
         // sigma_df doesn't change: mosquitoes do not survive traps
         it++;
