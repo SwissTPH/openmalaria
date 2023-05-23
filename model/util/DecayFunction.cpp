@@ -26,6 +26,7 @@
 #include "util/UnitParse.h"
 
 #include <cmath>
+#include <functional>
 #include <stdexcept>
 
 namespace OM {
@@ -243,24 +244,25 @@ private:
     double invL, k, hetFactor;
 };
 
-class AdditionDecayFunction : public DecayFunction {
+template<class T>
+class OperatorDecayFunction : public DecayFunction {
 public:
-    AdditionDecayFunction( const scnXml::DecayFunction& elt ) : 
+    OperatorDecayFunction( const scnXml::DecayFunction& elt ) : 
         DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()) {
         const scnXml::DecayFunction::DecaySequence &decaySequence = elt.getDecay();
         if(decaySequence.size() != 2)
-            throw util::xml_scenario_error("addition decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
+            throw util::xml_scenario_error("Operator decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
 
-        f1 = makeObject(decaySequence[0], "addition::f1");
-        f2 = makeObject(decaySequence[1], "addition::f2");
+        f1 = makeObject(decaySequence[0], "Operator::f1");
+        f2 = makeObject(decaySequence[1], "Operator::f2");
     }
 
-    AdditionDecayFunction(const AdditionDecayFunction &copy, unique_ptr<DecayFunction> f1, unique_ptr<DecayFunction> f2) : 
+    OperatorDecayFunction(const OperatorDecayFunction &copy, unique_ptr<DecayFunction> f1, unique_ptr<DecayFunction> f2) : 
         DecayFunction(copy),
         f1(move(f1)), f2(move(f2)) {}
 
     double compute(double effectiveAge) const {
-        return min(f1->eval(effectiveAge) + f2->eval(effectiveAge), 1.0);
+        return min(op(f1->eval(effectiveAge), f2->eval(effectiveAge)), 1.0);
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const {
@@ -270,13 +272,13 @@ public:
     unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<DecayFunction> f1hetSample = f1->hetSample(hetFactor);
         unique_ptr<DecayFunction> f2hetSample = f2->hetSample(hetFactor);
-        unique_ptr<AdditionDecayFunction> copy = make_unique<AdditionDecayFunction>(*this, move(f1hetSample), move(f2hetSample));
+        unique_ptr<OperatorDecayFunction> copy = make_unique<OperatorDecayFunction>(*this, move(f1hetSample), move(f2hetSample));
         return move(copy);
     }
 
 private:
-
     unique_ptr<DecayFunction> f1, f2;
+    T op;
 };
 
 // -----  interface / static functions  -----
@@ -300,8 +302,14 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
-    }else if( func == "addition" ){
-        return unique_ptr<DecayFunction>(new AdditionDecayFunction( elt ));
+    }else if( func == "plus" ){
+        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::plus<double>>( elt ));
+    }else if( func == "minus" ){
+        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::minus<double>>( elt ));
+    }else if( func == "divides" ){
+        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::divides<double>>( elt ));
+    }else if( func == "multiplies" ){
+        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::multiplies<double>>( elt ));
     }else{
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
