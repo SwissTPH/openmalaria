@@ -35,7 +35,7 @@ class BaseHetDecayFunction : public DecayFunction {
     LognormalSampler het;
 public:
     BaseHetDecayFunction( double timeFactorHet, const scnXml::DecayFunction& elt ) :
-        DecayFunction( elt.getComplement() )
+        DecayFunction( elt.getIncreasing() )
     {
         het.setMeanCV( 1.0, elt.getCV() );
     }
@@ -43,11 +43,9 @@ public:
     virtual unique_ptr<DecayFunction> _sample(double hetFactor) const =0;
 
     unique_ptr<DecayFunction> hetSample (LocalRng& rng) const{
-        //return DecayFunction(het.sample(rng) * getBaseTimeFactorHet());
         return _sample(het.sample(rng));
     }
     unique_ptr<DecayFunction> hetSample (NormalSample sample) const{
-        //return DecayFunction(het.sample(sample) * getBaseTimeFactorHet());
         return _sample(het.sample(sample));
     }
 };

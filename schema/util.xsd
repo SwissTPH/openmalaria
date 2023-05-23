@@ -192,7 +192,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="complement" type="xs:boolean" default="false">
+  <xs:attribute name="increasing" type="xs:boolean" default="false">
    <xs:annotation>
     <xs:documentation>
           (Boolean) If True, this tells OpenMalaria to use the complement of the
