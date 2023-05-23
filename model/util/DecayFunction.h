@@ -41,9 +41,7 @@ class DecayFunctionHet;
 class DecayFunction
 {
 public:
-    DecayFunction(double timeFactorHet = 0, bool complement = false) :
-        timeFactorHet(timeFactorHet), complement(complement)
-    {}
+    DecayFunction(bool complement = false) : complement(complement) {}
 
     virtual ~DecayFunction() {}
     
@@ -78,12 +76,10 @@ public:
     
     double eval(double ageDays) const {
         if(complement)
-            return 1.0 - _eval( ageDays * timeFactorHet);
+            return 1.0 - _eval( ageDays );
         else
-            return _eval( ageDays * timeFactorHet);
+            return _eval( ageDays );
     }
-
-    double timeFactorHet;
 
 protected:
     virtual double _eval(double ageDays) const =0;
