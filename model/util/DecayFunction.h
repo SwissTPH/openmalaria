@@ -39,7 +39,7 @@ namespace util {
 class DecayFunction
 {
 public:
-    DecayFunction(bool complement = false) : complement(complement) {}
+    DecayFunction(bool increasing = false) : increasing(increasing) {}
 
     virtual ~DecayFunction() {}
     
@@ -72,8 +72,8 @@ public:
      * @returns Age at which an object should decay. */
     virtual SimTime sampleAgeOfDecay (LocalRng& rng) const =0;
     
-    double eval(double ageDays) const {
-        if(complement)
+    inline double eval(double ageDays) const {
+        if(increasing)
             return 1.0 - _eval( ageDays );
         else
             return _eval( ageDays );
@@ -88,22 +88,8 @@ public:
 protected:
     virtual double _eval(double ageDays) const =0;
 
-    bool complement;
+    bool increasing;
 };
-
-class NullDecayFunction : public DecayFunction
-{
-public:
-    virtual double _eval(double ageDays) const { return 0.0; }
-
-    virtual unique_ptr<DecayFunction> hetSample (LocalRng& rng) const { return make_unique<NullDecayFunction>(); };
-    
-    /** Generate a DecayFunctionHet value from an existing sample. */
-    virtual unique_ptr<DecayFunction> hetSample (NormalSample sample) const { return make_unique<NullDecayFunction>(); };
-
-    virtual SimTime sampleAgeOfDecay (LocalRng& rng) const { return 0; };
-};
-
 
 } }
 #endif
