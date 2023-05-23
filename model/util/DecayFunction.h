@@ -33,13 +33,16 @@ namespace util {
 /** An interface for a few types of decay function (some of which may also be
  * suitible survival functions).
  *
- * Heterogeneity is implemented by passing a DecayFunctionHet object to the eval
+ * Heterogeneity is implemented by passing a DecayFunction object to the eval
  * function; this should be sampled by the same DecayFunction.
  *****************************************************************************/
 class DecayFunction
 {
 public:
-    DecayFunction(bool increasing = false) : increasing(increasing) {}
+    DecayFunction(bool increasing = false, double initialEfficacy = 1.0, double CV = 0.0) : 
+        increasing(increasing), initialEfficacy(initialEfficacy) {
+        het.setMeanCV( 1.0, CV );
+    }
 
     virtual ~DecayFunction() {}
     
@@ -52,16 +55,23 @@ public:
         const scnXml::DecayFunction& elt, const char* eltName
     );
 
-    /** Sample a DecayFunctionHet value (should be stored per individual).
+    /** Sample a DecayFunction value (should be stored per individual).
      * 
-     * Note that a DecayFunctionHet is needed to call eval() even if heterogeneity
+     * Note that a DecayFunction is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual unique_ptr<DecayFunction> hetSample (LocalRng& rng) const =0;
+    virtual unique_ptr<DecayFunction> hetSample(LocalRng& rng) const {
+        return hetSample(het.sample(rng));
+    }
     
-    /** Generate a DecayFunctionHet value from an existing sample. */
-    virtual unique_ptr<DecayFunction> hetSample (NormalSample sample) const =0;
+    /** Generate a DecayFunction value from an existing sample. */
+    virtual unique_ptr<DecayFunction> hetSample(NormalSample sample) const {
+        return hetSample(het.sample(sample));
+    }
     
+    /** Generate a DecayFunction value from an existing sample. */
+    virtual unique_ptr<DecayFunction> hetSample(double hetFactor) const =0;
+
     /** Say you have a population of objects which each have two states:
      * decayed and not decayed. If you want to use a DecayFunction to model
      * the proportion of objects which have decayed, you need to work out per
@@ -74,21 +84,23 @@ public:
     
     inline double eval(double ageDays) const {
         if(increasing)
-            return 1.0 - _eval( ageDays );
+            return 1.0 - compute( ageDays ) * initialEfficacy;
         else
-            return _eval( ageDays );
+            return compute( ageDays ) * initialEfficacy;
     }
 
-        /// Checkpointing
+    virtual double compute(double ageDays) const = 0;
+
+    /// Checkpointing
     template<class S>
     void operator& (S& stream) {
         // timeFactorHet & stream;
     }
 
-protected:
-    virtual double _eval(double ageDays) const =0;
-
+private:
     bool increasing;
+    double initialEfficacy;
+    LognormalSampler het;
 };
 
 } }

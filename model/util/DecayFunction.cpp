@@ -31,44 +31,32 @@
 namespace OM {
 namespace util {
 
-class BaseHetDecayFunction : public DecayFunction {
-    LognormalSampler het;
-public:
-    BaseHetDecayFunction( double timeFactorHet, const scnXml::DecayFunction& elt ) :
-        DecayFunction( elt.getIncreasing() )
-    {
-        het.setMeanCV( 1.0, elt.getCV() );
+double readLToDays( const scnXml::DecayFunction& elt ){
+    if( !elt.getL().present() ){
+        throw util::xml_scenario_error( "decay function: attribute L required" );
     }
-    
-    virtual unique_ptr<DecayFunction> _sample(double hetFactor) const =0;
+    return UnitParse::durationToDays(elt.getL().get(), UnitParse::YEARS);
+}
 
-    unique_ptr<DecayFunction> hetSample (LocalRng& rng) const{
-        return _sample(het.sample(rng));
-    }
-    unique_ptr<DecayFunction> hetSample (NormalSample sample) const{
-        return _sample(het.sample(sample));
-    }
-};
-
-class ConstantDecayFunction : public BaseHetDecayFunction {
+class ConstantDecayFunction : public DecayFunction {
 public:
     ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const {
         // Note: we now require all decay functions to return 0 when time > 0
         // and the DecayFunction is default-constructed. So const *after deployment*.
         if( effectiveAge * hetFactor == numeric_limits<double>::infinity() )
             return 0.0;
         return 1.0;
     }
-    SimTime sampleAgeOfDecay (LocalRng& rng) const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const {
         return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<ConstantDecayFunction> copy = make_unique<ConstantDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
@@ -78,22 +66,15 @@ private:
     double hetFactor;
 };
 
-double readLToDays( const scnXml::DecayFunction& elt ){
-    if( !elt.getL().present() ){
-        throw util::xml_scenario_error( "decay function: attribute L required" );
-    }
-    return UnitParse::durationToDays(elt.getL().get(), UnitParse::YEARS);
-}
-
-class StepDecayFunction : public BaseHetDecayFunction {
+class StepDecayFunction : public DecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         invL( 1.0 / readLToDays(elt) ),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         if( effectiveAge * invL * hetFactor < 1.0 ){
             return 1.0;
         }else{
@@ -105,26 +86,25 @@ public:
         return sim::roundToTSFromDays( 1.0 / invL );
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<StepDecayFunction> copy = make_unique<StepDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double invL;        // 1 / days
-    double hetFactor;
+    double invL, hetFactor;
 };
 
-class LinearDecayFunction : public BaseHetDecayFunction {
+class LinearDecayFunction : public DecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         invL( 1.0 / readLToDays(elt) ),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         cout << "Linear " << effectiveAge << " " << invL << " " << hetFactor <<endl;
         if( effectiveAge * invL * hetFactor < 1.0 ){
             return 1.0 - effectiveAge * invL * hetFactor;
@@ -138,26 +118,25 @@ public:
         return sim::roundToTSFromDays(rng.uniform_01() / invL);
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<LinearDecayFunction> copy = make_unique<LinearDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double invL;
-    double hetFactor;
+    double invL, hetFactor;
 };
 
-class ExponentialDecayFunction : public BaseHetDecayFunction {
+class ExponentialDecayFunction : public DecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         invL( log(2.0) / readLToDays(elt) ),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         return exp( -effectiveAge * invL * hetFactor);
     }
     
@@ -165,27 +144,26 @@ public:
         return sim::roundToTSFromDays( -log(rng.uniform_01()) / invL );
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<ExponentialDecayFunction> copy = make_unique<ExponentialDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double invL;
-    double hetFactor;
+    double invL, hetFactor;
 };
 
-class WeibullDecayFunction : public BaseHetDecayFunction {
+class WeibullDecayFunction : public DecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         constOverLambda( pow(log(2.0),1.0/elt.getK()) / readLToDays(elt) ),
         k( elt.getK() ),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         double p = -pow(effectiveAge * constOverLambda * hetFactor, k);
         if(p < -700.0)
             return 0.0;
@@ -197,28 +175,26 @@ public:
         return sim::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<WeibullDecayFunction> copy = make_unique<WeibullDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double constOverLambda;
-    double k;
-    double hetFactor;
+    double constOverLambda, k, hetFactor;
 };
 
-class HillDecayFunction : public BaseHetDecayFunction {
+class HillDecayFunction : public DecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() ),
         hetFactor(0.0)
     {}
     
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         return 1.0 / (1.0 + pow(effectiveAge * invL * hetFactor, k));
     }
     
@@ -226,27 +202,26 @@ public:
         return sim::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<HillDecayFunction> copy = make_unique<HillDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double invL, k;
-    double hetFactor;
+    double invL, k, hetFactor;
 };
 
-class SmoothCompactDecayFunction : public BaseHetDecayFunction {
+class SmoothCompactDecayFunction : public DecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
-        BaseHetDecayFunction( 0.0, elt ),
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()),
         invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() ),
         hetFactor(0.0)
     {}
 
-    double _eval(double effectiveAge) const{
+    double compute(double effectiveAge) const{
         if( effectiveAge * invL * hetFactor < 1.0 ){
             return exp( k - k / (1.0 - pow(effectiveAge * invL * hetFactor, 2.0)) );
         }else{
@@ -258,61 +233,51 @@ public:
         return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
     }
 
-    unique_ptr<DecayFunction> _sample(double hetFactor) const {
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
         unique_ptr<SmoothCompactDecayFunction> copy = make_unique<SmoothCompactDecayFunction>(*this);
         copy->hetFactor = hetFactor;
         return move(copy);
     }
     
 private:
-    double invL, k;
-    double hetFactor;
+    double invL, k, hetFactor;
 };
 
-// class BiphasicDecayFunction : public BaseHetDecayFunction<BiphasicDecayFunction> {
-// public:
-//     BiphasicDecayFunction( const scnXml::DecayFunction& elt ) :
-//         BaseHetDecayFunction( elt )
-//     {
-//         if( !elt.getInitial_efficacy().present() )
-//             throw util::xml_scenario_error( "biphasic decay function: attribute initial_efficacy required" );
-//         if( !elt.getRho().present() )
-//             throw util::xml_scenario_error( "biphasic decay function: attribute rho required" );
-//         if( !elt.getHalflife_long().present() )
-//             throw util::xml_scenario_error( "biphasic decay function: attribute halflife_long required" );
-//         if( !elt.getHalflife_short().present() )
-//             throw util::xml_scenario_error( "biphasic decay function: attribute halflife_short required" );
+class AdditionDecayFunction : public DecayFunction {
+public:
+    AdditionDecayFunction( const scnXml::DecayFunction& elt ) : 
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()) {
+        const scnXml::DecayFunction::DecaySequence &decaySequence = elt.getDecay();
+        if(decaySequence.size() != 2)
+            throw util::xml_scenario_error("addition decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
 
-//         initial_efficacy = elt.getInitial_efficacy().get();
-//         rho = elt.getRho().get();
-//         halflife_long = UnitParse::durationToDays(elt.getHalflife_long().get(), UnitParse::YEARS);
-//         halflife_short = UnitParse::durationToDays(elt.getHalflife_short().get(), UnitParse::YEARS);
+        f1 = makeObject(decaySequence[0], "addition::f1");
+        f2 = makeObject(decaySequence[1], "addition::f2");
+    }
 
-//         invL1 = log(2.0) / halflife_short;
-//         invL2 = log(2.0) / halflife_long;
-//     }
+    AdditionDecayFunction(const AdditionDecayFunction &copy, unique_ptr<DecayFunction> f1, unique_ptr<DecayFunction> f2) : 
+        DecayFunction(copy),
+        f1(move(f1)), f2(move(f2)) {}
+
+    double compute(double effectiveAge) const {
+        return min(f1->eval(effectiveAge) + f2->eval(effectiveAge), 1.0);
+    }
     
-//     double getBaseTimeFactorHet() const{
-//         return 1.0;
-//     }
-//     double _eval(double effectiveAge) const{
-//         return initial_efficacy * (
-//             rho * exp(-effectiveAge * invL1) 
-//             + (1.0 - rho) * exp(-effectiveAge * invL2)
-//         );
-//     }
-    
-//     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-//         throw util::xml_scenario_error( "biphasic decay function: sampleAgeOfDecay not implemented" );
-//     }
-    
-// private:
-//     double invL1, invL2;
-//     double initial_efficacy;
-//     double rho;
-//     double halflife_long;
-//     double halflife_short;
-// };
+    SimTime sampleAgeOfDecay (LocalRng& rng) const {
+        return sim::roundToTSFromDays( max(f1->sampleAgeOfDecay(rng), f2->sampleAgeOfDecay(rng)) );
+    }
+
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
+        unique_ptr<DecayFunction> f1hetSample = f1->hetSample(hetFactor);
+        unique_ptr<DecayFunction> f2hetSample = f2->hetSample(hetFactor);
+        unique_ptr<AdditionDecayFunction> copy = make_unique<AdditionDecayFunction>(*this, move(f1hetSample), move(f2hetSample));
+        return move(copy);
+    }
+
+private:
+
+    unique_ptr<DecayFunction> f1, f2;
+};
 
 // -----  interface / static functions  -----
 
@@ -335,8 +300,8 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
-    // }else if( func == "biphasic" ){
-    //     return unique_ptr<DecayFunction>(new BiphasicDecayFunction( elt ));
+    }else if( func == "addition" ){
+        return unique_ptr<DecayFunction>(new AdditionDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
