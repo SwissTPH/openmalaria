@@ -262,7 +262,7 @@ public:
         f1(move(f1)), f2(move(f2)) {}
 
     double compute(double effectiveAge) const {
-        return min(op(f1->eval(effectiveAge), f2->eval(effectiveAge)), 1.0);
+        return max(min(op(f1->eval(effectiveAge), f2->eval(effectiveAge)), 1.0), 0.0);
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const {
