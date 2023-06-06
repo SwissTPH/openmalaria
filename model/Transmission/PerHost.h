@@ -263,11 +263,11 @@ public:
     }
     //@}
     
+    vector<PerHostAnoph> speciesData;
+
 private:
     void checkpointIntervs( ostream& stream );
     void checkpointIntervs( istream& stream );
-    
-    vector<PerHostAnoph> speciesData;
     
     // Determines whether human is outside transmission
     bool outsideTransmission;
