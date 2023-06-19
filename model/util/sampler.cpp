@@ -221,11 +221,11 @@ void GammaSampler::setMeanVariance( double mean, double variance ){
     if( variance == 0.0 )
         return;
 
-    variance = variance;
+    this->variance = variance;
     // sigma / mu = 1 / sqrt(k)
     // sqrt(k) = mu / sigma
     // k = mu^2 / variance
-    k = (mu*mu)/variance;
+    k = (mu*mu)/this->variance;
     // k * theta = mean
     // theta = mean / k
     theta = mu / k;
@@ -233,8 +233,10 @@ void GammaSampler::setMeanVariance( double mean, double variance ){
 
 void GammaSampler::scaleMean(double scalar){
     mu *= scalar;
-    if(!isnan(variance))
-        k = (mu*mu)/variance;
+    // if(!isnan(this->variance))
+    // {
+    //     k = (mu*mu)/this->variance;
+    // }
     if(!isnan(k))
         theta = mu / k;
 }

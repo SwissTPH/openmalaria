@@ -220,7 +220,6 @@ int main(int argc, char* argv[])
                     humanFile << human.perHostTransmission.speciesData[i].getEntoAvailability() << " ";
                 }
                 humanFile << endl;
-                cout << i << endl;
             }
             humanFile.close();
         }
