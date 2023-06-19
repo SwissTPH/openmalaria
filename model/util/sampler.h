@@ -166,7 +166,7 @@ namespace OM { namespace util {
     public:
         GammaSampler(const scnXml::SampledValueCV& elt) :
             mu( 1.0 ),
-            k( 1.0 ),
+            k( numeric_limits<double>::signaling_NaN() ),
             theta( numeric_limits<double>::signaling_NaN() ),
             variance( numeric_limits<double>::signaling_NaN() )
         {

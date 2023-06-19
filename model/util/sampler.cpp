@@ -132,12 +132,8 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
     sigma = sqrt(log(a));
 }
 void LognormalSampler::setMeanVariance( double mean, double variance ){
-    cout << "using variance!!" << endl;
-    if( variance == 0.0 ){
-        throw util::xml_scenario_error( "log-normal: variance cannot be 0" );
-    }
-    if( !(mean > 0.0 && variance > 0.0) ){
-        throw util::xml_scenario_error( "log-normal: required mean > 0 and variance ≥ 0" );
+    if( !(mean > 0.0) ){
+        throw util::xml_scenario_error( "log-normal: required mean > 0" );
     }
     
     // The following formulae are derived from:
@@ -145,7 +141,13 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
     // E(X) = exp(μ + σ² / 2)
     // Var(X) = exp(σ² + 2μ)(exp(σ²) - 1)
     // Var = (CV * mean)²
-    
+
+    if( variance == 0.0)
+    {
+        mu = log(mean);
+        sigma = 0.0;
+        return;
+    }
     const double CV = variance / mean;
     const double a = 1 + (CV * CV);
     mu = log( mean / sqrt(a) );
@@ -199,10 +201,11 @@ void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
 }
 
 void GammaSampler::setMeanCV( double mean, double CV ){
-    if( CV == 0.0 )
-        throw util::xml_scenario_error( "gamma distr: required CV > 0" );
-
     mu = mean;
+    
+    if( CV == 0.0 )
+        return;
+
     // 1 / sqrt(k) = CV
     // sqrt(k) = 1/CV
     // k = 1 / CV^2
@@ -213,10 +216,11 @@ void GammaSampler::setMeanCV( double mean, double CV ){
 }
 
 void GammaSampler::setMeanVariance( double mean, double variance ){
-    if( variance == 0.0 )
-        throw util::xml_scenario_error( "gamma: required CV > 0" );
-
     mu = mean;
+
+    if( variance == 0.0 )
+        return;
+
     variance = variance;
     // sigma / mu = 1 / sqrt(k)
     // sqrt(k) = mu / sigma
@@ -231,7 +235,8 @@ void GammaSampler::scaleMean(double scalar){
     mu *= scalar;
     if(!isnan(variance))
         k = (mu*mu)/variance;
-    theta = mu / k;
+    if(!isnan(k))
+        theta = mu / k;
 }
 
 double GammaSampler::mean() const {
@@ -239,6 +244,8 @@ double GammaSampler::mean() const {
 }
 
 double GammaSampler::sample(LocalRng& rng) const{
+    if(isnan(theta))
+        return mu;
     return rng.gamma(k, theta);
 }
 
