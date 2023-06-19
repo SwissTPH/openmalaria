@@ -251,7 +251,7 @@ public:
         DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()) {
         const scnXml::DecayFunction::DecaySequence &decaySequence = elt.getDecay();
         if(decaySequence.size() != 2)
-            throw util::xml_scenario_error("Operator decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
+            throw util::xml_scenario_error("The operator decay function expects two decay functions, but " + to_string(decaySequence.size()) +"  were given.");
 
         f1 = makeObject(decaySequence[0], "Operator::f1");
         f2 = makeObject(decaySequence[1], "Operator::f2");
@@ -279,6 +279,67 @@ public:
 private:
     unique_ptr<DecayFunction> f1, f2;
     T op;
+};
+
+class EmaxFunction : public DecayFunction {
+public:
+    EmaxFunction( const scnXml::DecayFunction& elt ) : 
+        DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()) {
+        const scnXml::DecayFunction::DecaySequence &decaySequence = elt.getDecay();
+        if(decaySequence.size() != 1)
+            throw util::xml_scenario_error("The Emax function expects exactly one user function, but " + to_string(decaySequence.size()) +"  were given.");
+        if(!elt.getEmax().present())
+            throw util::xml_scenario_error("Emax function: the Emax parameter is not declared");
+        if(!elt.getIC50().present())
+            throw util::xml_scenario_error("Emax function: the IC50 parameter is not declared");
+        if(!elt.getSlope().present())
+            throw util::xml_scenario_error("Emax function: the Slope parameter is not declared");
+        if(!elt.getInitialConcentration().present())
+            throw util::xml_scenario_error("Emax function: the InitialConcentration parameter is not declared");
+        
+        f = makeObject(decaySequence[0], "Emax::f");
+
+        Emax = elt.getEmax().get();
+        IC50 = elt.getIC50().get();
+        slope = elt.getSlope().get();
+        initialConcentration = elt.getInitialConcentration().get();
+
+        IC50 = pow(IC50, slope); // compute once
+    }
+
+    EmaxFunction(const EmaxFunction &copy, unique_ptr<DecayFunction> f) : 
+        DecayFunction(copy),
+        f(move(f)),
+        Emax(copy.Emax), 
+        IC50(copy.IC50),
+        slope(copy.slope),
+        initialConcentration(copy.initialConcentration) {}
+
+    double compute(double effectiveAge) const {
+        double fcomp = pow(initialConcentration * f->eval(effectiveAge), slope);
+        cout << "t: " << effectiveAge << endl;
+        cout << "AB(t): " << f->eval(effectiveAge) << endl;
+        cout << "rho: " << initialConcentration << endl;
+        cout << "slope: " << slope << endl;
+        cout << "IC50^slope: " << IC50 << endl;
+        cout << "rho * AB(t)^slope: " << fcomp << endl;
+        cout << "Emax(t) = " << Emax * fcomp / (fcomp + IC50) << endl;
+        return max(min(Emax * fcomp / (fcomp + IC50), 1.0), 0.0);
+    }
+    
+    SimTime sampleAgeOfDecay (LocalRng& rng) const {
+        return sim::roundToTSFromDays( f->sampleAgeOfDecay(rng) );
+    }
+
+    unique_ptr<DecayFunction> hetSample(double hetFactor) const {
+        unique_ptr<DecayFunction> fhetSample = f->hetSample(hetFactor);
+        unique_ptr<EmaxFunction> copy = make_unique<EmaxFunction>(*this, move(fhetSample));
+        return move(copy);
+    }
+
+private:
+    unique_ptr<DecayFunction> f;
+    double Emax, IC50, slope, initialConcentration;
 };
 
 // -----  interface / static functions  -----
@@ -310,6 +371,8 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::divides<double>>( elt ));
     }else if( func == "multiplies" ){
         return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::multiplies<double>>( elt ));
+    }else if( func == "Emax" ){
+        return unique_ptr<DecayFunction>(new EmaxFunction( elt ));
     }else{
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
