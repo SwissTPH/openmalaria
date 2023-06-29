@@ -290,7 +290,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:documentation>
           The (linear) coefficient of variation.
           
-          This value must be specified when a (non-constant) distribution is used.
+          This value must be specified when a (non-constant) distribution is used. 
+          Note: since version 46, variance can be used instead.
           
           Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
           disables sampling of this parameter, even if distr is not &quot;const&quot;. 
@@ -325,11 +326,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:attribute name="variance" type="xs:double" use="optional">
    <xs:annotation>
     <xs:documentation>
-          The (linear) coefficient of variation.
+          The variance parameter of the distirbution.
           
-          This value must be specified when a (non-constant) distribution is used.
+          This value can be specified when a (non-constant) distribution is used.
           
-          Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+          Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
           disables sampling of this parameter, even if distr is not &quot;const&quot;. 
         </xs:documentation>
     <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
