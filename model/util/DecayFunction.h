@@ -27,54 +27,22 @@
 #include <limits>
 #include <memory>
 
-namespace scnXml
-{
-    class DecayFunction;
-    class DecayFunctionValue;
-}
-class DecayFunctionSuite;
-
 namespace OM {
 namespace util {
-
-/** A sample of parameters used to make decay functions heterogenious.
- *
- * The default constructor only sets an NaN value; new instances must be
- * sampled by DecayFunction::hetSample() before use. */
-class DecayFuncHet {
-    double tMult;
-    DecayFuncHet(double tMult): tMult(tMult) {}
-public:
-    /** Default value: should make all eval() calls return 0 (i.e. infinitely
-     * old deployment). */
-    DecayFuncHet() : tMult( numeric_limits<double>::infinity() ) {}
-    
-    inline double getTMult() const{
-        return tMult;
-    }
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        tMult & stream;
-    }
-    
-    friend class BaseHetDecayFunction;
-    friend class ConstantDecayFunction;
- };
 
 /** An interface for a few types of decay function (some of which may also be
  * suitible survival functions).
  *
- * Heterogeneity is implemented by passing a DecayFuncHet object to the eval
+ * Heterogeneity is implemented by passing a DecayFunction object to the eval
  * function; this should be sampled by the same DecayFunction.
  *****************************************************************************/
 class DecayFunction
 {
 public:
-    DecayFunction(const scnXml::DecayFunction& elt) :
-        complement(elt.getComplement())
-    {}
+    DecayFunction(bool increasing = false, double initialEfficacy = 1.0, double CV = 0.0) : 
+        increasing(increasing), initialEfficacy(initialEfficacy) {
+        het.setMeanCV( 1.0, CV );
+    }
 
     virtual ~DecayFunction() {}
     
@@ -87,34 +55,23 @@ public:
         const scnXml::DecayFunction& elt, const char* eltName
     );
 
-    /** Return a value in the range [0,1] describing remaining effectiveness of
-     * the intervention.
+    /** Sample a DecayFunction value (should be stored per individual).
      * 
-     * @param age Age of intervention/decayed property
-     * @param sample A DecayFuncHet value sampled for the intervention and
-     *  individual.
-     * 
-     * NOTE: As it is, values are calculated for the end of the time-period
-     * being updated over. It would be more accurate to return the mean value
-     * over this period (from age-1 to age), but difference should be small for
-     * interventions being effective for a month or more. */
-    inline double eval( SimTime age, DecayFuncHet sample )const{
-        if(complement)
-            return 1.0 - eval( age * sample.getTMult() );
-        else
-            return eval( age * sample.getTMult() );
-    }
-    
-    /** Sample a DecayFuncHet value (should be stored per individual).
-     * 
-     * Note that a DecayFuncHet is needed to call eval() even if heterogeneity
+     * Note that a DecayFunction is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual DecayFuncHet hetSample (LocalRng& rng) const =0;
+    virtual unique_ptr<DecayFunction> hetSample(LocalRng& rng) const {
+        return hetSample(het.sample(rng));
+    }
     
-    /** Generate a DecayFuncHet value from an existing sample. */
-    virtual DecayFuncHet hetSample (NormalSample sample) const =0;
+    /** Generate a DecayFunction value from an existing sample. */
+    virtual unique_ptr<DecayFunction> hetSample(NormalSample sample) const {
+        return hetSample(het.sample(sample));
+    }
     
+    /** Generate a DecayFunction value from an existing sample. */
+    virtual unique_ptr<DecayFunction> hetSample(double hetFactor) const =0;
+
     /** Say you have a population of objects which each have two states:
      * decayed and not decayed. If you want to use a DecayFunction to model
      * the proportion of objects which have decayed, you need to work out per
@@ -125,14 +82,25 @@ public:
      * @returns Age at which an object should decay. */
     virtual SimTime sampleAgeOfDecay (LocalRng& rng) const =0;
     
-protected:
-    DecayFunction() {}
-    // Protected version. Note that the het sample parameter is needed even
-    // when heterogeneity is not used so don't try calling this without that.
-    virtual double eval(double ageDays) const =0;
+    inline double eval(double ageDays) const {
+        if(increasing)
+            return 1.0 - compute( ageDays ) * initialEfficacy;
+        else
+            return compute( ageDays ) * initialEfficacy;
+    }
+
+    virtual double compute(double ageDays) const = 0;
+
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        // timeFactorHet & stream;
+    }
 
 private:
-    bool complement;
+    bool increasing;
+    double initialEfficacy;
+    LognormalSampler het;
 };
 
 } }

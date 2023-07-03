@@ -29,7 +29,6 @@
 namespace OM {
 namespace interventions {
     using util::DecayFunction;
-    using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using util::LocalRng;
@@ -167,8 +166,7 @@ public:
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSComponent& params)const{
         SimTime age = sim::nowOrTs1() - deployTime;  // implies age 1 TS on first use
-        double effectSurvival = params.insecticideDecay->eval( age,
-                                              insecticideDecayHet );
+        double effectSurvival = insecticideDecayHet->eval( age );
         return initialInsecticide * effectSurvival;
     }
     
@@ -195,7 +193,7 @@ private:
     double initialInsecticide;	// units: mg/m²
     
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    DecayFuncHet insecticideDecayHet;
+    unique_ptr<DecayFunction> insecticideDecayHet;
 };
 
 } }
