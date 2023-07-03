@@ -23,7 +23,6 @@
 #define Hmod_PerHost
 
 #include "Global.h"
-#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
@@ -32,13 +31,71 @@
 namespace OM {
 namespace Transmission {
 
-using Anopheles::PerHostAnophParams;
-using Anopheles::PerHostAnoph;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::LocalRng;
 
 class HumanVectorInterventionComponent;
+
+/** Stores vector model data applicable between a category of host and a
+ * mosquito species: intervention descriptions and model parameters.
+ *
+ * Parameters are read from XML, and the availability rate is adjusted. */
+class PerHostAnophParams {
+public:
+    static inline void initReserve (size_t numSpecies) {
+        params.reserve (numSpecies);
+    }
+    static inline void init (const scnXml::Mosq& mosq) {
+        params.push_back(PerHostAnophParams{ mosq });
+    }
+    
+    /// Get the number of vector species
+    static inline size_t numSpecies() {
+        return params.size();
+    }
+    
+    /// Get parameters for the given vector species
+    static inline const PerHostAnophParams& get(size_t species) {
+        return params[species];
+    }
+    
+    /** entoAvailability is calculated externally, then set after other
+     * parameters have been initialised.
+     * 
+     * This function doesn't need to exist, but helps make this fact obvious.
+     * 
+     * It should be called exactly once.
+      */
+    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
+        params[species].entoAvailability->scaleMean( entoAvailability );
+    }
+
+    /** @brief Probabilities of finding a host and surviving a feeding cycle
+     * 
+     * These parameters describe the mean and heterogeneity of α_i, P_B_i,
+     * P_C_i and P_D_i across the human population. */
+    //@{
+    /** Availability rate (α_i) */
+    unique_ptr<util::Sampler> entoAvailability;
+
+    /** Probability of mosquito successfully biting host (P_B_i) */
+    util::BetaSampler probMosqBiting;
+
+    /** Probability of mosquito escaping human and finding a resting site without
+     * dying, after biting the human (P_C_i). */
+    util::BetaSampler probMosqFindRestSite;
+
+    /** Probability of mosquito successfully resting after finding a resting site
+     * (P_D_i). */
+    util::BetaSampler probMosqSurvivalResting;
+    //@}
+    
+private:
+    PerHostAnophParams (const scnXml::Mosq& mosq);
+
+    static vector<PerHostAnophParams> params;
+};
 
 /**
  * A base class for interventions affecting human-vector interaction.
@@ -255,14 +312,16 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        speciesData & stream;
+        anophEntoAvailability & stream;
+        anophProbMosqBiting & stream;
+        anophProbMosqResting & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
         checkpointIntervs( stream );
     }
     //@}
     
-    vector<PerHostAnoph> speciesData;
+    // vector<PerHostAnoph> speciesData;
 
 private:
     void checkpointIntervs( ostream& stream );
@@ -278,6 +337,19 @@ private:
     vector<unique_ptr<PerHostInterventionData>> activeComponents;
     
     static AgeGroupInterpolator relAvailAge;
+
+    /** Species availability rate of human to mosquitoes, including hetergeneity factor
+     * and base rate, but excluding age and intervention factors. */
+    vector<double> anophEntoAvailability;
+    
+    /** Species probability of mosquito successfully biting host (P_B_i) in the absense of
+     * interventions. */
+    vector<double> anophProbMosqBiting;
+    
+    /** Species probability of mosquito escaping human and finding a resting site, then
+     * resting without dying, after biting the human (P_C_i * P_D_i) in the
+     * absense of interventions. */
+    vector<double> anophProbMosqResting;
 };
 
 }

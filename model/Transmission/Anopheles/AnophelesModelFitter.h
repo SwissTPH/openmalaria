@@ -23,7 +23,6 @@
 #define Hmod_AnophelesModelFitter
 
 #include "Global.h"
-#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "Transmission/PerHost.h"
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"

@@ -41,7 +41,6 @@ namespace Transmission
 {
 using namespace OM::util;
 using Anopheles::AnophelesModel;
-using Anopheles::PerHostAnophParams;
 using Anopheles::SimpleMPDAnophelesModel;
 
 void VectorModel::ctsCbN_v0(ostream &stream)

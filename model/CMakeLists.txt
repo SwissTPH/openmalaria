@@ -48,7 +48,7 @@ set (Model_CPP
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
-  Transmission/Anopheles/PerHostAnoph.cpp
+  # Transmission/Anopheles/PerHostAnoph.cpp
   #Transmission/Anopheles/EmergenceModel.cpp
   #Transmission/Anopheles/MosqTransmission.cpp
   #Transmission/Anopheles/FixedEmergence.cpp
