@@ -27,6 +27,7 @@
 #include "util/errors.h"
 #include "util/UnitParse.h"
 #include "Host/Human.h"
+#include "Host/WithinHost/WHInterface.h"
 
 namespace OM {
     class Population;
@@ -113,8 +114,8 @@ namespace Host {
             double rateNow = rate[lastIndex].value;
             if( rateNow > 0.0 ){
                 for(Human& human : population){
-                    if(human.rng().bernoulli( rateNow )){
-                        human.addInfection();
+                    if(human.rng.bernoulli( rateNow )){
+                        human.withinHostModel->importInfection(human.rng);
                     }
                 }
             }

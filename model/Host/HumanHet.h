@@ -26,10 +26,6 @@
 namespace OM {
 namespace Host {
 
-bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
-        opt_trans_treat_het = false, opt_comorb_treat_het = false,
-        opt_comorb_trans_het = false, opt_triple_het = false;
-
 /// (Some) heterogeneity parameters of humans
 struct HumanHet {
     /* Human heterogeneity; affects:
@@ -39,47 +35,39 @@ struct HumanHet {
     double comorbidityFactor;
     double treatmentSeekingFactor;
     double availabilityFactor;
+    
     HumanHet() : comorbidityFactor(1.0), treatmentSeekingFactor(1.0),
         availabilityFactor(1.0) {}
     
-    static void init(){
-        opt_trans_het = util::ModelOptions::option (util::TRANS_HET);
-        opt_comorb_het = util::ModelOptions::option (util::COMORB_HET);
-        opt_treat_het = util::ModelOptions::option (util::TREAT_HET);
-        opt_trans_treat_het = util::ModelOptions::option (util::TRANS_TREAT_HET);
-        opt_comorb_treat_het = util::ModelOptions::option (util::COMORB_TREAT_HET);
-        opt_comorb_trans_het = util::ModelOptions::option (util::COMORB_TRANS_HET);
-        opt_triple_het = util::ModelOptions::option (util::TRIPLE_HET);
-    }
-    
-    static HumanHet sample(LocalRng& rng){
+    static HumanHet sample(util::LocalRng& rng)
+    {
         HumanHet het;
-        if( opt_trans_het ){
+        if(util::ModelOptions::option (util::TRANS_HET)){
             het.availabilityFactor = 0.2;
             if( rng.bernoulli(0.5) ){
                 het.availabilityFactor = 1.8;
             }
         }
-        if( opt_comorb_het ){
+        if(util::ModelOptions::option (util::COMORB_HET)){
             het.comorbidityFactor = 0.2;
             if( rng.bernoulli(0.5) ){
                 het.comorbidityFactor = 1.8;
             }
         }
-        if( opt_treat_het ){
+        if(util::ModelOptions::option (util::TREAT_HET)){
             het.treatmentSeekingFactor = 0.2;
             if( rng.bernoulli(0.5) ){
                 het.treatmentSeekingFactor = 1.8;
             }
         }
-        if( opt_trans_treat_het ){
+        if(util::ModelOptions::option (util::TRANS_TREAT_HET)){
             het.treatmentSeekingFactor = 0.2;
             het.availabilityFactor = 1.8;
             if( rng.bernoulli(0.5) ){
                 het.treatmentSeekingFactor = 1.8;
                 het.availabilityFactor = 0.2;
             }
-        }else if( opt_comorb_treat_het ){
+        }else if(util::ModelOptions::option (util::COMORB_TREAT_HET)){
             if( rng.bernoulli(0.5) ){
                 het.comorbidityFactor = 1.8;
                 het.treatmentSeekingFactor = 0.2;
@@ -87,14 +75,14 @@ struct HumanHet {
                 het.comorbidityFactor = 0.2;
                 het.treatmentSeekingFactor = 1.8;
             }
-        }else if( opt_comorb_trans_het ){
+        }else if(util::ModelOptions::option (util::COMORB_TRANS_HET)){
             het.availabilityFactor = 1.8;
             het.comorbidityFactor = 1.8;
             if( rng.bernoulli(0.5) ){
                 het.availabilityFactor = 0.2;
                 het.comorbidityFactor = 0.2;
             }
-        }else if( opt_triple_het ){
+        }else if(util::ModelOptions::option (util::TRIPLE_HET)){
             het.availabilityFactor = 1.8;
             het.comorbidityFactor = 1.8;
             het.treatmentSeekingFactor = 0.2;
@@ -106,6 +94,7 @@ struct HumanHet {
         }
         return het;
     }
+
 };
 
 }

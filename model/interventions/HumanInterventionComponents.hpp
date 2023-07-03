@@ -130,7 +130,7 @@ void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
         const interventions::HumanInterventionComponent& component = **it;
         // we must report first, since it can change cohort and sub-population
         // which may affect what deployment does (at least in the case of reporting deployments)
-        human.reportDeployment( component.id(), component.duration() );
+        Host::human::reportDeployment(human, component.id(), component.duration());
         component.deploy( human, method, vaccLimits );
     }
 }
@@ -187,7 +187,7 @@ void TriggeredDeployments::SubList::deploy( Host::Human& human,
     //TODO: why does the above contradict what we do? Is this due to a date being shifted later?
     SimTime age = human.age(sim::nowOrTs1());
     if( age >= minAge && age < maxAge ){
-        if( coverage >= 1.0 || human.rng().bernoulli( coverage ) ){
+        if( coverage >= 1.0 || human.rng.bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );
         }
     }
@@ -228,7 +228,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
         mon::reportEventMHD( mon::MHD_SCREEN, human, method );
-        if( human.withinHostModel->diagnosticResult(human.rng(), diagnostic) ){
+        if( human.withinHostModel->diagnosticResult(human.rng, diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
             negative.deploy( human, method, vaccLimits );
@@ -351,7 +351,7 @@ public:
         HumanInterventionComponent(id) {}
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
-        human.clearImmunity();
+        human.withinHostModel->clearImmunity();
         //NOTE: not reported
     }
     

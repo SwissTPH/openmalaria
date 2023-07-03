@@ -382,8 +382,8 @@ SimTime VectorModel::initIterate()
 void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
 {
 
-    auto ag = human.monAgeGroup().i();
-    auto cs = human.cohortSet();
+    auto ag = human.monitoringAgeGroup.i();
+    auto cs = human.cohortSet;
     PerHost &host = human.perHostTransmission;
     host.update(human);
     if(simulationMode == transientEIRknown)
@@ -490,7 +490,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
             sigma_df[s] += df;
             for (size_t g = 0; g < nGenotypes; ++g)
             {
-                const double tbvFac = human.getVaccine().getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
+                const double tbvFac = human.vaccine.getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
                 sigma_dif[s][g] += df * probTransmission[g] * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);

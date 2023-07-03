@@ -215,7 +215,7 @@ double InfectionIncidenceModel::susceptibility () {
 }
 
 int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR) {
-  double expectedNumInfections = getModelExpectedInfections (human.rng(), effectiveEIR, human.perHostTransmission);
+  double expectedNumInfections = getModelExpectedInfections (human.rng, effectiveEIR, human.perHostTransmission);
   // error check (should be OK if kappa is checked, for nonVector model):
   if( !(std::isfinite)(effectiveEIR) ){
     ostringstream out;
@@ -227,7 +227,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
   // Setting this option to true will only affect reporting
   if(opt_vaccine_genotype == false)
       //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-      expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
+      expectedNumInfections *= human.vaccine.getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
   m_cumulativeEIRa+=effectiveEIR;
@@ -239,7 +239,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     m_pInfected = 1.0;
   
   if (expectedNumInfections > 0.0000001){
-    int n = human.rng().poisson(expectedNumInfections);
+    int n = human.rng.poisson(expectedNumInfections);
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }

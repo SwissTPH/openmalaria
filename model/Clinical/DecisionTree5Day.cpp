@@ -87,7 +87,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
         regimen = SecondLine;
     }
     
-    double x = human.rng().uniform_01();
+    double x = human.rng.uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
         CMHostData hostData( human, sim::inYears(human.age(sim::ts0())), pgState );
         

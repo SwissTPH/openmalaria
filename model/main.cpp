@@ -42,6 +42,9 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Host/Human.h"
+#include "Host/HumanHet.h"
+#include "Host/InfectionIncidenceModel.h"
+#include "Host/WithinHost/WHInterface.h"
 
 #include <cerrno>
 
@@ -74,7 +77,7 @@ void print_errno()
 }
 
 // Internal simulation loop
-void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, SimTime &endTime, SimTime &estEndTime, int lastPercent)
+void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, bool surveyOnlyNewEp, SimTime &endTime, SimTime &estEndTime, int lastPercent)
 {
     while (sim::now() < endTime)
     {
@@ -86,7 +89,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
             for(Host::Human &human : population.humans)
-                human.summarize();
+                Host::human::summarize(human, surveyOnlyNewEp);
             transmission.summarize();
             mon::concludeSurvey();
         }
@@ -107,7 +110,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         Host::NeonatalMortality::update (population.humans);
         
         for (Host::Human& human : population.humans)
-            if (human.getDateOfBirth() + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
+            if (human.dateOfBirth + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
                 Host::human::update(human, transmission);
        
         population.regularize();
@@ -153,10 +156,16 @@ int main(int argc, char* argv[])
         // 2) elements depending on only elements initialised in (1):
         WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters
         mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
-        Host::Human::init( parameters, *scenario );
+        
+        // Init models used by humans
+        Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
+        Host::InfectionIncidenceModel::init( parameters );
+        WithinHost::WHInterface::init( parameters, *scenario );
+        Clinical::ClinicalModel::init( parameters, *scenario );
         Host::NeonatalMortality::init( scenario->getModel().getClinical() );
         AgeStructure::init( scenario->getDemography() );
-        
+        bool surveyOnlyNewEp = scenario->getMonitoring().getSurveyOptions().getOnlyNewEpisode();
+
         // 3) elements depending on other elements; dependencies on (1) are not mentioned:
         // Transmission model initialisation depends on Transmission::PerHost and
         // genotypes (both from Human, from Population::init()) and
@@ -240,7 +249,7 @@ int main(int argc, char* argv[])
              * equilibrium in all age classes. Don't report any events. */
             endTime = humanWarmupLength;
             if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting Warmup..." << endl;
-            loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+            loop(humanWarmupLength, *population, *transmission, surveyOnlyNewEp, endTime, estEndTime, lastPercent);
             if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing Warmup..." << endl;
 
 
@@ -253,7 +262,7 @@ int main(int argc, char* argv[])
                 // adjust estimation of final time step: end of current period + length of main phase
                 estEndTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
                 if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting EIR Calibration..." << endl;
-                loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+                loop(humanWarmupLength, *population, *transmission, surveyOnlyNewEp, endTime, estEndTime, lastPercent);
                 if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing EIR Calibration..." << endl;
                 iterate = transmission->initIterate();
             }
@@ -285,13 +294,13 @@ int main(int argc, char* argv[])
 
         // Main phase loop
         if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting Intervention period..." << endl;
-        loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+        loop(humanWarmupLength, *population, *transmission, surveyOnlyNewEp, endTime, estEndTime, lastPercent);
         if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing Intervention period..." << endl;
        
         cerr << '\r' << flush;  // clean last line of progress-output
         
         for(Host::Human &human : population->humans)
-            human.flushReports();
+            human.clinicalModel->flushReports();
         mon::writeSurveyData();
         
     # ifdef OM_STREAM_VALIDATOR

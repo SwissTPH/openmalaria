@@ -180,7 +180,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
     CaseType regimen = (m_tLastTreatment + healthSystemMemory > sim::ts0()) ?
         SecondLine : FirstLine;
     
-    double x = human.rng().uniform_01();
+    double x = human.rng.uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
         // UC1: official care OR self treatment
         // UC2: official care only
@@ -188,7 +188,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         if( useDiagnosticUC ){
             mon::reportEventMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
             auto diag = WithinHost::diagnostics::monitoringDiagnostic();
-            if( !human.withinHostModel->diagnosticResult(human.rng(), diag) )
+            if( !human.withinHostModel->diagnosticResult(human.rng, diag) )
                 return; // negative outcome: no treatment
         }
         
@@ -197,7 +197,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         
         double p = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?
             cureRateUCSelfTreat[regimen] : cureRateUCOfficial[regimen];
-        if( human.rng().bernoulli(p) ){
+        if( human.rng.bernoulli(p) ){
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
             human.withinHostModel->treatment( human, treatmentUC[regimen] );

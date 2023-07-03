@@ -178,7 +178,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    if ( pgState & Episode::COMPLICATED ) {
                 const double pSequelae = pSequelaeInpatient.eval( ageYears );
                 mon::reportStatMHF( mon::MHF_EXPECTED_SEQUELAE, human, pSequelae );
-		if( human.rng().uniform_01() < pSequelae ){
+		if( human.rng.uniform_01() < pSequelae ){
 		    pgState = Episode::State (pgState | Episode::SEQUELAE);
                 }else{
 		    pgState = Episode::State (pgState | Episode::RECOVERY);
@@ -222,7 +222,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     pgState = Episode::State (pgState | newState | Episode::RUN_CM_TREE);
                     indirectMortality = pg.indirectMortality;
                     
-                    double uVariate = human.rng().uniform_01();
+                    double uVariate = human.rng.uniform_01();
                     size_t i = 0;       // units: days
                     for(; i < cumDailyPrImmUCTS.size(); ++i){
                         if( uVariate < cumDailyPrImmUCTS[i] ){
@@ -289,7 +289,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             mon::reportStatMHF( mon::MHF_EXPECTED_DIRECT_DEATHS, human, pDeath );
             if( inHospital )
                 mon::reportStatMHF( mon::MHF_EXPECTED_HOSPITAL_DEATHS, human, pDeath );
-	    if (human.rng().uniform_01() < pDeath) {
+	    if (human.rng.uniform_01() < pDeath) {
 		pgState = Episode::State (pgState | Episode::DIRECT_DEATH | Episode::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
 		//timeOfRecovery += extraDaysAtRisk;	(no point updating; will be set later: ATORWD)
@@ -307,7 +307,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double pNeedTreat = isMalarial ?
                         MF_need_antibiotic.eval( ageYears ) :
                         NMF_need_antibiotic.eval( ageYears );
-                bool needTreat = human.rng().bernoulli(pNeedTreat);
+                bool needTreat = human.rng.bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
                 double pTreatment = 0.0;
@@ -336,7 +336,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 
                 double treatmentEffectMult = 1.0;
                 
-                if( human.rng().uniform_01() < pTreatment ){
+                if( human.rng.uniform_01() < pTreatment ){
                     /*FIXME: impossible due to above; NMF output removed
                     Survey::current().addInt( Report::MI_NMF_TREATMENTS, human, 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
@@ -347,7 +347,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 // chance of death:
                 if( needTreat ){
                     double pDeath = severeNmfMortality.eval( ageYears ) * treatmentEffectMult;
-                    if( human.rng().uniform_01() < pDeath ){
+                    if( human.rng.uniform_01() < pDeath ){
                         pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
                     }
                 }
@@ -376,7 +376,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 mon::reportStatMHF( mon::MHF_EXPECTED_DIRECT_DEATHS, human, pDeath );
                 if( pgState & Episode::EVENT_IN_HOSPITAL )
                     mon::reportStatMHF( mon::MHF_EXPECTED_HOSPITAL_DEATHS, human, pDeath );
-		if (human.rng().uniform_01() < pDeath) {
+		if (human.rng.uniform_01() < pDeath) {
 		    pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
 		    // Human is killed at end of time at risk
 		    timeOfRecovery = timeOfRecovery + extraDaysAtRisk;	// may be re-set later (see ATORWD)
@@ -411,12 +411,11 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     }
     
     // Remove on first models...
-    if( timeLastTreatment == sim::ts0() ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
-    }
-    if( pgState & Episode::SICK ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
-    }
+    if( timeLastTreatment == sim::ts0() )
+        Host::human::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_TREATMENT);
+    
+    if( pgState & Episode::SICK )
+        Host::human::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_BOUT);
 }
 
 

@@ -536,7 +536,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 }
 
 void ITNComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
-    human.perHostTransmission.deployComponent( human.rng(), *this );
+    human.perHostTransmission.deployComponent( human.rng, *this );
     mon::reportEventMHD( mon::MHD_ITN, human, method );
 }
 
@@ -671,13 +671,13 @@ void HumanITN::update(Host::Human& human){
         // First use is at age 0 relative to ts0()
         if( sim::ts0() >= disposalTime ){
             deployTime = sim::never();
-            human.removeFromSubPop(id());
+            human.subPopExp.erase(id());
             return;
         }
         
-        int newHoles = human.rng().poisson( holeRate );
+        int newHoles = human.rng.poisson( holeRate );
         nHoles += newHoles;
-        holeIndex += newHoles + params.ripFactor * human.rng().poisson( nHoles * ripRate );
+        holeIndex += newHoles + params.ripFactor * human.rng.poisson( nHoles * ripRate );
     }
 }
 
