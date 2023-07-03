@@ -97,14 +97,6 @@ void Population::checkpoint (ostream& stream)
         human & stream;
 }
 
-void Population::preMainSimInit ()
-{
-    Host::InfectionIncidenceModel::preMainSimInit();
-    Clinical::InfantMortality::preMainSimInit();
-    WithinHost::Genotypes::preMainSimInit();
-    recentBirths = 0;
-}
-
 void Population::createInitialHumans()
 {
     /* We create a whole population here, regardless of whether humans can

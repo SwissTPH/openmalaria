@@ -269,7 +269,10 @@ int main(int argc, char* argv[])
             // reset endTime and estEndTime to their exact value after initIterate()
             estEndTime = endTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
             sim::s_interv = sim::zero();
-            population->preMainSimInit();
+            Host::InfectionIncidenceModel::preMainSimInit();
+            Clinical::InfantMortality::preMainSimInit();
+            WithinHost::Genotypes::preMainSimInit();
+            population->recentBirths = 0;
             transmission->summarize(); // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
 

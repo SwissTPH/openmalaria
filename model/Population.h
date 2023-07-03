@@ -47,10 +47,6 @@ public:
     
     /** Creates the initial population of Humans according to cumAgeProp. */
     void createInitialHumans();
-    
-    /** Initialisation run between initial one-lifespan run of simulation and
-     * actual simulation. */
-    void preMainSimInit ();
 
     //! Updates all individuals in the list for one time-step
     /*!  Also updates the population-level measures such as infectiousness, and
