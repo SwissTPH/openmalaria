@@ -5102,7 +5102,8 @@ base*(1-usage<em>propActing) + intervention_factor</em>usage*propActing.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-ITN">ITN</a> → <a href="#elt-holeRate">holeRate</a></p>
 <pre><code class="language-xml">&lt;holeRate
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -5129,11 +5130,12 @@ Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&qu
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution" id="distribution">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -5143,6 +5145,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-8" id="coefficient-of-variation-8">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean" id="mean">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -5151,7 +5161,8 @@ of the distribution and not log-space properties.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-ITN">ITN</a> → <a href="#elt-ripRate">ripRate</a></p>
 <pre><code class="language-xml">&lt;ripRate
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -5175,16 +5186,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-144" id="attributes-144">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-8" id="coefficient-of-variation-8">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-9" id="coefficient-of-variation-9">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-1" id="distribution-1">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -5194,6 +5206,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-10" id="coefficient-of-variation-10">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-1" id="mean-1">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -5313,7 +5333,7 @@ rounding happens as late as possible.</p>
 <p><strong>Default value:</strong> 1.0</p>
 <p>Shape parameter of distribution. If not specified, default value of
 1 is used. Meaning depends on function; not used in some cases.</p>
-<h4><a class="header" href="#coefficient-of-variation-9" id="coefficient-of-variation-9">Coefficient of Variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-11" id="coefficient-of-variation-11">Coefficient of Variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Min:</strong> 0</p>
@@ -5398,7 +5418,7 @@ rounding happens as late as possible.</p>
 <p><strong>Default value:</strong> 1.0</p>
 <p>Shape parameter of distribution. If not specified, default value of
 1 is used. Meaning depends on function; not used in some cases.</p>
-<h4><a class="header" href="#coefficient-of-variation-10" id="coefficient-of-variation-10">Coefficient of Variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-12" id="coefficient-of-variation-12">Coefficient of Variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Min:</strong> 0</p>
@@ -6192,7 +6212,7 @@ rounding happens as late as possible.</p>
 <p><strong>Default value:</strong> 1.0</p>
 <p>Shape parameter of distribution. If not specified, default value of
 1 is used. Meaning depends on function; not used in some cases.</p>
-<h4><a class="header" href="#coefficient-of-variation-11" id="coefficient-of-variation-11">Coefficient of Variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-13" id="coefficient-of-variation-13">Coefficient of Variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Min:</strong> 0</p>
@@ -6487,7 +6507,7 @@ rounding happens as late as possible.</p>
 <p><strong>Default value:</strong> 1.0</p>
 <p>Shape parameter of distribution. If not specified, default value of
 1 is used. Meaning depends on function; not used in some cases.</p>
-<h4><a class="header" href="#coefficient-of-variation-12" id="coefficient-of-variation-12">Coefficient of Variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-14" id="coefficient-of-variation-14">Coefficient of Variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Min:</strong> 0</p>
@@ -7508,7 +7528,8 @@ mosquito interaction of a single species of anopheles mosquito.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a> → <a href="#elt-mosq">mosq</a> → <a href="#elt-availability">availability</a></p>
 <pre><code class="language-xml">&lt;availability
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-153" id="documentation-element-153">Documentation (element)</a></h4>
@@ -7522,16 +7543,17 @@ no heterogeneity.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-199" id="attributes-199">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-13" id="coefficient-of-variation-13">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-15" id="coefficient-of-variation-15">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-4" id="distribution-4">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -7541,6 +7563,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-16" id="coefficient-of-variation-16">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h2><a class="header" href="#a-nameelt-mosqprobbiting-2a-probability-that-the-mosquito-succesfully-bites-chosen-host" id="a-nameelt-mosqprobbiting-2a-probability-that-the-mosquito-succesfully-bites-chosen-host"><a name="elt-mosqProbBiting-2"></a> Probability that the mosquito succesfully bites chosen host</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a> → <a href="#elt-mosq">mosq</a> → <a href="#elt-mosqProbBiting-2">mosqProbBiting</a></p>
 <pre><code class="language-xml">&lt;mosqProbBiting
@@ -8368,7 +8398,8 @@ phenotype, repeat the whole &quot;restriction onLocus...&quot; element.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PD">PD</a> → <a href="#elt-phenotype-2">phenotype</a> → <a href="#elt-IC50">IC50</a></p>
 <pre><code class="language-xml">&lt;IC50
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8386,16 +8417,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-233" id="attributes-233">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-14" id="coefficient-of-variation-14">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-17" id="coefficient-of-variation-17">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-5" id="distribution-5">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8405,6 +8437,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-18" id="coefficient-of-variation-18">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-7" id="mean-7">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8475,7 +8515,8 @@ and m_exponent.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-k">k</a></p>
 <pre><code class="language-xml">&lt;k
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8499,16 +8540,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-234" id="attributes-234">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-15" id="coefficient-of-variation-15">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-19" id="coefficient-of-variation-19">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-6" id="distribution-6">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8518,6 +8560,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-20" id="coefficient-of-variation-20">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-8" id="mean-8">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8543,7 +8593,8 @@ to <em>both</em> the elimination and the conversion rates.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-k_a">k_a</a></p>
 <pre><code class="language-xml">&lt;k_a
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8562,16 +8613,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-235" id="attributes-235">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-16" id="coefficient-of-variation-16">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-21" id="coefficient-of-variation-21">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-7" id="distribution-7">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8581,6 +8633,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-22" id="coefficient-of-variation-22">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-9" id="mean-9">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8624,7 +8684,8 @@ undergo conversion with the current models.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-conversion">conversion</a> → <a href="#elt-rate-2">rate</a></p>
 <pre><code class="language-xml">&lt;rate
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8639,16 +8700,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-236" id="attributes-236">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-17" id="coefficient-of-variation-17">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-23" id="coefficient-of-variation-23">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-8" id="distribution-8">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8658,6 +8720,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-24" id="coefficient-of-variation-24">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-10" id="mean-10">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8695,7 +8765,8 @@ metabolite IC50 values).</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-vol_dist">vol_dist</a></p>
 <pre><code class="language-xml">&lt;vol_dist
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8713,16 +8784,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-237" id="attributes-237">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-18" id="coefficient-of-variation-18">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-25" id="coefficient-of-variation-25">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-9" id="distribution-9">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8732,6 +8804,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-26" id="coefficient-of-variation-26">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-11" id="mean-11">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8755,7 +8835,8 @@ from- a second compartment.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-compartment2">compartment2</a> → <a href="#elt-k12">k12</a></p>
 <pre><code class="language-xml">&lt;k12
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8774,16 +8855,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-238" id="attributes-238">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-19" id="coefficient-of-variation-19">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-27" id="coefficient-of-variation-27">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-10" id="distribution-10">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8793,6 +8875,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-28" id="coefficient-of-variation-28">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-12" id="mean-12">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8801,7 +8891,8 @@ of the distribution and not log-space properties.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-compartment2">compartment2</a> → <a href="#elt-k21">k21</a></p>
 <pre><code class="language-xml">&lt;k21
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8820,16 +8911,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-239" id="attributes-239">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-20" id="coefficient-of-variation-20">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-29" id="coefficient-of-variation-29">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-11" id="distribution-11">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8839,6 +8931,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-30" id="coefficient-of-variation-30">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-13" id="mean-13">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8862,7 +8962,8 @@ from- a third compartment.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-compartment3">compartment3</a> → <a href="#elt-k13">k13</a></p>
 <pre><code class="language-xml">&lt;k13
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8881,16 +8982,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-240" id="attributes-240">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-21" id="coefficient-of-variation-21">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-31" id="coefficient-of-variation-31">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-12" id="distribution-12">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8900,6 +9002,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-32" id="coefficient-of-variation-32">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-14" id="mean-14">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -8908,7 +9018,8 @@ of the distribution and not log-space properties.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-pharmacology">pharmacology</a> → <a href="#elt-drugs">drugs</a> → <a href="#elt-drug">drug</a> → <a href="#elt-PK">PK</a> → <a href="#elt-compartment3">compartment3</a> → <a href="#elt-k31">k31</a></p>
 <pre><code class="language-xml">&lt;k31
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
   /&gt;
 </code></pre>
@@ -8927,16 +9038,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-241" id="attributes-241">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-22" id="coefficient-of-variation-22">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-33" id="coefficient-of-variation-33">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-13" id="distribution-13">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -8946,6 +9058,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-34" id="coefficient-of-variation-34">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-15" id="mean-15">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -9478,7 +9598,8 @@ n = 0</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-vivax">vivax</a> → <a href="#elt-hypnozoiteRelease">hypnozoiteRelease</a> → <a href="#elt-firstReleaseDays">firstReleaseDays</a></p>
 <pre><code class="language-xml">&lt;firstReleaseDays
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
     latentRelapse=double
   /&gt;
@@ -9500,16 +9621,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-255" id="attributes-255">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-23" id="coefficient-of-variation-23">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-35" id="coefficient-of-variation-35">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-14" id="distribution-14">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -9519,6 +9641,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-36" id="coefficient-of-variation-36">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-16" id="mean-16">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
@@ -9531,7 +9661,8 @@ of the distribution and not log-space properties.</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-vivax">vivax</a> → <a href="#elt-hypnozoiteRelease">hypnozoiteRelease</a> → <a href="#elt-secondReleaseDays">secondReleaseDays</a></p>
 <pre><code class="language-xml">&lt;secondReleaseDays
   [ CV=double ]
-  [ distr=(&quot;const&quot; or &quot;lognormal&quot;) ] DEFAULT VALUE const
+  [ distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;) ] DEFAULT VALUE const
+  [ variance=double ]
     mean=double
     latentRelapse=double
   /&gt;
@@ -9553,16 +9684,17 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <h3><a class="header" href="#attributes-256" id="attributes-256">Attributes</a></h3>
-<h4><a class="header" href="#coefficient-of-variation-24" id="coefficient-of-variation-24">Coefficient of variation</a></h4>
+<h4><a class="header" href="#coefficient-of-variation-37" id="coefficient-of-variation-37">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
 <p><strong>Units:</strong> unitless</p>
 <p>The (linear) coefficient of variation.
-This value must be specified when a (non-constant) distribution is used.
+This value must be specified when a (non-constant) distribution is used. 
+Note: since version 46, variance can be used instead.
 Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
 disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#distribution-15" id="distribution-15">Distribution</a></h4>
-<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot;)
+<pre><code class="language-xml">distr=(&quot;const&quot; or &quot;lognormal&quot; or &quot;gamma&quot;)
 </code></pre>
 <p><strong>Default value:</strong> const</p>
 <p>To allow heterogeneity, a distribution must be specified.
@@ -9572,6 +9704,14 @@ same effect as not specifying distr at all.
 &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
 Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
 of the distribution and not log-space properties.</p>
+<h4><a class="header" href="#coefficient-of-variation-38" id="coefficient-of-variation-38">Coefficient of variation</a></h4>
+<pre><code class="language-xml">variance=double
+</code></pre>
+<p><strong>Units:</strong> unitless</p>
+<p>The variance parameter of the distirbution.
+This value can be specified when a (non-constant) distribution is used.
+Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+disables sampling of this parameter, even if distr is not &quot;const&quot;. </p>
 <h4><a class="header" href="#mean-17" id="mean-17">mean</a></h4>
 <pre><code class="language-xml">mean=double
 </code></pre>
