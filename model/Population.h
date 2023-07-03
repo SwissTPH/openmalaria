@@ -40,17 +40,17 @@ namespace OM {
 class Population
 {
 public:
-    Population( size_t populationSize );
+    Population(size_t populationSize);
 
     //! Size of the human population
     size_t populationSize;
     
     ///@brief Variables for continuous reporting
     //@{
-    vector<double> ctsDemogAgeGroups;
+    vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
     
     /// Births since last continuous output
-    int recentBirths;
+    int recentBirths = 0;
     //@}
     
     /** The simulated human population
@@ -61,6 +61,8 @@ public:
 
     namespace population
     {
+        Population *createPopulation(size_t populationSize);
+
         void checkpoint(Population &population, istream& stream);
         void checkpoint(Population &population, ostream& stream);
 

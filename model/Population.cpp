@@ -46,36 +46,33 @@ namespace OM
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(size_t populationSize)
-    : populationSize (populationSize), recentBirths(0)
-{
-    using mon::Continuous;
-    Continuous.registerCallback( "hosts", "\thosts", &population::ctsHosts );
-    // Age groups are currently hard-coded.
-    ctsDemogAgeGroups.insert(ctsDemogAgeGroups.end(), { 1.0, 5.0, 10.0, 15.0, 25.0 });
-    ostringstream ctsDemogTitle;
-    for( double ubound : ctsDemogAgeGroups ){
-        ctsDemogTitle << "\thost % ≤ " << ubound;
-    }
-    Continuous.registerCallback( "host demography", ctsDemogTitle.str(), &population::ctsHostDemography);
-    Continuous.registerCallback( "recent births", "\trecent births", &population::ctsRecentBirths);
-    Continuous.registerCallback( "patent hosts", "\tpatent hosts", &population::ctsPatentHosts);
-    Continuous.registerCallback( "immunity h", "\timmunity h", &population::ctsImmunityh);
-    Continuous.registerCallback( "immunity Y", "\timmunity Y", &population::ctsImmunityY);
-    Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y", &population::ctsMedianImmunityY);
-    Continuous.registerCallback( "human age availability", "\thuman age availability", &population::ctsMeanAgeAvailEffect);
-    Continuous.registerCallback( "ITN coverage", "\tITN coverage", &population::ctsITNCoverage);
-    Continuous.registerCallback( "IRS coverage", "\tIRS coverage", &population::ctsIRSCoverage);
-    Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &population::ctsGVICoverage);
-    // "nets owned" replaced by "ITN coverage"
-//     Continuous.registerCallback( "nets owned", "\tnets owned",
-//         MakeDelegate( this, &Population::ctsNetsOwned ) );
-//     Continuous.registerCallback( "mean hole index", "\tmean hole index",
-//         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
-}
+Population::Population(size_t populationSize) : populationSize (populationSize){}
 
 namespace population
 {
+    Population *createPopulation(size_t populationSize)
+    {
+        Population *population = new Population(populationSize);
+
+        ostringstream ctsDemogTitle;
+        for( double ubound : population->ctsDemogAgeGroups )
+            ctsDemogTitle << "\thost % ≤ " << ubound;
+
+        mon::Continuous.registerCallback( "hosts", "\thosts", &population::ctsHosts );
+        mon::Continuous.registerCallback( "host demography", ctsDemogTitle.str(), &population::ctsHostDemography);
+        mon::Continuous.registerCallback( "recent births", "\trecent births", &population::ctsRecentBirths);
+        mon::Continuous.registerCallback( "patent hosts", "\tpatent hosts", &population::ctsPatentHosts);
+        mon::Continuous.registerCallback( "immunity h", "\timmunity h", &population::ctsImmunityh);
+        mon::Continuous.registerCallback( "immunity Y", "\timmunity Y", &population::ctsImmunityY);
+        mon::Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y", &population::ctsMedianImmunityY);
+        mon::Continuous.registerCallback( "human age availability", "\thuman age availability", &population::ctsMeanAgeAvailEffect);
+        mon::Continuous.registerCallback( "ITN coverage", "\tITN coverage", &population::ctsITNCoverage);
+        mon::Continuous.registerCallback( "IRS coverage", "\tIRS coverage", &population::ctsIRSCoverage);
+        mon::Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &population::ctsGVICoverage);
+
+        return population;
+    }
+
     void checkpoint (Population &population, istream& stream)
     {
         population.populationSize & stream;
@@ -208,6 +205,7 @@ namespace population
         // this option is intended for debugging human initialization; normally this should equal populationSize.
         stream << '\t' << population.populationSize;
     }
+
     void ctsHostDemography (Population &population, ostream& stream){
         auto iter = population.humans.crbegin();
         int cumCount = 0;
@@ -219,6 +217,7 @@ namespace population
             stream << '\t' << cumCount;
         }
     }
+
     void ctsRecentBirths (Population &population, ostream& stream){
         stream << '\t' << population.recentBirths;
         population.recentBirths = 0;
@@ -233,6 +232,7 @@ namespace population
         }
         stream << '\t' << patent;
     }
+
     void ctsImmunityh (Population &population, ostream& stream){
         double x = 0.0;
         for(const Host::Human &human : population.humans) {
@@ -241,6 +241,7 @@ namespace population
         x /= population.populationSize;
         stream << '\t' << x;
     }
+
     void ctsImmunityY (Population &population, ostream& stream){
         double x = 0.0;
         for(const Host::Human &human : population.humans) {
@@ -249,6 +250,7 @@ namespace population
         x /= population.populationSize;
         stream << '\t' << x;
     }
+
     void ctsMedianImmunityY (Population &population, ostream& stream){
         vector<double> list;
         list.reserve( population.populationSize );
@@ -265,6 +267,7 @@ namespace population
         }
         stream << '\t' << x;
     }
+
     void ctsMeanAgeAvailEffect (Population &population, ostream& stream){
         int nHumans = 0;
         double avail = 0.0;
@@ -276,6 +279,7 @@ namespace population
         }
         stream << '\t' << avail/nHumans;
     }
+
     void ctsITNCoverage (Population &population, ostream& stream){
         int nActive = 0;
         for(const Host::Human &human : population.humans) {
@@ -284,6 +288,7 @@ namespace population
         double coverage = static_cast<double>(nActive) / population.populationSize;
         stream << '\t' << coverage;
     }
+
     void ctsIRSCoverage (Population &population, ostream& stream){
         int nActive = 0;
         for(const Host::Human &human : population.humans) {
@@ -292,6 +297,7 @@ namespace population
         double coverage = static_cast<double>(nActive) / population.populationSize;
         stream << '\t' << coverage;
     }
+    
     void ctsGVICoverage (Population &population, ostream& stream){
         int nActive = 0;
         for(const Host::Human &human : population.humans) {
