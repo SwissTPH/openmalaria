@@ -44,23 +44,6 @@ namespace OM
     using namespace OM::util;
     using Transmission::TransmissionModel;
 
-// -----  Population: static data / methods  -----
-void Population::staticCheckpoint (istream& stream)
-{
-    Host::NeonatalMortality::staticCheckpoint (stream);
-    Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::InfantMortality::staticCheckpoint(stream);
-    WithinHost::Genotypes::staticCheckpoint(stream);
-}
-void Population::staticCheckpoint (ostream& stream)
-{
-    Host::NeonatalMortality::staticCheckpoint (stream);
-    Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::InfantMortality::staticCheckpoint(stream);
-    WithinHost::Genotypes::staticCheckpoint(stream);
-}
-
-
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population(size_t populationSize)

@@ -40,11 +40,6 @@ namespace OM {
 class Population
 {
 public:
-    /// Checkpointing for static data members
-    static void staticCheckpoint (istream& stream);
-    static void staticCheckpoint (ostream& stream); ///< ditto
-
-
     Population( size_t populationSize );
     
     void checkpoint (istream& stream);

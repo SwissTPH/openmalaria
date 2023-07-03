@@ -27,6 +27,8 @@
 #include "mon/Continuous.h"
 #include "mon/management.h"
 #include "interventions/InterventionManager.hpp"
+#include "Host/NeonatalMortality.h"
+#include "Clinical/ClinicalModel.h"
 
 #include "checkpoint.h"
 
@@ -56,7 +58,10 @@ void checkpoint (istream& stream, SimTime &endTime, SimTime &estEndTime, Populat
     {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
-        Population::staticCheckpoint (stream);
+        Host::NeonatalMortality::staticCheckpoint (stream);
+        Host::InfectionIncidenceModel::staticCheckpoint (stream);
+        Clinical::InfantMortality::staticCheckpoint(stream);
+        WithinHost::Genotypes::staticCheckpoint(stream);
         mon::Continuous & stream;
         mon::checkpoint( stream );
 #       ifdef OM_STREAM_VALIDATOR
@@ -100,7 +105,10 @@ void checkpoint (ostream& stream, SimTime &endTime, SimTime &estEndTime, Populat
         throw util::checkpoint_error ("Unable to write to file");
 
     util::CommandLine::staticCheckpoint (stream);
-    Population::staticCheckpoint (stream);
+    Host::NeonatalMortality::staticCheckpoint (stream);
+    Host::InfectionIncidenceModel::staticCheckpoint (stream);
+    Clinical::InfantMortality::staticCheckpoint(stream);
+    WithinHost::Genotypes::staticCheckpoint(stream);
     mon::Continuous & stream;
     mon::checkpoint( stream );
 # ifdef OM_STREAM_VALIDATOR
