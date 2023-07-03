@@ -61,7 +61,7 @@ public:
      * It should be called exactly once.
       */
     inline static void scaleEntoAvailability(size_t species, double entoAvailability){
-        params[species].entoAvailability.scaleMean( entoAvailability );
+        params[species].entoAvailability->scaleMean( entoAvailability );
     }
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
@@ -70,7 +70,8 @@ public:
      * P_C_i and P_D_i across the human population. */
     //@{
     /** Availability rate (α_i) */
-    util::LognormalSampler entoAvailability;
+    // util::LognormalSampler entoAvailability;
+    unique_ptr<util::Sampler> entoAvailability;
 
     /** Probability of mosquito successfully biting host (P_B_i) */
     util::BetaSampler probMosqBiting;

@@ -210,6 +210,20 @@ int main(int argc, char* argv[])
         
         int lastPercent = -1; // last _integer_ percentage value
         
+        // ofstream humanFile ("humans.txt");
+        // if (humanFile.is_open())
+        // {
+        //     for(size_t i=0; i<population->getHumans()[0].perHostTransmission.speciesData.size(); i++)
+        //     {
+        //         for(const Host::Human &human : population->getHumans())
+        //         {
+        //             humanFile << human.perHostTransmission.speciesData[i].getEntoAvailability() << " ";
+        //         }
+        //         humanFile << endl;
+        //     }
+        //     humanFile.close();
+        // }
+
         /** Warm-up phase: 
          * Run the simulation using the equilibrium inoculation rates over one
          * complete lifespan (sim::maxHumanAge()) to reach immunological

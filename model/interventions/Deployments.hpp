@@ -469,7 +469,7 @@ public:
                 NhhParamsInterv &p = nhhParams[anophModel->mosq.name];
                 Transmission::Anopheles::Nhh nhh;
 
-                double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability.mean();
+                double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability->mean();
                 double avail_i = popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
 
                 nhh.avail_i = avail_i;
