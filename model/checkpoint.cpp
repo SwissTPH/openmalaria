@@ -72,7 +72,7 @@ void checkpoint (istream& stream, SimTime &endTime, SimTime &estEndTime, Populat
         endTime & stream;
         estEndTime & stream;
         transmission & stream;
-        population.checkpoint(stream);
+        population::checkpoint(population, stream);
         interventions::InterventionManager::checkpoint(stream);
         interventions::InterventionManager::loadFromCheckpoint(population.humans, transmission);
         
@@ -119,7 +119,7 @@ void checkpoint (ostream& stream, SimTime &endTime, SimTime &estEndTime, Populat
     endTime & stream;
     estEndTime & stream;
     transmission & stream;
-    population.checkpoint(stream);
+    population::checkpoint(population, stream);
     interventions::InterventionManager::checkpoint( stream );
     
     sim::s_t0 & stream;

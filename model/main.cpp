@@ -84,7 +84,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         // and is when reporting happens in our time-series.
         Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
-            population.newSurvey();
+            population::newSurvey(population);
             transmission.summarize();
             mon::concludeSurvey();
         }
@@ -100,7 +100,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         // This needs the whole population (it is an approximation before all humans are updated).
         transmission.vectorUpdate(population.humans);
         
-        population.update(transmission, humanWarmupLength);
+        population::update(population, transmission, humanWarmupLength);
         
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
         else
         {
             Continuous.init( monitoring, false );
-            population->createInitialHumans();
+            population::createInitialHumans(*population);
             transmission->init2(population->humans);
         }
         
@@ -291,7 +291,7 @@ int main(int argc, char* argv[])
        
         cerr << '\r' << flush;  // clean last line of progress-output
         
-        population->flushReports();        // ensure all Human instances report past events
+        population::flushReports(*population);        // ensure all Human instances report past events
         mon::writeSurveyData();
         
     # ifdef OM_STREAM_VALIDATOR

@@ -41,24 +41,6 @@ class Population
 {
 public:
     Population( size_t populationSize );
-    
-    void checkpoint (istream& stream);
-    void checkpoint (ostream& stream);
-    
-    /** Creates the initial population of Humans according to cumAgeProp. */
-    void createInitialHumans();
-
-    //! Updates all individuals in the list for one time-step
-    /*!  Also updates the population-level measures such as infectiousness, and
-         the age-distribution by c outmigrating or creating new births if
-         necessary */
-    void update( Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
-
-    //! Makes a survey
-    void newSurvey();
-    
-    /// Flush anything pending report. Should only be called just before destruction.
-    void flushReports();
 
     //! Size of the human population
     size_t populationSize;
@@ -77,27 +59,47 @@ public:
     vector<Host::Human> humans;
 };
 
-/// Delegate to print the number of hosts
-void ctsHosts (Population &population, ostream& stream);
-/// Delegate to print cumulative numbers of hosts under various age limits
-void ctsHostDemography (Population &population, ostream& stream);
-/// Delegate to print the number of births since last count
-void ctsRecentBirths (Population &population, ostream& stream);
-/// Delegate to print the number of patent hosts
-void ctsPatentHosts (Population &population, ostream& stream);
-/// Delegate to print immunity's cumulativeh parameter
-void ctsImmunityh (Population &population, ostream& stream);
-/// Delegate to print immunity's cumulativeY parameter (mean across population)
-void ctsImmunityY (Population &population, ostream& stream);
-/// Delegate to print immunity's cumulativeY parameter (median across population)
-void ctsMedianImmunityY (Population &population, ostream& stream);
-/// Delegate to print the mean age-based availability reduction of each human relative to an adult
-void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
-void ctsITNCoverage (Population &population, ostream& stream);
-void ctsIRSCoverage (Population &population, ostream& stream);
-void ctsGVICoverage (Population &population, ostream& stream);
-/// Delegate to print the mean hole index of all bed nets
-//     void ctsNetHoleIndex (ostream& stream);
+    namespace population
+    {
+        void checkpoint(Population &population, istream& stream);
+        void checkpoint(Population &population, ostream& stream);
 
+        /** Creates the initial population of Humans according to cumAgeProp. */
+        void createInitialHumans(Population &population);
+
+        //! Updates all individuals in the list for one time-step
+        /*!  Also updates the population-level measures such as infectiousness, and
+             the age-distribution by c outmigrating or creating new births if
+             necessary */
+        void update( Population &population, Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
+
+        //! Makes a survey
+        void newSurvey(Population &population);
+
+        /// Flush anything pending report. Should only be called just before destruction.
+        void flushReports(Population &population);
+
+        /// Delegate to print the number of hosts
+        void ctsHosts (Population &population, ostream& stream);
+        /// Delegate to print cumulative numbers of hosts under various age limits
+        void ctsHostDemography (Population &population, ostream& stream);
+        /// Delegate to print the number of births since last count
+        void ctsRecentBirths (Population &population, ostream& stream);
+        /// Delegate to print the number of patent hosts
+        void ctsPatentHosts (Population &population, ostream& stream);
+        /// Delegate to print immunity's cumulativeh parameter
+        void ctsImmunityh (Population &population, ostream& stream);
+        /// Delegate to print immunity's cumulativeY parameter (mean across population)
+        void ctsImmunityY (Population &population, ostream& stream);
+        /// Delegate to print immunity's cumulativeY parameter (median across population)
+        void ctsMedianImmunityY (Population &population, ostream& stream);
+        /// Delegate to print the mean age-based availability reduction of each human relative to an adult
+        void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
+        void ctsITNCoverage (Population &population, ostream& stream);
+        void ctsIRSCoverage (Population &population, ostream& stream);
+        void ctsGVICoverage (Population &population, ostream& stream);
+        /// Delegate to print the mean hole index of all bed nets
+        //     void ctsNetHoleIndex (ostream& stream);
+    }
 }
 #endif
