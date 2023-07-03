@@ -72,40 +72,11 @@ public:
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
     
-    /// Type of population list. Store pointers to humans only to avoid copy operations.
-    typedef vector<Host::Human> HumanPop;
-    /// Iterator type of population
-    typedef HumanPop::iterator Iter;
-    /// Const iterator type of population
-    typedef HumanPop::const_iterator ConstIter;
-    /// Const reverse iterator type of population
-    typedef HumanPop::const_reverse_iterator ConstReverseIter;
-    
-    /** @brief Access the population list, as a whole or with iterators. */
-    //@{
-    // non-const versions are needed to do things like add infections
-    inline Iter begin() { return population.begin(); }
-    inline Iter end() { return population.end(); }
-    inline ConstIter cbegin() const{ return population.cbegin(); }
-    inline ConstIter cend() const{ return population.cend(); }
-    inline ConstReverseIter crbegin() const{ return population.crbegin(); }
-    inline ConstReverseIter crend() const{ return population.crend(); }
-    // Pair of iterators (begin, end)
-    inline std::pair<Iter, Iter> range() {
-        return std::make_pair(population.begin(), population.end());
-    }
-    // Pair of const iterators (cbegin, cend)
-    inline std::pair<ConstIter, ConstIter> crange() const {
-        return std::make_pair(population.cbegin(), population.cend());
-    }
     /** Return the number of humans. */
-    inline size_t size() const {
-        return populationSize;
-    }
-    inline HumanPop &getHumans() {
+    inline vector<Host::Human> &getHumans() {
         return population;
     }
-    inline const HumanPop &getHumans() const {
+    inline const vector<Host::Human> &getHumans() const {
         return population;
     }
     //@}
@@ -148,9 +119,7 @@ private:
     /** The simulated human population
      *
      * The list of all humans, ordered from oldest to youngest. */
-    HumanPop population;
-    
-    friend class AnophelesModelSuite;
+    vector<Host::Human> population;
 };
 
 }

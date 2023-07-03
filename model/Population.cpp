@@ -129,8 +129,8 @@ void Population::checkpoint (ostream& stream)
     populationSize & stream;
     recentBirths & stream;
     
-    for(Iter iter = population.begin(); iter != population.end(); ++iter)
-        (*iter) & stream;
+    for(Host::Human &human : population)
+        human & stream;
 }
 
 void Population::preMainSimInit ()
@@ -174,7 +174,7 @@ void Population::update(Transmission::TransmissionModel& transmission, SimTime f
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
     // (until humans old enough to be pregnate get updated and can be infected).
-    Host::NeonatalMortality::update (*this);
+    Host::NeonatalMortality::update (population);
     
     // Update each human in turn
     for (Host::Human& human : population) {
@@ -194,20 +194,20 @@ void Population::update(Transmission::TransmissionModel& transmission, SimTime f
     int targetPop = populationSize;
     int cumPop = 0;
 
-    for (Iter iter = population.begin(); iter != population.end();) {
-        bool isDead = iter->remove();
+    for (auto it = population.begin(); it != population.end();) {
+        bool isDead = it->remove();
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
         // Also see targetPop = ... comment above
-        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(iter->age(sim::ts1())), targetPop);
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(it->age(sim::ts1())), targetPop);
         
         if( isDead || outmigrate ){
-            iter = population.erase (iter);
+            it = population.erase (it);
             continue;
         }
         ++cumPop;
-        ++iter;
+        ++it;
     } // end of per-human updates
 
     // increase population size to targetPop
@@ -243,25 +243,25 @@ void Population::ctsRecentBirths (ostream& stream){
 }
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
+    for(Host::Human &human : population) {
         auto diag = WithinHost::diagnostics::monitoringDiagnostic();
-        if( iter->getWithinHostModel().diagnosticResult(iter->rng(), diag) )
+        if( human.getWithinHostModel().diagnosticResult(human.rng(), diag) )
             ++patent;
     }
     stream << '\t' << patent;
 }
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulative_h();
+    for(Host::Human &human : population) {
+        x += human.getWithinHostModel().getCumulative_h();
     }
     x /= populationSize;
     stream << '\t' << x;
 }
 void Population::ctsImmunityY (ostream& stream){
     double x = 0.0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulative_Y();
+    for(Host::Human &human : population) {
+        x += human.getWithinHostModel().getCumulative_Y();
     }
     x /= populationSize;
     stream << '\t' << x;
@@ -269,8 +269,8 @@ void Population::ctsImmunityY (ostream& stream){
 void Population::ctsMedianImmunityY (ostream& stream){
     vector<double> list;
     list.reserve( populationSize );
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        list.push_back( iter->getWithinHostModel().getCumulative_Y() );
+    for(Host::Human &human : population) {
+        list.push_back( human.getWithinHostModel().getCumulative_Y() );
     }
     sort( list.begin(), list.end() );
     double x;
@@ -285,34 +285,34 @@ void Population::ctsMedianImmunityY (ostream& stream){
 void Population::ctsMeanAgeAvailEffect (ostream& stream){
     int nHumans = 0;
     double avail = 0.0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( !iter->perHostTransmission.isOutsideTransmission() ){
+    for(Host::Human &human : population) {
+        if( !human.perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(sim::inYears(iter->age(sim::now())));
+            avail += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
         }
     }
     stream << '\t' << avail/nHumans;
 }
 void Population::ctsITNCoverage (ostream& stream){
     int nActive = 0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::ITN );
+    for(Host::Human &human : population) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::ITN );
     }
     double coverage = static_cast<double>(nActive) / populationSize;
     stream << '\t' << coverage;
 }
 void Population::ctsIRSCoverage (ostream& stream){
     int nActive = 0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::IRS );
+    for(Host::Human &human : population) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::IRS );
     }
     double coverage = static_cast<double>(nActive) / populationSize;
     stream << '\t' << coverage;
 }
 void Population::ctsGVICoverage (ostream& stream){
     int nActive = 0;
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::GVI );
+    for(Host::Human &human : population) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::GVI );
     }
     double coverage = static_cast<double>(nActive) / populationSize;
     stream << '\t' << coverage;
@@ -320,10 +320,10 @@ void Population::ctsGVICoverage (ostream& stream){
 // void Population::ctsNetHoleIndex (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
-//     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
+//     for(Host::Human &human : population) {
+//         if( human.perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++nNets;
-//             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
+//             meanVar += human.perHostTransmission.getITN().getHoleIndex();
 //         }
 //     }
 //     stream << '\t' << meanVar/nNets;
@@ -331,14 +331,14 @@ void Population::ctsGVICoverage (ostream& stream){
 
 void Population::newSurvey ()
 {
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        iter->summarize();
+    for(Host::Human &human : population) {
+        human.summarize();
     }
 }
 
 void Population::flushReports (){
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        iter->flushReports();
+    for(Host::Human &human : population) {
+        human.flushReports();
     }
 }    
 

@@ -67,7 +67,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     }
 }
 
-void ImportedInfections::import( Population& population ){
+void ImportedInfections::import( vector<Human> &population ){
     if( rate.size() == 0 ) return;      // no imported infections
     SimTime now = sim::intervTime();
     assert( now >= sim::zero() );

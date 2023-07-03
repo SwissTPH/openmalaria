@@ -25,6 +25,7 @@
 #include "Global.h"
 #include "schema/interventions.h"
 #include "util/errors.h"
+#include "Host/Human.h"
 
 namespace OM {
     class Population;
@@ -51,7 +52,7 @@ namespace Host {
          *  person.
          * 
          * @param pop The Population class encapsulating all humans */
-        void import( Population& pop );
+        void import(vector<Human> &population);
         
         /// Checkpointing
         template<class S>

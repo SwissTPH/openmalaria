@@ -155,7 +155,7 @@ public:
 
     /** Extra initialisation when not loading from a checkpoint, requiring
      * information from the human population structure. */
-    virtual void init2(const Population &population) = 0;
+    virtual void init2(const vector<Host::Human> &population) = 0;
 
     /// Checkpointing
     template <class S>
@@ -211,7 +211,7 @@ public:
     /** Needs to be called each step of the simulation before Human::update().
      *
      * when the vector model is used this updates mosquito populations. */
-    virtual void vectorUpdate(const Population &population){};
+    virtual void vectorUpdate(const vector<Host::Human> &population){};
 
     virtual void changeEIRIntervention(const scnXml::NonVector &) = 0;
 
@@ -264,14 +264,14 @@ public:
     /** Needs to be called each time-step after Human::update() to update summary
      * statististics related to transmission. Also returns kappa (the average
      * human infectiousness weighted by availability to mosquitoes). */
-    virtual double updateKappa(const Population &population)
+    virtual double updateKappa(const vector<Host::Human> &population)
     {
         // We calculate kappa for output and the non-vector model.
         double sumWt_kappa = 0.0;
         double sumWeight = 0.0;
         numTransmittingHumans = 0;
 
-        for (const Host::Human &human : population.getHumans())
+        for (const Host::Human &human : population)
         {
             // NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().

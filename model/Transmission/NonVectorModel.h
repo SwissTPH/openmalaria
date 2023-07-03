@@ -81,7 +81,7 @@ public:
 
     virtual ~NonVectorModel() {}
 
-    virtual void init2(const Population &population) { simulationMode = forcedEIR; } // no set-up needed; just indicate we're ready to roll
+    virtual void init2(const vector<Host::Human> &population) { simulationMode = forcedEIR; } // no set-up needed; just indicate we're ready to roll
 
     virtual void scaleEIR(double factor)
     {
@@ -170,7 +170,7 @@ public:
         laggedKappa.assign(laggedKappa.size(), 0.0);
     }
 
-    virtual double updateKappa(const Population &population)
+    virtual double updateKappa(const vector<Host::Human> &population)
     {
         double currentKappa = TransmissionModel::updateKappa(population);
         if (simulationMode == forcedEIR) { initialKappa[sim::moduloSteps(sim::ts1(), initialKappa.size())] = currentKappa; }

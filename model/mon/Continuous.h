@@ -25,6 +25,7 @@
 #include "Global.h"
 #include <FastDelegate.h>
 #include <string>
+#include "Host/Human.h"
 
 using fastdelegate::MakeDelegate;
 
@@ -71,11 +72,11 @@ namespace mon {
 	 */
         void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
         /// As above, except that the called delegate is passed a reference to the Population object
-        void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const Population&, ostream&>);
+        void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const vector<Host::Human>&, ostream&>);
 	
 	/// Generate time-step's output. Called at beginning of time step.
         /// Passed population since some callbacks use this to generate output.
-	void update (const Population& population);
+	void update (const vector<Host::Human> &population);
         
     private:
         void checkpoint(ostream& stream);

@@ -54,23 +54,23 @@ namespace OM { namespace mon {
     public:
         virtual ~Callback() {}
         string titles;
-        virtual void call( const Population&, ostream& ) =0;
+        virtual void call( const vector<Host::Human>&, ostream& ) =0;
     };
     class Callback1 : public Callback {
 	FastDelegate1<ostream&> cb;
     public:
         Callback1( const string& t, FastDelegate1<ostream&> outputCb ) :
             Callback(t), cb( outputCb ) {}
-        virtual void call( const Population&, ostream& stream ){
+        virtual void call( const vector<Host::Human>&, ostream& stream ){
             cb( stream );
         }
     };
     class Callback2Pop : public Callback {
-        FastDelegate2<const Population&,ostream&> cb;
+        FastDelegate2<const vector<Host::Human>&,ostream&> cb;
     public:
-        Callback2Pop( const string& t, FastDelegate2<const Population&,ostream&> outputCb ) :
+        Callback2Pop( const string& t, FastDelegate2<const vector<Host::Human>&,ostream&> outputCb ) :
             Callback(t), cb( outputCb ) {}
-        virtual void call( const Population& pop, ostream& stream ){
+        virtual void call( const vector<Host::Human>& pop, ostream& stream ){
             cb( pop, stream );
         }
     };
@@ -188,12 +188,12 @@ namespace OM { namespace mon {
 	registered[optName] = new Callback1( titles, outputCb );
     }
     void ContinuousType::registerCallback (string optName, string titles,
-            fastdelegate::FastDelegate2<const Population&,ostream&> outputCb){
+            fastdelegate::FastDelegate2<const vector<Host::Human>&,ostream&> outputCb){
         assert(registered.count(optName) == 0); // name clash/registered twice?
         registered[optName] = new Callback2Pop( titles, outputCb );
     }
     
-    void ContinuousType::update (const Population& population){
+    void ContinuousType::update (const vector<Host::Human>& population){
         if( ctsPeriod == sim::zero() )
             return;	// output disabled
         if( !duringInit ){

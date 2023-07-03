@@ -24,6 +24,7 @@
 
 #include "Global.h"
 #include "util/random.h"
+#include "Host/Human.h"
 
 namespace scnXml {
     class Clinical;
@@ -47,7 +48,7 @@ public:
   static bool eventNeonatalMortality(LocalRng& rng);
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
-  static void update (Population& population);
+  static void update (vector<Human> &population);
 };
 
 } }

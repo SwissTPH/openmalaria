@@ -90,7 +90,7 @@ bool NeonatalMortality::eventNeonatalMortality(LocalRng& rng) {
   return rng.uniform_01() <= riskFromMaternalInfection;
 }
 
-void NeonatalMortality::update (Population& population) {
+void NeonatalMortality::update (vector<Host::Human> &population) {
     // ———  find potential mothers and their prevalence  ———
     // For individuals in the age range 20-25, we sum:
     int nCounter=0;	// total number

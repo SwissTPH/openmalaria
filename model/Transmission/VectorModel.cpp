@@ -21,7 +21,6 @@
 
 #include "Transmission/VectorModel.h"
 #include "Population.h"
-#include "Host/Human.h"
 #include "Host/WithinHost/WHInterface.h"
 #include "Host/WithinHost/Genotypes.h"
 #include "mon/Continuous.h"
@@ -95,73 +94,73 @@ void VectorModel::ctsCbS_v(ostream &stream)
     for (size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i]->getLastVecStat(Anopheles::SV);
 }
-void VectorModel::ctsCbAlpha(const Population &population, ostream &stream)
+void VectorModel::ctsCbAlpha(const vector<Host::Human> &population, ostream &stream)
 {
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
         double total = 0.0;
-        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter)
+        for (const Host::Human &human : population)
         {
-            total += iter->perHostTransmission.entoAvailabilityFull(i, sim::inYears(iter->age(sim::now())));
+            total += human.perHostTransmission.entoAvailabilityFull(i, sim::inYears(human.age(sim::now())));
         }
         stream << '\t' << total / population.size();
     }
 }
-void VectorModel::ctsCbP_B(const Population &population, ostream &stream)
+void VectorModel::ctsCbP_B(const vector<Host::Human> &population, ostream &stream)
 {
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
         double total = 0.0;
-        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter)
+        for (const Host::Human &human : population)
         {
-            total += iter->perHostTransmission.probMosqBiting(i);
+            total += human.perHostTransmission.probMosqBiting(i);
         }
         stream << '\t' << total / population.size();
     }
 }
-void VectorModel::ctsCbP_CD(const Population &population, ostream &stream)
+void VectorModel::ctsCbP_CD(const vector<Host::Human> &population, ostream &stream)
 {
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
         double total = 0.0;
-        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter)
+        for (const Host::Human &human : population)
         {
-            total += iter->perHostTransmission.probMosqResting(i);
+            total += human.perHostTransmission.probMosqResting(i);
         }
         stream << '\t' << total / population.size();
     }
 }
-void VectorModel::ctsNetInsecticideContent(const Population &population, ostream &stream)
+void VectorModel::ctsNetInsecticideContent(const vector<Host::Human> &population, ostream &stream)
 {
     //     double meanVar = 0.0;
     //     int n = 0;
-    //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-    //         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
+    //     for(const Host::Human &human : population) {
+    //         if( human.perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
     //             ++n;
-    //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
+    //             meanVar += human.perHostTransmission.getITN().getInsecticideContent(_ITNParams);
     //         }
     //     }
     //     stream << '\t' << meanVar/n;
 }
-void VectorModel::ctsIRSInsecticideContent(const Population &population, ostream &stream)
+void VectorModel::ctsIRSInsecticideContent(const vector<Host::Human> &population, ostream &stream)
 {
     // TODO(monitoring): work out how this applies when multiple IRS effects are allowed
     //     double totalInsecticide = 0.0;
-    //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-    //         totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
+    //     for(const Host::Human &human : population) {
+    //         totalInsecticide += human.perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
     //     }
     //     stream << '\t' << totalInsecticide / population.size();
 }
-void VectorModel::ctsIRSEffects(const Population &population, ostream &stream)
+void VectorModel::ctsIRSEffects(const vector<Host::Human> &population, ostream &stream)
 {
     // TODO(monitoring): work out how this applies when multiple IRS effects are allowed
     //     for( size_t i = 0; i < speciesIndex.size(); ++i ){
     //         const interventions::IRSAnophelesParams& params = species[i]->getHumanBaseParams().irs;
     //         double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
-    //         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-    //             totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
-    //             totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
-    //             totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
+    //         for(const Host::Human &human : population) {
+    //             totalRA += human.perHostTransmission.getIRS().relativeAttractiveness(params);
+    //             totalPrePSF += human.perHostTransmission.getIRS().preprandialSurvivalFactor(params);
+    //             totalPostPSF += human.perHostTransmission.getIRS().postprandialSurvivalFactor(params);
     //         }
     //         stream << '\t' << totalRA / population.size()
     //             << '\t' << totalPrePSF / population.size()
@@ -258,10 +257,10 @@ VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<st
 
 VectorModel::~VectorModel() {}
 
-void VectorModel::init2(const Population &population)
+void VectorModel::init2(const vector<Host::Human> &population)
 {
     double sumRelativeAvailability = 0.0;
-    for (const Host::Human &human : population.getHumans())
+    for (const Host::Human &human : population)
     {
         sumRelativeAvailability += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
     }
@@ -280,7 +279,7 @@ void VectorModel::init2(const Population &population)
         double sigma_df = 0.0;
         double sigma_dff = 0.0;
 
-        for (const Host::Human &human : population.getHumans())
+        for (const Host::Human &human : population)
         {
             const OM::Transmission::PerHost &host = human.perHostTransmission;
             double prod = host.entoAvailabilityFull(i, sim::inYears(human.age(sim::now())));
@@ -452,7 +451,7 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
 }
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate(const Population &population)
+void VectorModel::vectorUpdate(const vector<Host::Human> &population)
 {
     const size_t nGenotypes = WithinHost::Genotypes::N();
     std::vector<double> probTransmission;
@@ -460,7 +459,7 @@ void VectorModel::vectorUpdate(const Population &population)
     std::vector<double> sigma_df(speciesIndex.size());
     std::vector<double> sigma_dff(speciesIndex.size());
     std::vector<std::vector<double>> sigma_dif(speciesIndex.size(), std::vector<double>(nGenotypes));
-    for (const Host::Human &human : population.getHumans())
+    for (const Host::Human &human : population)
     {
         const OM::Transmission::PerHost &host = human.perHostTransmission;
         WithinHost::WHInterface &whm = *human.withinHostModel;

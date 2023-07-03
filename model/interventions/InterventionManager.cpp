@@ -510,7 +510,7 @@ ComponentId InterventionManager::getComponentId(const string textId)
     return it->second;
 }
 
-void InterventionManager::loadFromCheckpoint(Population &population, Transmission::TransmissionModel &transmission)
+void InterventionManager::loadFromCheckpoint(vector<Host::Human> &population, Transmission::TransmissionModel &transmission)
 {
     SimTime date = sim::intervDate();
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
@@ -531,7 +531,7 @@ void InterventionManager::loadFromCheckpoint(Population &population, Transmissio
     }
 }
 
-void InterventionManager::deploy(Population &population, Transmission::TransmissionModel &transmission)
+void InterventionManager::deploy(vector<Host::Human> &population, Transmission::TransmissionModel &transmission)
 {
     if (sim::intervTime() < sim::zero()) return;
 
@@ -554,9 +554,9 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
     }
 
     // deploy continuous interventions
-    for (Population::Iter it = population.begin(); it != population.end(); ++it)
+    for (Host::Human &human : population)
     {
-        uint32_t nextCtsDist = it->getNextCtsDist();
+        uint32_t nextCtsDist = human.getNextCtsDist();
         // deploy continuous interventions
         while (nextCtsDist < continuous.size())
         {
@@ -566,8 +566,8 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
                 continuous[nextCtsDist].print_details(cout);
                 cout << endl;
             }
-            if (!continuous[nextCtsDist].filterAndDeploy(*it, population)) break; // deployment (and all remaining) happens in the future
-            nextCtsDist = it->incrNextCtsDist();
+            if (!continuous[nextCtsDist].filterAndDeploy(human, population)) break; // deployment (and all remaining) happens in the future
+            nextCtsDist = human.incrNextCtsDist();
         }
     }
 }
