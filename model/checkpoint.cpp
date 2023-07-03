@@ -69,7 +69,7 @@ void checkpoint (istream& stream, SimTime &endTime, SimTime &estEndTime, Populat
         transmission & stream;
         population.checkpoint(stream);
         interventions::InterventionManager::checkpoint(stream);
-        interventions::InterventionManager::loadFromCheckpoint(population.getHumans(), transmission);
+        interventions::InterventionManager::loadFromCheckpoint(population.humans, transmission);
         
         // read last, because other loads may use random numbers or expect time
         // to be negative

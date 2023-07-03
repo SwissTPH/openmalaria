@@ -71,15 +71,6 @@ public:
     
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
-    
-    /** Return the number of humans. */
-    inline vector<Host::Human> &getHumans() {
-        return population;
-    }
-    inline const vector<Host::Human> &getHumans() const {
-        return population;
-    }
-    //@}
 
     //! Size of the human population
     size_t populationSize;
@@ -95,7 +86,7 @@ public:
     /** The simulated human population
      *
      * The list of all humans, ordered from oldest to youngest. */
-    vector<Host::Human> population;
+    vector<Host::Human> humans;
 };
 
 /// Delegate to print the number of hosts

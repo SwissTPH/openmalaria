@@ -88,7 +88,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         }
         
         // Deploy interventions, at time sim::now().
-        InterventionManager::deploy( population.getHumans(), transmission );
+        InterventionManager::deploy( population.humans, transmission );
         
         // Time step updates. Time steps are mid-day to mid-day.
         // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
@@ -96,13 +96,13 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
 
         // This should be called before humans contract new infections in the simulation step.
         // This needs the whole population (it is an approximation before all humans are updated).
-        transmission.vectorUpdate(population.getHumans());
+        transmission.vectorUpdate(population.humans);
         
         population.update(transmission, humanWarmupLength);
         
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
-        transmission.updateKappa(population.getHumans());
+        transmission.updateKappa(population.humans);
 
         sim::end_update();
 
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
         {
             Continuous.init( monitoring, false );
             population->createInitialHumans();
-            transmission->init2(population->getHumans());
+            transmission->init2(population->humans);
         }
         
         int lastPercent = -1; // last _integer_ percentage value

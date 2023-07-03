@@ -159,7 +159,7 @@ namespace OM {
 
         void ContinuousType::registerCallback (string optName, string titles, function<void(const vector<Host::Human> &, ostream&)> f){
             assert(registered.count(optName) == 0); // name clash/registered twice?
-            function<void(const Population&, ostream&)> _f = [f](const Population &p, ostream& ostream){ f(p.getHumans(), ostream); };
+            function<void(const Population&, ostream&)> _f = [f](const Population &p, ostream& ostream){ f(p.humans, ostream); };
             registered[optName] = {titles, _f};
         }
 
