@@ -230,7 +230,7 @@ namespace population
         int nHumans = 0;
         double avail = 0.0;
         for(Host::Human &human : population.humans) {
-            if( !human.perHostTransmission.isOutsideTransmission() ){
+            if( !human.perHostTransmission.outsideTransmission ){
                 ++nHumans;
                 avail += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
             }

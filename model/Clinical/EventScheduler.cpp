@@ -193,7 +193,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::NONE;	// recovery (reset to healthy state)
 	    
 	    // And returns to transmission (if was removed)
-	    human.perHostTransmission.removeFromTransmission( false );
+	    human.perHostTransmission.outsideTransmission = false;
 	}
     }
     
@@ -393,7 +393,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	// This should have an effect from the start of the next time step.
 	// NOTE: This is not very accurate, but considered of little importance.
 	if (pgState & Episode::EVENT_IN_HOSPITAL)
-	    human.perHostTransmission.removeFromTransmission( true );
+	    human.perHostTransmission.outsideTransmission = true;
 	
 	if (pgState & Episode::COMPLICATED) {
 	    // complicatedCaseDuration should to some respects be associated

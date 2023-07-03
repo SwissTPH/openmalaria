@@ -183,7 +183,7 @@ double InfectionIncidenceModel::getModelExpectedInfections (LocalRng& rng, doubl
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans) {
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/(sim::oneTS()*phTrans.relativeAvailabilityHet())*EstarInv)) *
+    (1 + effectiveEIR/(sim::oneTS()*phTrans.relativeAvailabilityHet)*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {

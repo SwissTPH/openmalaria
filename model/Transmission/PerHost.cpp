@@ -56,12 +56,12 @@ void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
 
 PerHost::PerHost () :
         outsideTransmission(false),
-        _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
+        relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
 
 void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
-    _relativeAvailabilityHet = availabilityFactor;
+    relativeAvailabilityHet = availabilityFactor;
     anophEntoAvailability.resize(PerHostAnophParams::numSpecies());
     anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
     anophProbMosqResting.resize(PerHostAnophParams::numSpecies());

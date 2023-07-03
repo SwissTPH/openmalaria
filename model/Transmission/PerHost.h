@@ -193,25 +193,10 @@ public:
     
     /// Call once per time step. Updates net holes.
     void update(Host::Human& human);
-    
-    ///@brief Intervention controls
-    //@{
-    /** Set true to remove human from transmission. Must set back to false
-     * to restore transmission. */
-    inline void removeFromTransmission (bool s){
-        outsideTransmission = s;
-    }
   
     /// Deploy some intervention component
     void deployComponent( LocalRng& rng, const HumanVectorInterventionComponent& params );
     //@}
-    
-    /** @brief Availability of host to mosquitoes */
-    //@{
-    /** Return true if the human has been removed from transmission. */
-    inline bool isOutsideTransmission() {
-        return outsideTransmission;
-    }
     
     /** Calculates the adjustment for body size in exposure to mosquitoes,
      * relative to an average adult.
@@ -228,16 +213,7 @@ public:
      * 
      * Also has a switch to put individuals entirely outside transmission. */
     inline double relativeAvailabilityAge (double ageYears) const {
-        return outsideTransmission ? 0.0 :
-            relAvailAge.eval( ageYears );
-    }
-    
-    /** Relative availability of host to mosquitoes excluding age factor.
-     *
-     * (ONLY for HeterogeneityWorkaroundII, and documentation purposes.)
-     * Assume mean is 1.0. */
-    inline double relativeAvailabilityHet () const {
-        return _relativeAvailabilityHet;
+        return outsideTransmission ? 0.0 : relAvailAge.eval( ageYears );
     }
     
     /** Get the availability of this host to mosquitoes relative to an average
@@ -249,17 +225,8 @@ public:
      * Mean output is less than 1.0 (roughly 1.0/invMeanPopAvail).
      */
     inline double relativeAvailabilityHetAge (double ageYears) const {
-        return _relativeAvailabilityHet
-            * relativeAvailabilityAge (ageYears);
+        return relativeAvailabilityHet * relativeAvailabilityAge (ageYears);
     }
-    
-    /** Availability of host to mosquitoes (α_i) excluding age factor
-     * 
-     * (Includes heterogeneity, intervention, and human-to-vector availability
-     * rate factors.)
-     * 
-     * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv (size_t species) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -269,10 +236,17 @@ public:
      * by the average availability of the population, which was incorrectly done
      * in the past. */
     inline double entoAvailabilityFull (size_t species, double ageYears) const {
-        return entoAvailabilityHetVecItv (species)
-            * relativeAvailabilityAge (ageYears);
+        return entoAvailabilityHetVecItv (species) * relativeAvailabilityAge (ageYears);
     }
     //@}
+
+    /** Availability of host to mosquitoes (α_i) excluding age factor
+     * 
+     * (Includes heterogeneity, intervention, and human-to-vector availability
+     * rate factors.)
+     * 
+     * Assume mean is human-to-vector availability rate factor. */
+    double entoAvailabilityHetVecItv (size_t species) const;
     
     ///@brief Get effects of interventions pre/post biting
     //@{
@@ -315,24 +289,22 @@ public:
         anophEntoAvailability & stream;
         anophProbMosqBiting & stream;
         anophProbMosqResting & stream;
-        _relativeAvailabilityHet & stream;
+        relativeAvailabilityHet & stream;
         outsideTransmission & stream;
         checkpointIntervs( stream );
     }
     //@}
     
-    // vector<PerHostAnoph> speciesData;
+    // Determines whether human is outside transmission
+    bool outsideTransmission;
+
+    // Heterogeneity factor in availability; this is already multiplied into the
+    // entoAvailability param stored in HostMosquitoInteraction.
+    double relativeAvailabilityHet;
 
 private:
     void checkpointIntervs( ostream& stream );
     void checkpointIntervs( istream& stream );
-    
-    // Determines whether human is outside transmission
-    bool outsideTransmission;
-    
-    // Heterogeneity factor in availability; this is already multiplied into the
-    // entoAvailability param stored in HostMosquitoInteraction.
-    double _relativeAvailabilityHet;
 
     vector<unique_ptr<PerHostInterventionData>> activeComponents;
     
