@@ -194,19 +194,6 @@ public:
      * XML data is not touched. */
     virtual void scaleEIR(double factor) = 0;
 
-    /** How many intervals are needed for transmission initialization during the
-     * "human" phase (before vector init)?
-     *
-     * Should include time for both data collection and to give the data
-     * collected time to stabilize. */
-    virtual SimTime minPreinitDuration() = 0;
-    /** Length of time that initIterate() is most likely to add: only used to
-     * estimate total runtime. */
-    virtual SimTime expectedInitDuration() = 0;
-    /** Check whether transmission has been sufficiently well initialized. If so,
-     * switch to dynamic transmission mode. If not, try to improve the situation
-     * and return the length of sim-time before this should be called again.
-     */
     virtual SimTime initIterate() = 0;
 
     /** Needs to be called each step of the simulation before Human::update().

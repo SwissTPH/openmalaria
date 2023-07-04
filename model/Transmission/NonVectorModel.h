@@ -89,15 +89,6 @@ public:
         annualEIR = util::vectors::sum(initialisationEIR);
     }
 
-    virtual SimTime minPreinitDuration()
-    {
-        if (interventionMode == forcedEIR) { return sim::zero(); }
-        // nYearsWarmupData years for data collection, 50 years stabilization
-        return sim::fromYearsI(50) + sim::fromYearsI(nYearsWarmupData);
-    }
-
-    virtual SimTime expectedInitDuration() { return sim::zero(); }
-
     virtual SimTime initIterate()
     {
         simulationMode = interventionMode;

@@ -65,8 +65,6 @@ public:
 
     virtual void scaleEIR(double factor);
 
-    virtual SimTime minPreinitDuration();
-    virtual SimTime expectedInitDuration();
     virtual SimTime initIterate();
 
     virtual void vectorUpdate(const vector<Host::Human> &population);

@@ -331,15 +331,6 @@ void VectorModel::scaleEIR(double factor)
     annualEIR = vectors::sum(initialisationEIR);
 }
 
-SimTime VectorModel::minPreinitDuration()
-{
-    if (interventionMode == forcedEIR) { return sim::zero(); }
-    // Data is summed over 5 years; add an extra 50 for stabilization.
-    // 50 years seems a reasonable figure from a few tests
-    return sim::fromYearsI(55);
-}
-SimTime VectorModel::expectedInitDuration() { return sim::oneYear(); }
-
 SimTime VectorModel::initIterate()
 {
     if (interventionMode != dynamicEIR)

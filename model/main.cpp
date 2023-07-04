@@ -104,14 +104,9 @@ Model* create(const scnXml::Scenario &scenario)
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
     SimTime humanWarmupLength = sim::maxHumanAge();
-    if( humanWarmupLength < transmission->minPreinitDuration() ){
-        cerr << "Warning: human life-span (" << sim::inYears(humanWarmupLength);
-        cerr << ") shorter than length of warm-up requested by" << endl;
-        cerr << "transmission model (" << sim::inYears(transmission->minPreinitDuration());
-        cerr << "). Transmission may be unstable; perhaps use forced" << endl;
-        cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
-        humanWarmupLength = transmission->minPreinitDuration();
-    }
+    if(transmission->interventionMode != Transmission::forcedEIR)
+        humanWarmupLength = max(humanWarmupLength, sim::fromYearsI(55)); // Data is summed over 5 years; add an extra 50 for stabilization.
+
     humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(sim::inYears(humanWarmupLength))) );
 
     Model *model = new Model();
@@ -238,7 +233,7 @@ int main(int argc, char* argv[])
         else
             startedFromCheckpoint = false;
         
-        estEndTime = model->humanWarmupLength + model->transmission->expectedInitDuration() + (sim::endDate() - sim::startDate()) + sim::oneTS();
+        estEndTime = model->humanWarmupLength + (sim::endDate() - sim::startDate()) + sim::oneTS();
         assert( estEndTime + sim::never() < sim::zero() );
 
         if (startedFromCheckpoint)
