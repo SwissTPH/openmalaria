@@ -30,40 +30,42 @@
 
 namespace OM {
 
-//! The simulated human population
+/** The simulated human population. */
 class Population
 {
 public:
     Population(size_t size);
 
-    /** Creates the initial population of Humans */
+    /** Create the initial population of Humans */
     void createInitialHumans();
 
     /** Remove dead humans, outmigrate others and introduce babies to
      * while keeping the population size and demography distirbution unchanged. */
     void regularize();
 
-    /** Returns the size of the human population */
+    /** Return the size of the human population */
     size_t getSize() const;
 
-    /** Returns the number of recent births */
+    /** Return the number of recent births */
     int getRecentBirths() const;
 
     /** Reset the number of recent births to 0 */
     void resetRecentBirths();
 
-    /** Checkpointing methods */
+    /** Checkpoint (read) */
     void checkpoint(istream& stream);
+
+    /** Checkpoint (write) */
     void checkpoint(ostream& stream);
 
-    /** The simulated human population */
+    /** The simulated human hosts */
     vector<Host::Human> humans;
 
 private:
     /** Size of the human population */
     size_t size = 0;
     
-    /** Births since last continuous output */
+    /** Births count since last continuous output */
     int recentBirths = 0;
 };
 
