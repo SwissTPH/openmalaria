@@ -171,8 +171,10 @@ int main(int argc, char* argv[])
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
         size_t popSize = scenario->getDemography().getPopSize();
 
-        std::unique_ptr<Population> population = std::unique_ptr<Population>(createPopulation(popSize));
+        std::unique_ptr<Population> population = std::unique_ptr<Population>(new Population(popSize));
         std::unique_ptr<TransmissionModel> transmission = std::unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario->getEntomology(), popSize));
+
+        registerContinousPopulationCallbacks();
 
         // Depends on transmission model (for species indexes):
         // MDA1D may depend on health system (too complex to verify)

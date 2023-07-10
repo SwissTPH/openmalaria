@@ -110,10 +110,8 @@ void Population::regularize()
     }
 }
     
-Population *createPopulation(size_t populationSize)
+void registerContinousPopulationCallbacks()
 {
-    Population *population = new Population(populationSize);
-
     ostringstream ctsDemogTitle;
     for( double ubound : ctsDemogAgeGroups )
         ctsDemogTitle << "\thost % ≤ " << ubound;
@@ -129,8 +127,6 @@ Population *createPopulation(size_t populationSize)
     mon::Continuous.registerCallback( "ITN coverage", "\tITN coverage", &ctsITNCoverage);
     mon::Continuous.registerCallback( "IRS coverage", "\tIRS coverage", &ctsIRSCoverage);
     mon::Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &ctsGVICoverage);
-
-    return population;
 }
 
 void checkpoint (Population &population, istream& stream)

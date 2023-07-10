@@ -53,7 +53,7 @@ public:
     vector<Host::Human> humans;
 };
 
-Population *createPopulation(size_t populationSize);
+void registerContinousPopulationCallbacks();
 
 void checkpoint(Population &population, istream& stream);
 void checkpoint(Population &population, ostream& stream);
