@@ -41,7 +41,7 @@ public:
 
     /** Remove dead humans, outmigrate others and introduce babies to
      * while keeping the population size and demography distirbution unchanged. */
-    void regularize();
+    void update();
 
     /** Return the size of the human population */
     inline size_t getSize() const;

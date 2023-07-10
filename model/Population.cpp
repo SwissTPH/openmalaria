@@ -76,7 +76,7 @@ void Population::createInitialHumans()
     assert( sim::now() == sim::zero() );      // assumed below
 }
 
-void Population::regularize()
+void Population::update()
 {
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // size is assumed to be the _actual and exact_ population size by other code.

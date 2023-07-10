@@ -111,7 +111,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
                 Host::update(human, transmission);
         }
        
-        population.regularize();
+        population.update();
         
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
