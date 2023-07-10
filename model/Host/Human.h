@@ -29,10 +29,6 @@
 #include "util/checkpoint_containers.h"
 #include <map>
 
-class UnittestUtil;
-namespace scnXml {
-    class Scenario;
-}
 namespace OM {
 namespace Clinical {
     class ClinicalModel;
@@ -81,15 +77,16 @@ public:
     /** After this call, isDead() will be true */
     void kill();
 
-    /** Add the human to an intervention component's sub-population for the given
-     * duration. A duration of zero implies no effect. */
-    void addToCohort(interventions::ComponentId id, SimTime duration );
+    /** Add the human to an intervention component's sub-population for the given duration. 
+     * A duration of zero implies no effect. */
+    void addToCohort(interventions::ComponentId id, SimTime duration);
 
+    /** Remove the human from an intervention component's sub-population */
     void removeFromCohort(interventions::ComponentId id);
 
     /** Act on "remove from sub-population on first ..." events.
      * This is only for use during a human update. */
-    void removeFirstEvent(interventions::SubPopRemove::RemoveAtCode code );
+    void removeFirstEvent(interventions::SubPopRemove::RemoveAtCode code);
 
     /** Remove host from expired cohorts */
     void updateCohortSet();
@@ -154,12 +151,10 @@ void summarize(Human &human, bool surveyOnlyNewEp);
 
 void update(Human &human, Transmission::TransmissionModel& transmission);
 
-/** Get human's age with respect to some time. */
-inline SimTime Human::age( SimTime time ) const { return time - dateOfBirth; }
+inline SimTime Human::age( SimTime time ) const { 
+    return time - dateOfBirth; 
+}
 
-/** Return true if human is a member of the sub-population.
-* 
-* @param id Sub-population identifier. */
 inline bool Human::isInSubPop( interventions::ComponentId id ) const {
     auto it = subPopExp.find( id );
     if( it == subPopExp.end() ) return false;   // no history of membership
