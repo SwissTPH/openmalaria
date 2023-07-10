@@ -49,7 +49,7 @@ const vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(size_t populationSize) : populationSize (populationSize) {}
+Population::Population(size_t size) : size (size) {}
 
 void Population::createInitialHumans()
 {
@@ -62,7 +62,7 @@ void Population::createInitialHumans()
     for(size_t iage_prev = AgeStructure::getMaxTStepsPerLife(), iage = iage_prev - 1;
          iage_prev > 0; iage_prev = iage, iage -= 1 )
     {
-        int targetPop = AgeStructure::targetCumPop( iage, populationSize );
+        int targetPop = AgeStructure::targetCumPop( iage, size );
         while (cumulativePop < targetPop) {
             SimTime dob = sim::zero() - sim::fromTS(iage);
             util::streamValidate( dob );
@@ -79,9 +79,9 @@ void Population::createInitialHumans()
 void Population::regularize()
 {
     //NOTE: other parts of code are not set up to handle changing population size. Also
-    // populationSize is assumed to be the _actual and exact_ population size by other code.
+    // size is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp( AgeStructure::rho * sim::ts1().inSteps() ));
+    //int targetPop = (int) (size * exp( AgeStructure::rho * sim::ts1().inSteps() ));
     int cumPop = 0;
 
     for (auto it = humans.begin(); it != humans.end();) {
@@ -91,7 +91,7 @@ void Population::regularize()
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
         // Also see targetPop = ... comment above
-        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(it->age(sim::ts1())), populationSize);
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(it->age(sim::ts1())), size);
         
         if( isDead || outmigrate ){
             it = humans.erase (it);
@@ -102,14 +102,50 @@ void Population::regularize()
     } // end of per-human updates
 
     // increase population size to targetPop
-    recentBirths += (populationSize - cumPop);
-    while (cumPop < (int)populationSize) {
+    recentBirths += (size - cumPop);
+    while (cumPop < (int)size) {
         // humans born at end of this time step = beginning of next, hence ts1
         humans.push_back( Host::Human (sim::ts1()) );
         ++cumPop;
     }
 }
-    
+
+size_t Population::getSize() const
+{
+    return size;
+}
+
+int Population::getRecentBirths() const
+{
+    return recentBirths;
+}
+
+void Population::resetRecentBirths()
+{
+    recentBirths = 0;
+}
+
+void Population::checkpoint(istream& stream)
+{
+    size & stream;
+    recentBirths & stream;
+
+    for(size_t i = 0; i < size && !stream.eof(); ++i) {
+        humans.push_back( Host::Human (sim::zero()) );
+        Host::checkpoint(humans.back(), stream);
+    }
+    if (humans.size() != size)
+        throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
+}
+
+void Population::checkpoint(ostream& stream)
+{
+    size & stream;
+    recentBirths & stream;
+    for(Host::Human &human : humans)
+        Host::checkpoint(human, stream);
+}
+
 void registerContinousPopulationCallbacks()
 {
     ostringstream ctsDemogTitle;
@@ -129,36 +165,9 @@ void registerContinousPopulationCallbacks()
     mon::Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &ctsGVICoverage);
 }
 
-void checkpoint (Population &population, istream& stream)
-{
-    population.populationSize & stream;
-    population.recentBirths & stream;
-
-    auto &humans = population.humans;
-    
-    for(size_t i = 0; i < population.populationSize && !stream.eof(); ++i) {
-        // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
-        // ctor and leaves less opportunity for uninitialized memory.
-        humans.push_back( Host::Human (sim::zero()) );
-        Host::checkpoint(humans.back(), stream);
-    }
-    if (humans.size() != population.populationSize)
-        throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
-}
-
-void checkpoint (Population &population, ostream& stream)
-{
-    population.populationSize & stream;
-    population.recentBirths & stream;
-    auto &humans = population.humans;
-
-    for(Host::Human &human : humans)
-        Host::checkpoint(human, stream);
-}
-
 void ctsHosts (Population &population, ostream& stream){
-    // this option is intended for debugging human initialization; normally this should equal populationSize.
-    stream << '\t' << population.populationSize;
+    // this option is intended for debugging human initialization; normally this should equal size.
+    stream << '\t' << population.getSize();
 }
 
 void ctsHostDemography (Population &population, ostream& stream){
@@ -174,8 +183,8 @@ void ctsHostDemography (Population &population, ostream& stream){
 }
 
 void ctsRecentBirths (Population &population, ostream& stream){
-    stream << '\t' << population.recentBirths;
-    population.recentBirths = 0;
+    stream << '\t' << population.getRecentBirths();
+    population.resetRecentBirths();
 }
 
 void ctsPatentHosts (Population &population, ostream& stream){
@@ -193,7 +202,7 @@ void ctsImmunityh (Population &population, ostream& stream){
     for(const Host::Human &human : population.humans) {
         x += human.withinHostModel->getCumulative_h();
     }
-    x /= population.populationSize;
+    x /= population.getSize();
     stream << '\t' << x;
 }
 
@@ -202,23 +211,23 @@ void ctsImmunityY (Population &population, ostream& stream){
     for(const Host::Human &human : population.humans) {
         x += human.withinHostModel->getCumulative_Y();
     }
-    x /= population.populationSize;
+    x /= population.getSize();
     stream << '\t' << x;
 }
 
 void ctsMedianImmunityY (Population &population, ostream& stream){
     vector<double> list;
-    list.reserve( population.populationSize );
+    list.reserve( population.getSize() );
     for(const Host::Human &human : population.humans) {
         list.push_back( human.withinHostModel->getCumulative_Y() );
     }
     sort( list.begin(), list.end() );
     double x;
-    if( mod_nn(population.populationSize, 2) == 0 ){
-        size_t i = population.populationSize / 2;
+    if( mod_nn(population.getSize(), 2) == 0 ){
+        size_t i = population.getSize() / 2;
         x = (list[i-1]+list[i])/2.0;
     }else{
-        x = list[population.populationSize / 2];
+        x = list[population.getSize() / 2];
     }
     stream << '\t' << x;
 }
@@ -240,7 +249,7 @@ void ctsITNCoverage (Population &population, ostream& stream){
     for(const Host::Human &human : population.humans) {
         nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::ITN );
     }
-    double coverage = static_cast<double>(nActive) / population.populationSize;
+    double coverage = static_cast<double>(nActive) / population.getSize();
     stream << '\t' << coverage;
 }
 
@@ -249,7 +258,7 @@ void ctsIRSCoverage (Population &population, ostream& stream){
     for(const Host::Human &human : population.humans) {
         nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::IRS );
     }
-    double coverage = static_cast<double>(nActive) / population.populationSize;
+    double coverage = static_cast<double>(nActive) / population.getSize();
     stream << '\t' << coverage;
 }
 
@@ -258,7 +267,7 @@ void ctsGVICoverage (Population &population, ostream& stream){
     for(const Host::Human &human : population.humans) {
         nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::GVI );
     }
-    double coverage = static_cast<double>(nActive) / population.populationSize;
+    double coverage = static_cast<double>(nActive) / population.getSize();
     stream << '\t' << coverage;
 }
 

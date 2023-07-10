@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
             Host::InfectionIncidenceModel::preMainSimInit();
             Clinical::InfantMortality::preMainSimInit();
             WithinHost::Genotypes::preMainSimInit();
-            population->recentBirths = 0;
+            population->resetRecentBirths();
             transmission->summarize(); // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
 

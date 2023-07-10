@@ -34,7 +34,7 @@ namespace OM {
 class Population
 {
 public:
-    Population(size_t populationSize);
+    Population(size_t size);
 
     /** Creates the initial population of Humans */
     void createInitialHumans();
@@ -43,20 +43,31 @@ public:
      * while keeping the population size and demography distirbution unchanged. */
     void regularize();
 
+    /** Returns the size of the human population */
+    size_t getSize() const;
+
+    /** Returns the number of recent births */
+    int getRecentBirths() const;
+
+    /** Reset the number of recent births to 0 */
+    void resetRecentBirths();
+
+    /** Checkpointing methods */
+    void checkpoint(istream& stream);
+    void checkpoint(ostream& stream);
+
+    /** The simulated human population */
+    vector<Host::Human> humans;
+
+private:
     /** Size of the human population */
-    size_t populationSize = 0;
+    size_t size = 0;
     
     /** Births since last continuous output */
     int recentBirths = 0;
-    
-    /** The simulated human population */
-    vector<Host::Human> humans;
 };
 
 void registerContinousPopulationCallbacks();
-
-void checkpoint(Population &population, istream& stream);
-void checkpoint(Population &population, ostream& stream);
 
 /// Delegate to print the number of hosts
 void ctsHosts (Population &population, ostream& stream);
