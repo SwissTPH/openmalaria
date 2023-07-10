@@ -47,7 +47,7 @@ public:
     size_t populationSize;
     
     /** Variables for continuous reporting */
-    vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
+    const vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
     
     /** Births since last continuous output */
     int recentBirths = 0;
