@@ -49,7 +49,6 @@ struct HumanHet {
     HumanHet() : comorbidityFactor(1.0), treatmentSeekingFactor(1.0), availabilityFactor(1.0) {}
 };
 
-// -----  Non-static functions: creation/destruction, checkpointing  -----
 HumanHet hetSample(util::LocalRng& rng)
 {
     HumanHet het;
@@ -106,14 +105,10 @@ HumanHet hetSample(util::LocalRng& rng)
     return het;
 }
 
-// Create new human
 Human::Human(SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
     rng(util::master_RNG),
-    dateOfBirth(dateOfBirth),
-    toRemove(false),
-    cohortSet(0),
-    nextCtsDist(0)
+    dateOfBirth(dateOfBirth)
 {
     // Initial humans are created at time 0 and may have dateOfBirth in past. Otherwise dateOfBirth must be now.
     assert( dateOfBirth == sim::nowOrTs1() || (sim::now() == sim::zero() && dateOfBirth < sim::now()) );
@@ -178,10 +173,19 @@ void Human::updateCohortSet()
     }
 }
 
-/** Return date of birth */
 SimTime Human::getDOB() const
 {
     return dateOfBirth;
+}
+
+bool Human::isDead() const
+{
+    return dead;
+}
+
+void Human::kill()
+{
+    dead = true;
 }
 
 void Human::checkpoint(istream &stream)
@@ -240,7 +244,7 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = human.age(sim::ts0());
     if (human.clinicalModel->isDead(age0)) {
-        human.toRemove = true;
+        human.kill();
         return;
     }
     

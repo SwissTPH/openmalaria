@@ -539,7 +539,7 @@ public:
      * 
      * @returns false iff this deployment (and thus all later ones in the
      *  ordered list) happens in the future. */
-    bool filterAndDeploy( Host::Human& human, const vector<Host::Human> &population ) const{
+    bool filterAndDeploy( Host::Human& human ) const{
         SimTime age = human.age(sim::now());
         if( deployAge > age ){
             // stop processing continuous deployments for this

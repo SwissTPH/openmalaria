@@ -93,7 +93,13 @@ public:
 
     /** Return date of birth */
     SimTime getDOB() const;
-    
+
+    /** Return true if dead, false otherwise */
+    bool isDead() const;
+
+    /** After this call, isDead() will be true */
+    void kill();
+
     /** Checkpoint (read) */
     void checkpoint(istream &stream);
 
@@ -122,16 +128,17 @@ public:
     /** Made persistant to save a lookup each time step (significant performance improvement) */
     mon::AgeGroup monitoringAgeGroup;
 
-    bool toRemove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
-
     /** The next continuous distribution in the series */
-    uint32_t nextCtsDist;
+    uint32_t nextCtsDist = 0;
 
 private:
     SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
 
     /** Cache, updated when human is added to or removed from a sub-population */
-    uint32_t cohortSet;
+    uint32_t cohortSet = 0;
+
+    /** The state of he human. A human cannot be revived. */
+    bool dead = false;
 
     /** This lists sub-populations of which the human is a member together with
     * expiry time.
