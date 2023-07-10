@@ -44,13 +44,13 @@ public:
     void regularize();
 
     /** Return the size of the human population */
-    size_t getSize() const;
+    inline size_t getSize() const;
 
     /** Return the number of recent births */
-    int getRecentBirths() const;
+    inline int getRecentBirths() const;
 
     /** Reset the number of recent births to 0 */
-    void resetRecentBirths();
+    inline void resetRecentBirths();
 
     /** Checkpoint (read) */
     void checkpoint(istream& stream);
@@ -90,6 +90,18 @@ void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
 void ctsITNCoverage (Population &population, ostream& stream);
 void ctsIRSCoverage (Population &population, ostream& stream);
 void ctsGVICoverage (Population &population, ostream& stream);
+
+inline size_t Population::getSize() const {
+    return size;
+}
+
+inline int Population::getRecentBirths() const {
+    return recentBirths;
+}
+
+inline void Population::resetRecentBirths() {
+    recentBirths = 0;
+}
 
 }
 #endif

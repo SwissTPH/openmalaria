@@ -65,18 +65,21 @@ public:
     Human& operator=(const Human&) = delete;
 
     /** Get human's age with respect to some time. */
-    inline SimTime age( SimTime time )const{ return time - dateOfBirth; }
+    inline SimTime age( SimTime time ) const;
 
-    /** Return true if human is a member of the sub-population.
-    * 
-    * @param id Sub-population identifier. */
-    inline bool isInSubPop( interventions::ComponentId id ) const {
-        auto it = subPopExp.find( id );
-        if( it == subPopExp.end() ) return false;   // no history of membership
-        else return it->second > sim::nowOrTs0();   // added: has expired?
-    }
+    /** Return true if human is a member of the sub-population. */
+    inline bool isInSubPop( interventions::ComponentId id ) const;
 
-    inline uint32_t getCohortSet() const { return cohortSet; }
+    inline uint32_t getCohortSet() const;
+
+    /** Return date of birth */
+    SimTime getDOB() const;
+
+    /** Return true if dead, false otherwise */
+    bool isDead() const;
+
+    /** After this call, isDead() will be true */
+    void kill();
 
     /** Add the human to an intervention component's sub-population for the given
      * duration. A duration of zero implies no effect. */
@@ -90,15 +93,6 @@ public:
 
     /** Remove host from expired cohorts */
     void updateCohortSet();
-
-    /** Return date of birth */
-    SimTime getDOB() const;
-
-    /** Return true if dead, false otherwise */
-    bool isDead() const;
-
-    /** After this call, isDead() will be true */
-    void kill();
 
     /** Checkpoint (read) */
     void checkpoint(istream &stream);
@@ -159,6 +153,34 @@ private:
 void summarize(Human &human, bool surveyOnlyNewEp);
 
 void update(Human &human, Transmission::TransmissionModel& transmission);
+
+/** Get human's age with respect to some time. */
+inline SimTime Human::age( SimTime time ) const { return time - dateOfBirth; }
+
+/** Return true if human is a member of the sub-population.
+* 
+* @param id Sub-population identifier. */
+inline bool Human::isInSubPop( interventions::ComponentId id ) const {
+    auto it = subPopExp.find( id );
+    if( it == subPopExp.end() ) return false;   // no history of membership
+    else return it->second > sim::nowOrTs0();   // added: has expired?
+}
+
+inline uint32_t Human::getCohortSet() const { 
+    return cohortSet; 
+}
+
+inline SimTime Human::getDOB() const {
+    return dateOfBirth;
+}
+
+inline bool Human::isDead() const {
+    return dead;
+}
+
+inline void Human::kill() {
+    dead = true;
+}
 
 } }
 #endif

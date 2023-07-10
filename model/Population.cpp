@@ -110,21 +110,6 @@ void Population::regularize()
     }
 }
 
-size_t Population::getSize() const
-{
-    return size;
-}
-
-int Population::getRecentBirths() const
-{
-    return recentBirths;
-}
-
-void Population::resetRecentBirths()
-{
-    recentBirths = 0;
-}
-
 void Population::checkpoint(istream& stream)
 {
     size & stream;

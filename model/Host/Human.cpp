@@ -173,21 +173,6 @@ void Human::updateCohortSet()
     }
 }
 
-SimTime Human::getDOB() const
-{
-    return dateOfBirth;
-}
-
-bool Human::isDead() const
-{
-    return dead;
-}
-
-void Human::kill()
-{
-    dead = true;
-}
-
 void Human::checkpoint(istream &stream)
 {
     perHostTransmission & stream;
