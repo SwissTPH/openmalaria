@@ -132,7 +132,7 @@ void Population::checkpoint(istream& stream)
 
     for(size_t i = 0; i < size && !stream.eof(); ++i) {
         humans.push_back( Host::Human (sim::zero()) );
-        Host::checkpoint(humans.back(), stream);
+        humans.back().checkpoint(stream);
     }
     if (humans.size() != size)
         throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
@@ -143,7 +143,7 @@ void Population::checkpoint(ostream& stream)
     size & stream;
     recentBirths & stream;
     for(Host::Human &human : humans)
-        Host::checkpoint(human, stream);
+        human.checkpoint(stream);
 }
 
 void registerContinousPopulationCallbacks()

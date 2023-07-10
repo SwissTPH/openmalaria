@@ -45,7 +45,7 @@ void Episode::update (const Host::Human& human, Episode::State newState)
         time = sim::ts0();
         surveyPeriod = mon::eventSurveyNumber();
         ageGroup = human.monitoringAgeGroup;
-        cohortSet = human.cohortSet;
+        cohortSet = human.getCohortSet();
         state = newState;
     } else {
         state = Episode::State (state | newState);

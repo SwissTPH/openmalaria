@@ -76,6 +76,30 @@ public:
         else return it->second > sim::nowOrTs0();   // added: has expired?
     }
 
+    inline uint32_t getCohortSet() const { return cohortSet; }
+
+    /** Add the human to an intervention component's sub-population for the given
+     * duration. A duration of zero implies no effect. */
+    void addToCohort(interventions::ComponentId id, SimTime duration );
+
+    void removeFromCohort(interventions::ComponentId id);
+
+    /** Act on "remove from sub-population on first ..." events.
+     * This is only for use during a human update. */
+    void removeFirstEvent(interventions::SubPopRemove::RemoveAtCode code );
+
+    /** Remove host from expired cohorts */
+    void updateCohortSet();
+
+    /** Return date of birth */
+    SimTime getDOB() const;
+    
+    /** Checkpoint (read) */
+    void checkpoint(istream &stream);
+
+    /** Checkpoint (write) */
+    void checkpoint(ostream &stream);
+
     /** Contains per-species vector data (VectorModel only). */
     Transmission::PerHost perHostTransmission;
 
@@ -92,21 +116,22 @@ public:
 
     util::LocalRng rng;
 
-    SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
-
-    bool toRemove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
-
     /** Vaccines */
     interventions::PerHumanVaccine vaccine;
 
     /** Made persistant to save a lookup each time step (significant performance improvement) */
     mon::AgeGroup monitoringAgeGroup;
 
-    /** Cache, updated when human is added to or removed from a sub-population */
-    uint32_t cohortSet;
+    bool toRemove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
 
     /** The next continuous distribution in the series */
     uint32_t nextCtsDist;
+
+private:
+    SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
+
+    /** Cache, updated when human is added to or removed from a sub-population */
+    uint32_t cohortSet;
 
     /** This lists sub-populations of which the human is a member together with
     * expiry time.
@@ -123,17 +148,6 @@ public:
     // ComponentId of interest the set of humans who are members
     std::map<interventions::ComponentId,SimTime> subPopExp;
 };
-
-void checkpoint(Human &human, istream &stream);
-void checkpoint(Human &human, ostream &stream);
-
-/** Add the human to an intervention component's sub-population for the given
- * duration. A duration of zero implies no effect. */
-void reportDeployment(Human &human, interventions::ComponentId id, SimTime duration );
-
-/** Act on "remove from sub-population on first ..." events.
- * This is only for use during a human update. */
-void removeFirstEvent(Human &human, interventions::SubPopRemove::RemoveAtCode code );
 
 void summarize(Human &human, bool surveyOnlyNewEp);
 

@@ -584,17 +584,17 @@ void internal::write( ostream& stream ){
 void reportEventMHI( Measure measure, const Host::Human& human, int val ){
     const size_t survey = impl::survNumEvent;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, 0 );
+    storeI.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, 0 );
 }
 void reportStatMHI( Measure measure, const Host::Human& human, int val ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, 0 );
+    storeI.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, 0 );
 }
 void reportEventMHI_CMDT( Measure measure, const Host::Human& human, int val, int outId ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, 0, outId );
+    storeI.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, 0, outId );
 }
 void reportMSACI( Measure measure, size_t survey,
                   AgeGroup ageGroup, uint32_t cohortSet, int val )
@@ -606,14 +606,14 @@ void reportStatMHGI( Measure measure, const Host::Human& human, size_t genotype,
 {
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.report( val, measure, survey, ageIndex, human.cohortSet, 0, genotype, 0 );
+    storeI.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, genotype, 0 );
 }
 void reportStatMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
                 int val )
 {
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, drugIndex );
+    storeI.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, drugIndex );
 }
 // Deployment reporting uses a different function to handle the method
 // (mostly to make other types of report faster).
@@ -623,10 +623,10 @@ void reportEventMHD( Measure measure, const Host::Human& human,
     const int val = 1;  // always report 1 deployment
     const size_t survey = impl::survNumEvent;
     size_t ageIndex = human.monitoringAgeGroup.i();
-    storeI.deploy( val, measure, survey, ageIndex, human.cohortSet, method );
+    storeI.deploy( val, measure, survey, ageIndex, human.getCohortSet(), method );
     // This is for nTreatDeployments:
     measure = MHD_ALL_DEPLOYS;
-    storeI.deploy( val, measure, survey, ageIndex, human.cohortSet, method );
+    storeI.deploy( val, measure, survey, ageIndex, human.getCohortSet(), method );
 }
 
 void reportStatMF( Measure measure, double val ){
@@ -635,7 +635,7 @@ void reportStatMF( Measure measure, double val ){
 void reportStatMHF( Measure measure, const Host::Human& human, double val ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeF.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, 0 );
+    storeF.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, 0 );
 }
 void reportStatMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotype, double val )
@@ -652,12 +652,12 @@ void reportStatMACSGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
 void reportStatMHPF( Measure measure, const Host::Human& human, size_t drug, double val ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monitoringAgeGroup.i();
-    storeF.report( val, measure, survey, ageIndex, human.cohortSet, 0, 0, drug );
+    storeF.report( val, measure, survey, ageIndex, human.getCohortSet(), 0, 0, drug );
 }
 void reportStatMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val )
 {
-    reportStatMACGF( measure, human.monitoringAgeGroup.i(), human.cohortSet,
+    reportStatMACGF( measure, human.monitoringAgeGroup.i(), human.getCohortSet(),
                  genotype, val );
 }
 void reportStatMSF( Measure measure, size_t species, double val ){

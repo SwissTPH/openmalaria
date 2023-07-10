@@ -208,7 +208,7 @@ public:
         EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge(ageYears);
 
         auto ag = human.monitoringAgeGroup.i();
-        auto cs = human.cohortSet;
+        auto cs = human.getCohortSet();
         mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, EIR[0]);
     }
 

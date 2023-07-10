@@ -126,68 +126,96 @@ Human::Human(SimTime dateOfBirth) :
     clinicalModel = Clinical::ClinicalModel::createClinicalModel(het.treatmentSeekingFactor);
 }
 
-// -----  Non-static functions: per-time-step update  -----
-vector<double> EIR_per_genotype;        // cache (not thread safe)
-
-void checkpoint(Human &human, istream &stream)
-{
-    human.perHostTransmission & stream;
-    human.infIncidence & stream;
-    human.withinHostModel & stream;
-    human.clinicalModel & stream;
-    human.rng.checkpoint(stream);
-    human.dateOfBirth & stream;
-    human.vaccine & stream;
-    human.monitoringAgeGroup & stream;
-    human.cohortSet & stream;
-    human.nextCtsDist & stream;
-    human.subPopExp & stream;
-}
-
-void checkpoint(Human &human, ostream &stream)
-{
-    human.perHostTransmission & stream;
-    human.infIncidence & stream;
-    human.withinHostModel & stream;
-    human.clinicalModel & stream;
-    human.rng.checkpoint(stream);
-    human.dateOfBirth & stream;
-    human.vaccine & stream;
-    human.monitoringAgeGroup & stream;
-    human.cohortSet & stream;
-    human.nextCtsDist & stream;
-    human.subPopExp & stream;
-}
-
-void reportDeployment(Human &human, ComponentId id, SimTime duration )
+void Human::addToCohort(ComponentId id, SimTime duration )
 {
     if( duration <= sim::zero() ) return; // nothing to do
-    human.subPopExp[id] = sim::nowOrTs1() + duration;
-    human.cohortSet = mon::updateCohortSet( human.cohortSet, id, true );
+    subPopExp[id] = sim::nowOrTs1() + duration;
+    cohortSet = mon::updateCohortSet( cohortSet, id, true );
 }
 
-void removeFirstEvent(Human &human, interventions::SubPopRemove::RemoveAtCode code )
+void Human::removeFromCohort(interventions::ComponentId id)
+{
+    subPopExp.erase(id);
+}
+
+void Human::removeFirstEvent(interventions::SubPopRemove::RemoveAtCode code )
 {
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
     for( auto it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        auto expIt = human.subPopExp.find( *it );
-        if( expIt != human.subPopExp.end() ){
+        auto expIt = subPopExp.find( *it );
+        if( expIt != subPopExp.end() ){
             if( expIt->second > sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should
                 // be independent for each cohort, but this is a usable approximation.
-                human.clinicalModel->flushReports();     // reset HS memory
+                clinicalModel->flushReports();     // reset HS memory
                 
                 // report removal due to first infection/bout/treatment
-                mon::reportEventMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, human, 1 );
+                mon::reportEventMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, *this, 1 );
             }
-            human.cohortSet = mon::updateCohortSet( human.cohortSet, expIt->first, false );
+            cohortSet = mon::updateCohortSet( cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
-            human.subPopExp.erase( expIt );
+            subPopExp.erase( expIt );
         }
     }
 }
+
+void Human::updateCohortSet()
+{
+    // check sub-pop expiry
+    for( auto expIt = subPopExp.begin(), expEnd = subPopExp.end(); expIt != expEnd; ) {
+        if( !(expIt->second >= sim::ts0()) ){       // membership expired
+            // don't flush reports
+            // report removal due to expiry
+            mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
+            cohortSet = mon::updateCohortSet( cohortSet, expIt->first, false );
+            // erase element, but continue iteration
+            expIt = subPopExp.erase( expIt );
+        }else{
+            ++expIt;
+        }
+    }
+}
+
+/** Return date of birth */
+SimTime Human::getDOB() const
+{
+    return dateOfBirth;
+}
+
+void Human::checkpoint(istream &stream)
+{
+    perHostTransmission & stream;
+    infIncidence & stream;
+    withinHostModel & stream;
+    clinicalModel & stream;
+    rng.checkpoint(stream);
+    dateOfBirth & stream;
+    vaccine & stream;
+    monitoringAgeGroup & stream;
+    cohortSet & stream;
+    nextCtsDist & stream;
+    subPopExp & stream;
+}
+
+void Human::checkpoint(ostream &stream)
+{
+    perHostTransmission & stream;
+    infIncidence & stream;
+    withinHostModel & stream;
+    clinicalModel & stream;
+    rng.checkpoint(stream);
+    dateOfBirth & stream;
+    vaccine & stream;
+    monitoringAgeGroup & stream;
+    cohortSet & stream;
+    nextCtsDist & stream;
+    subPopExp & stream;
+}
+
+// -----  Non-static functions: per-time-step update  -----
+vector<double> EIR_per_genotype;        // cache (not thread safe)
 
 void summarize(Human &human, bool surveyOnlyNewEp) {
     if( surveyOnlyNewEp && human.clinicalModel->isExistingCase() ){
@@ -203,24 +231,7 @@ void summarize(Human &human, bool surveyOnlyNewEp) {
     
     if( patent && mon::isReported() ){
         // this should happen after all other reporting!
-        removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_INFECTION);
-    }
-}
-
-void updateCohortSet(Human &human)
-{
-    // check sub-pop expiry
-    for( auto expIt = human.subPopExp.begin(), expEnd = human.subPopExp.end(); expIt != expEnd; ) {
-        if( !(expIt->second >= sim::ts0()) ){       // membership expired
-            // don't flush reports
-            // report removal due to expiry
-            mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, human, 1 );
-            human.cohortSet = mon::updateCohortSet( human.cohortSet, expIt->first, false );
-            // erase element, but continue iteration
-            expIt = human.subPopExp.erase( expIt );
-        }else{
-            ++expIt;
-        }
+        human.removeFirstEvent(interventions::SubPopRemove::ON_FIRST_INFECTION);
     }
 }
 
@@ -238,7 +249,7 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     // monitoringAgeGroup is the group for the start of the time step.
     human.monitoringAgeGroup.update( age0 );
     
-    updateCohortSet(human);
+    human.updateCohortSet();
 
     // Age at  the end of the update period. In most cases
     // the difference between this and age at the start is not especially

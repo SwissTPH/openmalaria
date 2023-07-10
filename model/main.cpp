@@ -107,7 +107,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         
         for (Host::Human& human : population.humans)
         {
-            if (human.dateOfBirth + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
+            if (human.getDOB() + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
                 Host::update(human, transmission);
         }
        

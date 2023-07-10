@@ -412,10 +412,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     
     // Remove on first models...
     if( timeLastTreatment == sim::ts0() )
-        Host::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_TREATMENT);
+        human.removeFirstEvent(interventions::SubPopRemove::ON_FIRST_TREATMENT);
     
     if( pgState & Episode::SICK )
-        Host::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_BOUT);
+        human.removeFirstEvent(interventions::SubPopRemove::ON_FIRST_BOUT);
 }
 
 
