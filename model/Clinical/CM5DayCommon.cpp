@@ -83,10 +83,10 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
         doomed = -sim::oneTS();
     
     if( m_tLastTreatment == sim::ts0() )
-        Host::human::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_TREATMENT);
+        Host::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_TREATMENT);
     
     if( pgState & Episode::SICK )
-        Host::human::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_BOUT);
+        Host::removeFirstEvent(human, interventions::SubPopRemove::ON_FIRST_BOUT);
 }
 
 void CM5DayCommon::severeMalaria (

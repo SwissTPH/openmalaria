@@ -124,23 +124,20 @@ public:
     std::map<interventions::ComponentId,SimTime> subPopExp;
 };
 
-namespace human
-{
-    void checkpoint(Human &human, istream &stream);
-    void checkpoint(Human &human, ostream &stream);
+void checkpoint(Human &human, istream &stream);
+void checkpoint(Human &human, ostream &stream);
 
-    /** Add the human to an intervention component's sub-population for the given
-     * duration. A duration of zero implies no effect. */
-    void reportDeployment(Human &human, interventions::ComponentId id, SimTime duration );
+/** Add the human to an intervention component's sub-population for the given
+ * duration. A duration of zero implies no effect. */
+void reportDeployment(Human &human, interventions::ComponentId id, SimTime duration );
 
-    /** Act on "remove from sub-population on first ..." events.
-     * This is only for use during a human update. */
-    void removeFirstEvent(Human &human, interventions::SubPopRemove::RemoveAtCode code );
+/** Act on "remove from sub-population on first ..." events.
+ * This is only for use during a human update. */
+void removeFirstEvent(Human &human, interventions::SubPopRemove::RemoveAtCode code );
 
-    void summarize(Human &human, bool surveyOnlyNewEp);
+void summarize(Human &human, bool surveyOnlyNewEp);
 
-    void update(Human &human, Transmission::TransmissionModel& transmission);
-}
+void update(Human &human, Transmission::TransmissionModel& transmission);
 
 } }
 #endif

@@ -130,7 +130,7 @@ void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
         const interventions::HumanInterventionComponent& component = **it;
         // we must report first, since it can change cohort and sub-population
         // which may affect what deployment does (at least in the case of reporting deployments)
-        Host::human::reportDeployment(human, component.id(), component.duration());
+        Host::reportDeployment(human, component.id(), component.duration());
         component.deploy( human, method, vaccLimits );
     }
 }

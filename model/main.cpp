@@ -85,7 +85,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
             for(Host::Human &human : population.humans)
-                Host::human::summarize(human, surveyOnlyNewEp);
+                Host::summarize(human, surveyOnlyNewEp);
             transmission.summarize();
             mon::concludeSurvey();
         }
@@ -108,7 +108,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         for (Host::Human& human : population.humans)
         {
             if (human.dateOfBirth + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
-                Host::human::update(human, transmission);
+                Host::update(human, transmission);
         }
        
         population.regularize();
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
         size_t popSize = scenario->getDemography().getPopSize();
 
-        std::unique_ptr<Population> population = std::unique_ptr<Population>(population::createPopulation(popSize));
+        std::unique_ptr<Population> population = std::unique_ptr<Population>(createPopulation(popSize));
         std::unique_ptr<TransmissionModel> transmission = std::unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario->getEntomology(), popSize));
 
         // Depends on transmission model (for species indexes):
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
         if (startedFromCheckpoint)
         {
             Continuous.init(scenario->getMonitoring(), true);
-            checkpoint::read(checkpointFileName, endTime, estEndTime, *population, *transmission);
+            readCheckpoint(checkpointFileName, endTime, estEndTime, *population, *transmission);
         }
         else
         {
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 
             if(util::CommandLine::option (util::CommandLine::CHECKPOINT))
             {
-                checkpoint::write(startedFromCheckpoint, checkpointFileName, endTime, estEndTime, *population, *transmission);
+                writeCheckpoint(startedFromCheckpoint, checkpointFileName, endTime, estEndTime, *population, *transmission);
                 if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) )
                     throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }

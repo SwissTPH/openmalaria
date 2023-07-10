@@ -44,6 +44,9 @@ namespace OM
     using namespace OM::util;
     using Transmission::TransmissionModel;
 
+/** Variables for continuous reporting */
+const vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
+
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population(size_t populationSize) : populationSize (populationSize) {}
@@ -107,163 +110,160 @@ void Population::regularize()
     }
 }
     
-namespace population
+Population *createPopulation(size_t populationSize)
 {
-    Population *createPopulation(size_t populationSize)
-    {
-        Population *population = new Population(populationSize);
+    Population *population = new Population(populationSize);
 
-        ostringstream ctsDemogTitle;
-        for( double ubound : population->ctsDemogAgeGroups )
-            ctsDemogTitle << "\thost % ≤ " << ubound;
+    ostringstream ctsDemogTitle;
+    for( double ubound : ctsDemogAgeGroups )
+        ctsDemogTitle << "\thost % ≤ " << ubound;
 
-        mon::Continuous.registerCallback( "hosts", "\thosts", &population::ctsHosts );
-        mon::Continuous.registerCallback( "host demography", ctsDemogTitle.str(), &population::ctsHostDemography);
-        mon::Continuous.registerCallback( "recent births", "\trecent births", &population::ctsRecentBirths);
-        mon::Continuous.registerCallback( "patent hosts", "\tpatent hosts", &population::ctsPatentHosts);
-        mon::Continuous.registerCallback( "immunity h", "\timmunity h", &population::ctsImmunityh);
-        mon::Continuous.registerCallback( "immunity Y", "\timmunity Y", &population::ctsImmunityY);
-        mon::Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y", &population::ctsMedianImmunityY);
-        mon::Continuous.registerCallback( "human age availability", "\thuman age availability", &population::ctsMeanAgeAvailEffect);
-        mon::Continuous.registerCallback( "ITN coverage", "\tITN coverage", &population::ctsITNCoverage);
-        mon::Continuous.registerCallback( "IRS coverage", "\tIRS coverage", &population::ctsIRSCoverage);
-        mon::Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &population::ctsGVICoverage);
+    mon::Continuous.registerCallback( "hosts", "\thosts", &ctsHosts );
+    mon::Continuous.registerCallback( "host demography", ctsDemogTitle.str(), &ctsHostDemography);
+    mon::Continuous.registerCallback( "recent births", "\trecent births", &ctsRecentBirths);
+    mon::Continuous.registerCallback( "patent hosts", "\tpatent hosts", &ctsPatentHosts);
+    mon::Continuous.registerCallback( "immunity h", "\timmunity h", &ctsImmunityh);
+    mon::Continuous.registerCallback( "immunity Y", "\timmunity Y", &ctsImmunityY);
+    mon::Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y", &ctsMedianImmunityY);
+    mon::Continuous.registerCallback( "human age availability", "\thuman age availability", &ctsMeanAgeAvailEffect);
+    mon::Continuous.registerCallback( "ITN coverage", "\tITN coverage", &ctsITNCoverage);
+    mon::Continuous.registerCallback( "IRS coverage", "\tIRS coverage", &ctsIRSCoverage);
+    mon::Continuous.registerCallback( "GVI coverage", "\tGVI coverage", &ctsGVICoverage);
 
-        return population;
-    }
+    return population;
+}
 
-    void checkpoint (Population &population, istream& stream)
-    {
-        population.populationSize & stream;
-        population.recentBirths & stream;
+void checkpoint (Population &population, istream& stream)
+{
+    population.populationSize & stream;
+    population.recentBirths & stream;
 
-        auto &humans = population.humans;
-        
-        for(size_t i = 0; i < population.populationSize && !stream.eof(); ++i) {
-            // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
-            // ctor and leaves less opportunity for uninitialized memory.
-            humans.push_back( Host::Human (sim::zero()) );
-            Host::human::checkpoint(humans.back(), stream);
-        }
-        if (humans.size() != population.populationSize)
-            throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
-    }
-
-    void checkpoint (Population &population, ostream& stream)
-    {
-        population.populationSize & stream;
-        population.recentBirths & stream;
-        auto &humans = population.humans;
-
-        for(Host::Human &human : humans)
-            Host::human::checkpoint(human, stream);
-    }
-
-    void ctsHosts (Population &population, ostream& stream){
-        // this option is intended for debugging human initialization; normally this should equal populationSize.
-        stream << '\t' << population.populationSize;
-    }
-
-    void ctsHostDemography (Population &population, ostream& stream){
-        auto iter = population.humans.crbegin();
-        int cumCount = 0;
-        for( double ubound : population.ctsDemogAgeGroups ){
-            while( iter != population.humans.crend() && sim::inYears(iter->age(sim::now())) < ubound ){
-                ++cumCount;
-                ++iter;
-            }
-            stream << '\t' << cumCount;
-        }
-    }
-
-    void ctsRecentBirths (Population &population, ostream& stream){
-        stream << '\t' << population.recentBirths;
-        population.recentBirths = 0;
-    }
-
-    void ctsPatentHosts (Population &population, ostream& stream){
-        int patent = 0;
-        for(Host::Human &human : population.humans) {
-            auto diag = WithinHost::diagnostics::monitoringDiagnostic();
-            if( human.withinHostModel->diagnosticResult(human.rng, diag) )
-                ++patent;
-        }
-        stream << '\t' << patent;
-    }
-
-    void ctsImmunityh (Population &population, ostream& stream){
-        double x = 0.0;
-        for(const Host::Human &human : population.humans) {
-            x += human.withinHostModel->getCumulative_h();
-        }
-        x /= population.populationSize;
-        stream << '\t' << x;
-    }
-
-    void ctsImmunityY (Population &population, ostream& stream){
-        double x = 0.0;
-        for(const Host::Human &human : population.humans) {
-            x += human.withinHostModel->getCumulative_Y();
-        }
-        x /= population.populationSize;
-        stream << '\t' << x;
-    }
-
-    void ctsMedianImmunityY (Population &population, ostream& stream){
-        vector<double> list;
-        list.reserve( population.populationSize );
-        for(const Host::Human &human : population.humans) {
-            list.push_back( human.withinHostModel->getCumulative_Y() );
-        }
-        sort( list.begin(), list.end() );
-        double x;
-        if( mod_nn(population.populationSize, 2) == 0 ){
-            size_t i = population.populationSize / 2;
-            x = (list[i-1]+list[i])/2.0;
-        }else{
-            x = list[population.populationSize / 2];
-        }
-        stream << '\t' << x;
-    }
-
-    void ctsMeanAgeAvailEffect (Population &population, ostream& stream){
-        int nHumans = 0;
-        double avail = 0.0;
-        for(Host::Human &human : population.humans) {
-            if( !human.perHostTransmission.outsideTransmission ){
-                ++nHumans;
-                avail += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
-            }
-        }
-        stream << '\t' << avail/nHumans;
-    }
-
-    void ctsITNCoverage (Population &population, ostream& stream){
-        int nActive = 0;
-        for(const Host::Human &human : population.humans) {
-            nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::ITN );
-        }
-        double coverage = static_cast<double>(nActive) / population.populationSize;
-        stream << '\t' << coverage;
-    }
-
-    void ctsIRSCoverage (Population &population, ostream& stream){
-        int nActive = 0;
-        for(const Host::Human &human : population.humans) {
-            nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::IRS );
-        }
-        double coverage = static_cast<double>(nActive) / population.populationSize;
-        stream << '\t' << coverage;
-    }
+    auto &humans = population.humans;
     
-    void ctsGVICoverage (Population &population, ostream& stream){
-        int nActive = 0;
-        for(const Host::Human &human : population.humans) {
-            nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::GVI );
-        }
-        double coverage = static_cast<double>(nActive) / population.populationSize;
-        stream << '\t' << coverage;
+    for(size_t i = 0; i < population.populationSize && !stream.eof(); ++i) {
+        // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
+        // ctor and leaves less opportunity for uninitialized memory.
+        humans.push_back( Host::Human (sim::zero()) );
+        Host::checkpoint(humans.back(), stream);
     }
+    if (humans.size() != population.populationSize)
+        throw util::checkpoint_error("Population: out of data (read " + to_string(humans.size()) + " humans)");
+}
+
+void checkpoint (Population &population, ostream& stream)
+{
+    population.populationSize & stream;
+    population.recentBirths & stream;
+    auto &humans = population.humans;
+
+    for(Host::Human &human : humans)
+        Host::checkpoint(human, stream);
+}
+
+void ctsHosts (Population &population, ostream& stream){
+    // this option is intended for debugging human initialization; normally this should equal populationSize.
+    stream << '\t' << population.populationSize;
+}
+
+void ctsHostDemography (Population &population, ostream& stream){
+    auto iter = population.humans.crbegin();
+    int cumCount = 0;
+    for( double ubound : ctsDemogAgeGroups ){
+        while( iter != population.humans.crend() && sim::inYears(iter->age(sim::now())) < ubound ){
+            ++cumCount;
+            ++iter;
+        }
+        stream << '\t' << cumCount;
+    }
+}
+
+void ctsRecentBirths (Population &population, ostream& stream){
+    stream << '\t' << population.recentBirths;
+    population.recentBirths = 0;
+}
+
+void ctsPatentHosts (Population &population, ostream& stream){
+    int patent = 0;
+    for(Host::Human &human : population.humans) {
+        auto diag = WithinHost::diagnostics::monitoringDiagnostic();
+        if( human.withinHostModel->diagnosticResult(human.rng, diag) )
+            ++patent;
+    }
+    stream << '\t' << patent;
+}
+
+void ctsImmunityh (Population &population, ostream& stream){
+    double x = 0.0;
+    for(const Host::Human &human : population.humans) {
+        x += human.withinHostModel->getCumulative_h();
+    }
+    x /= population.populationSize;
+    stream << '\t' << x;
+}
+
+void ctsImmunityY (Population &population, ostream& stream){
+    double x = 0.0;
+    for(const Host::Human &human : population.humans) {
+        x += human.withinHostModel->getCumulative_Y();
+    }
+    x /= population.populationSize;
+    stream << '\t' << x;
+}
+
+void ctsMedianImmunityY (Population &population, ostream& stream){
+    vector<double> list;
+    list.reserve( population.populationSize );
+    for(const Host::Human &human : population.humans) {
+        list.push_back( human.withinHostModel->getCumulative_Y() );
+    }
+    sort( list.begin(), list.end() );
+    double x;
+    if( mod_nn(population.populationSize, 2) == 0 ){
+        size_t i = population.populationSize / 2;
+        x = (list[i-1]+list[i])/2.0;
+    }else{
+        x = list[population.populationSize / 2];
+    }
+    stream << '\t' << x;
+}
+
+void ctsMeanAgeAvailEffect (Population &population, ostream& stream){
+    int nHumans = 0;
+    double avail = 0.0;
+    for(Host::Human &human : population.humans) {
+        if( !human.perHostTransmission.outsideTransmission ){
+            ++nHumans;
+            avail += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
+        }
+    }
+    stream << '\t' << avail/nHumans;
+}
+
+void ctsITNCoverage (Population &population, ostream& stream){
+    int nActive = 0;
+    for(const Host::Human &human : population.humans) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::ITN );
+    }
+    double coverage = static_cast<double>(nActive) / population.populationSize;
+    stream << '\t' << coverage;
+}
+
+void ctsIRSCoverage (Population &population, ostream& stream){
+    int nActive = 0;
+    for(const Host::Human &human : population.humans) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::IRS );
+    }
+    double coverage = static_cast<double>(nActive) / population.populationSize;
+    stream << '\t' << coverage;
+}
+
+void ctsGVICoverage (Population &population, ostream& stream){
+    int nActive = 0;
+    for(const Host::Human &human : population.humans) {
+        nActive += human.perHostTransmission.hasActiveInterv( interventions::Component::GVI );
+    }
+    double coverage = static_cast<double>(nActive) / population.populationSize;
+    stream << '\t' << coverage;
 }
 
 }

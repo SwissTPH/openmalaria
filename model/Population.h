@@ -44,10 +44,7 @@ public:
     void regularize();
 
     /** Size of the human population */
-    size_t populationSize;
-    
-    /** Variables for continuous reporting */
-    const vector<double> ctsDemogAgeGroups = { 1.0, 5.0, 10.0, 15.0, 25.0 };
+    size_t populationSize = 0;
     
     /** Births since last continuous output */
     int recentBirths = 0;
@@ -56,33 +53,30 @@ public:
     vector<Host::Human> humans;
 };
 
-namespace population
-{
-    Population *createPopulation(size_t populationSize);
+Population *createPopulation(size_t populationSize);
 
-    void checkpoint(Population &population, istream& stream);
-    void checkpoint(Population &population, ostream& stream);
+void checkpoint(Population &population, istream& stream);
+void checkpoint(Population &population, ostream& stream);
 
-    /// Delegate to print the number of hosts
-    void ctsHosts (Population &population, ostream& stream);
-    /// Delegate to print cumulative numbers of hosts under various age limits
-    void ctsHostDemography (Population &population, ostream& stream);
-    /// Delegate to print the number of births since last count
-    void ctsRecentBirths (Population &population, ostream& stream);
-    /// Delegate to print the number of patent hosts
-    void ctsPatentHosts (Population &population, ostream& stream);
-    /// Delegate to print immunity's cumulativeh parameter
-    void ctsImmunityh (Population &population, ostream& stream);
-    /// Delegate to print immunity's cumulativeY parameter (mean across population)
-    void ctsImmunityY (Population &population, ostream& stream);
-    /// Delegate to print immunity's cumulativeY parameter (median across population)
-    void ctsMedianImmunityY (Population &population, ostream& stream);
-    /// Delegate to print the mean age-based availability reduction of each human relative to an adult
-    void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
-    void ctsITNCoverage (Population &population, ostream& stream);
-    void ctsIRSCoverage (Population &population, ostream& stream);
-    void ctsGVICoverage (Population &population, ostream& stream);
-}
+/// Delegate to print the number of hosts
+void ctsHosts (Population &population, ostream& stream);
+/// Delegate to print cumulative numbers of hosts under various age limits
+void ctsHostDemography (Population &population, ostream& stream);
+/// Delegate to print the number of births since last count
+void ctsRecentBirths (Population &population, ostream& stream);
+/// Delegate to print the number of patent hosts
+void ctsPatentHosts (Population &population, ostream& stream);
+/// Delegate to print immunity's cumulativeh parameter
+void ctsImmunityh (Population &population, ostream& stream);
+/// Delegate to print immunity's cumulativeY parameter (mean across population)
+void ctsImmunityY (Population &population, ostream& stream);
+/// Delegate to print immunity's cumulativeY parameter (median across population)
+void ctsMedianImmunityY (Population &population, ostream& stream);
+/// Delegate to print the mean age-based availability reduction of each human relative to an adult
+void ctsMeanAgeAvailEffect (Population &population, ostream& stream);
+void ctsITNCoverage (Population &population, ostream& stream);
+void ctsIRSCoverage (Population &population, ostream& stream);
+void ctsGVICoverage (Population &population, ostream& stream);
 
 }
 #endif
