@@ -182,7 +182,7 @@ protected:
         const Clinical::Episode &latest = hostData.human.clinicalModel->getLatestReport();
 
         // Rely on the health system memory to not count the same episode twice
-        if( (latest.time + lookBack > sim::ts0() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
+        if( (latest.time + lookBack > sim::now() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
         {
             result = positive.exec( hostData );
         }
