@@ -198,7 +198,9 @@ public:
         TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
         minAge( sim::fromYearsN( mass.getMinAge() ) ),
-        maxAge( sim::future() )
+        maxAge( sim::future() ),
+        minAvailability( sim::fromYearsN( mass.getMinAvailability() ) ),
+        maxAvailability( sim::future() )
     {
         if( mass.getMaxAge().present() )
             maxAge = sim::fromYearsN( mass.getMaxAge().get() );

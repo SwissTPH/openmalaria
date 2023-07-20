@@ -122,6 +122,9 @@ public:
     /** The next continuous distribution in the series */
     uint32_t nextCtsDist = 0;
 
+    /** DEBUG **/
+    double avail = 1.0;
+
 private:
     SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
 
