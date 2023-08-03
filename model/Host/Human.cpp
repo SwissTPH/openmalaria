@@ -119,6 +119,10 @@ Human::Human(SimTime dateOfBirth) :
     double iiFactor = infIncidence->getAvailabilityFactor(rng, 1.0);
     perHostTransmission.initialise (rng, het.availabilityFactor * iiFactor);
     clinicalModel = Clinical::ClinicalModel::createClinicalModel(het.treatmentSeekingFactor);
+
+    avail = 0.0;
+    for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
+        avail += perHostTransmission.anophEntoAvailability[i];
 }
 
 void Human::addToCohort(ComponentId id, SimTime duration )

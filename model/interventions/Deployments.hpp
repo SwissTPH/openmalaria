@@ -199,24 +199,36 @@ public:
         HumanDeploymentBase( mass, intervention, subPop, complement ),
         minAge( sim::fromYearsN( mass.getMinAge() ) ),
         maxAge( sim::future() ),
-        minAvailability( sim::fromYearsN( mass.getMinAvailability() ) ),
-        maxAvailability( sim::future() )
+        minAvailability( 0 ),
+        maxAvailability( 100 ),
+        useAvailability(false)
     {
         if( mass.getMaxAge().present() )
             maxAge = sim::fromYearsN( mass.getMaxAge().get() );
             
-        if( minAge < sim::zero() || maxAge < minAge ){
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
-        }
+        if( minAge < sim::zero() || maxAge < minAge )
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability");
+
+        if( mass.getMaxAvailability().present() )
+            maxAvailability = mass.getMaxAvailability().get();
+
+        if( mass.getMinAvailability().present() )
+            minAvailability = mass.getMinAvailability().get();
+            
+        if( minAvailability < sim::zero() || maxAvailability < minAvailability )
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability");
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
+            double avail = human.avail;
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                    if( human.rng.bernoulli( coverage ) ){
-                        deployToHuman( human, mon::Deploy::TIMED );
+                if( avail >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && avail <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                    if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
+                        if( human.rng.bernoulli( coverage ) ){
+                            deployToHuman( human, mon::Deploy::TIMED );
+                        }
                     }
                 }
             }
@@ -235,6 +247,8 @@ public:
 protected:
     // restrictions on deployment
     SimTime minAge, maxAge;
+    SimTime minAvailability, maxAvailability;
+    bool useAvailability;
 };
 
 /// Timed deployment of human-specific interventions in cumulative mode
@@ -548,6 +562,7 @@ public:
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
+
             auto now = sim::intervDate();
             if( begin <= now && now < end &&
                 ( subPop == ComponentId::wholePop() ||
