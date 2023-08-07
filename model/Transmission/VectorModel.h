@@ -26,6 +26,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/Anopheles/AnophelesModelFitter.h"
+#include "Host/Human.h"
 
 namespace scnXml
 {
@@ -56,7 +57,7 @@ public:
 
     /** Extra initialisation when not loading from a checkpoint, requiring
      * information from the human population structure. */
-    virtual void init2(const Population &population);
+    virtual void init2(const vector<Host::Human> &population);
 
     virtual void initVectorInterv(const scnXml::Description::AnophelesSequence &list, size_t instance, const string &name);
     virtual void initVectorTrap(const scnXml::VectorTrap::DescriptionSequence list, size_t instance,
@@ -64,11 +65,9 @@ public:
 
     virtual void scaleEIR(double factor);
 
-    virtual SimTime minPreinitDuration();
-    virtual SimTime expectedInitDuration();
     virtual SimTime initIterate();
 
-    virtual void vectorUpdate(const Population &population);
+    virtual void vectorUpdate(const vector<Host::Human> &population);
 
     virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const;
 
@@ -96,12 +95,12 @@ private:
     void ctsCbN_v(ostream &stream);
     void ctsCbO_v(ostream &stream);
     void ctsCbS_v(ostream &stream);
-    void ctsCbAlpha(const Population &population, ostream &stream);
-    void ctsCbP_B(const Population &population, ostream &stream);
-    void ctsCbP_CD(const Population &population, ostream &stream);
-    void ctsNetInsecticideContent(const Population &population, ostream &stream);
-    void ctsIRSInsecticideContent(const Population &population, ostream &stream);
-    void ctsIRSEffects(const Population &population, ostream &stream);
+    void ctsCbAlpha(const vector<Host::Human> &population, ostream &stream);
+    void ctsCbP_B(const vector<Host::Human> &population, ostream &stream);
+    void ctsCbP_CD(const vector<Host::Human> &population, ostream &stream);
+    void ctsNetInsecticideContent(const vector<Host::Human> &population, ostream &stream);
+    void ctsIRSInsecticideContent(const vector<Host::Human> &population, ostream &stream);
+    void ctsIRSEffects(const vector<Host::Human> &population, ostream &stream);
     void ctsCbResAvailability(ostream &stream);
     void ctsCbResRequirements(ostream &stream);
 

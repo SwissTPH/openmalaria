@@ -23,7 +23,6 @@
 #define Hmod_PerHost
 
 #include "Global.h"
-#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
@@ -32,13 +31,71 @@
 namespace OM {
 namespace Transmission {
 
-using Anopheles::PerHostAnophParams;
-using Anopheles::PerHostAnoph;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::LocalRng;
 
 class HumanVectorInterventionComponent;
+
+/** Stores vector model data applicable between a category of host and a
+ * mosquito species: intervention descriptions and model parameters.
+ *
+ * Parameters are read from XML, and the availability rate is adjusted. */
+class PerHostAnophParams {
+public:
+    static inline void initReserve (size_t numSpecies) {
+        params.reserve (numSpecies);
+    }
+    static inline void init (const scnXml::Mosq& mosq) {
+        params.push_back(PerHostAnophParams{ mosq });
+    }
+    
+    /// Get the number of vector species
+    static inline size_t numSpecies() {
+        return params.size();
+    }
+    
+    /// Get parameters for the given vector species
+    static inline const PerHostAnophParams& get(size_t species) {
+        return params[species];
+    }
+    
+    /** entoAvailability is calculated externally, then set after other
+     * parameters have been initialised.
+     * 
+     * This function doesn't need to exist, but helps make this fact obvious.
+     * 
+     * It should be called exactly once.
+      */
+    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
+        params[species].entoAvailability->scaleMean( entoAvailability );
+    }
+
+    /** @brief Probabilities of finding a host and surviving a feeding cycle
+     * 
+     * These parameters describe the mean and heterogeneity of α_i, P_B_i,
+     * P_C_i and P_D_i across the human population. */
+    //@{
+    /** Availability rate (α_i) */
+    unique_ptr<util::Sampler> entoAvailability;
+
+    /** Probability of mosquito successfully biting host (P_B_i) */
+    util::BetaSampler probMosqBiting;
+
+    /** Probability of mosquito escaping human and finding a resting site without
+     * dying, after biting the human (P_C_i). */
+    util::BetaSampler probMosqFindRestSite;
+
+    /** Probability of mosquito successfully resting after finding a resting site
+     * (P_D_i). */
+    util::BetaSampler probMosqSurvivalResting;
+    //@}
+    
+private:
+    PerHostAnophParams (const scnXml::Mosq& mosq);
+
+    static vector<PerHostAnophParams> params;
+};
 
 /**
  * A base class for interventions affecting human-vector interaction.
@@ -136,25 +193,10 @@ public:
     
     /// Call once per time step. Updates net holes.
     void update(Host::Human& human);
-    
-    ///@brief Intervention controls
-    //@{
-    /** Set true to remove human from transmission. Must set back to false
-     * to restore transmission. */
-    inline void removeFromTransmission (bool s){
-        outsideTransmission = s;
-    }
   
     /// Deploy some intervention component
     void deployComponent( LocalRng& rng, const HumanVectorInterventionComponent& params );
     //@}
-    
-    /** @brief Availability of host to mosquitoes */
-    //@{
-    /** Return true if the human has been removed from transmission. */
-    inline bool isOutsideTransmission() {
-        return outsideTransmission;
-    }
     
     /** Calculates the adjustment for body size in exposure to mosquitoes,
      * relative to an average adult.
@@ -171,16 +213,7 @@ public:
      * 
      * Also has a switch to put individuals entirely outside transmission. */
     inline double relativeAvailabilityAge (double ageYears) const {
-        return outsideTransmission ? 0.0 :
-            relAvailAge.eval( ageYears );
-    }
-    
-    /** Relative availability of host to mosquitoes excluding age factor.
-     *
-     * (ONLY for HeterogeneityWorkaroundII, and documentation purposes.)
-     * Assume mean is 1.0. */
-    inline double relativeAvailabilityHet () const {
-        return _relativeAvailabilityHet;
+        return outsideTransmission ? 0.0 : relAvailAge.eval( ageYears );
     }
     
     /** Get the availability of this host to mosquitoes relative to an average
@@ -192,17 +225,8 @@ public:
      * Mean output is less than 1.0 (roughly 1.0/invMeanPopAvail).
      */
     inline double relativeAvailabilityHetAge (double ageYears) const {
-        return _relativeAvailabilityHet
-            * relativeAvailabilityAge (ageYears);
+        return relativeAvailabilityHet * relativeAvailabilityAge (ageYears);
     }
-    
-    /** Availability of host to mosquitoes (α_i) excluding age factor
-     * 
-     * (Includes heterogeneity, intervention, and human-to-vector availability
-     * rate factors.)
-     * 
-     * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv (size_t species) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -212,10 +236,17 @@ public:
      * by the average availability of the population, which was incorrectly done
      * in the past. */
     inline double entoAvailabilityFull (size_t species, double ageYears) const {
-        return entoAvailabilityHetVecItv (species)
-            * relativeAvailabilityAge (ageYears);
+        return entoAvailabilityHetVecItv (species) * relativeAvailabilityAge (ageYears);
     }
     //@}
+
+    /** Availability of host to mosquitoes (α_i) excluding age factor
+     * 
+     * (Includes heterogeneity, intervention, and human-to-vector availability
+     * rate factors.)
+     * 
+     * Assume mean is human-to-vector availability rate factor. */
+    double entoAvailabilityHetVecItv (size_t species) const;
     
     ///@brief Get effects of interventions pre/post biting
     //@{
@@ -255,29 +286,42 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        speciesData & stream;
-        _relativeAvailabilityHet & stream;
+        anophEntoAvailability & stream;
+        anophProbMosqBiting & stream;
+        anophProbMosqResting & stream;
+        relativeAvailabilityHet & stream;
         outsideTransmission & stream;
         checkpointIntervs( stream );
     }
     //@}
     
-    vector<PerHostAnoph> speciesData;
+    // Determines whether human is outside transmission
+    bool outsideTransmission;
+
+    // Heterogeneity factor in availability; this is already multiplied into the
+    // entoAvailability param stored in HostMosquitoInteraction.
+    double relativeAvailabilityHet;
 
 private:
     void checkpointIntervs( ostream& stream );
     void checkpointIntervs( istream& stream );
-    
-    // Determines whether human is outside transmission
-    bool outsideTransmission;
-    
-    // Heterogeneity factor in availability; this is already multiplied into the
-    // entoAvailability param stored in HostMosquitoInteraction.
-    double _relativeAvailabilityHet;
 
     vector<unique_ptr<PerHostInterventionData>> activeComponents;
     
     static AgeGroupInterpolator relAvailAge;
+
+    /** Species availability rate of human to mosquitoes, including hetergeneity factor
+     * and base rate, but excluding age and intervention factors. */
+    vector<double> anophEntoAvailability;
+    
+    /** Species probability of mosquito successfully biting host (P_B_i) in the absense of
+     * interventions. */
+    vector<double> anophProbMosqBiting;
+    
+    /** Species probability of mosquito escaping human and finding a resting site, then
+     * resting without dying, after biting the human (P_C_i * P_D_i) in the
+     * absense of interventions. */
+    vector<double> anophProbMosqResting;
 };
 
 }

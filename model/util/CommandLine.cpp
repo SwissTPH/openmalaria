@@ -45,6 +45,20 @@ namespace OM { namespace util {
 		return string(argv[i]);
 	}
 
+	string CommandLine::lookupResource (const string& path) {
+		string ret;
+		if (path.size() >= 1 && path[0] == '/') {
+		    // UNIX absolute path
+		} else if (path.size() >= 3 && path[1] == ':'
+			&& (path[2] == '\\' || path[2] == '/')) {
+		    // Windows absolute path.. at least probably
+		} else {	// relative
+			ret = resourcePath;
+		}
+		ret.append (path);
+		return ret;
+	}
+
 	string CommandLine::parse (int argc, char* argv[]) {
 		bool cloHelp = false, cloVersion = false, cloError = false;
 		string scenarioFile = "";
@@ -198,7 +212,7 @@ namespace OM { namespace util {
 	if (cloVersion || cloHelp){
 		cerr<<"OpenMalaria simulator of malaria epidemiology and control."<<endl<< endl
 		<<"For more information, see https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
-		<<"\tschema version: \t"   <<DocumentLoader::SCHEMA_VERSION<<endl
+		<<"\tschema version: \t"   <<SCHEMA_VERSION<<endl
 		<<"\tprogram version:\t" << util::semantic_version <<endl<<endl
 		<<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute"<<endl
 		<<"and Liverpool School Of Tropical Medicine."<<endl
@@ -276,21 +290,7 @@ namespace OM { namespace util {
 		ctsoutName = "ctsout.txt";
 	}
 
-	return scenarioFile;
-}
-
-string CommandLine::lookupResource (const string& path) {
-	string ret;
-	if (path.size() >= 1 && path[0] == '/') {
-	    // UNIX absolute path
-	} else if (path.size() >= 3 && path[1] == ':'
-		&& (path[2] == '\\' || path[2] == '/')) {
-	    // Windows absolute path.. at least probably
-	} else {	// relative
-		ret = resourcePath;
-	}
-	ret.append (path);
-	return ret;
+	return lookupResource(scenarioFile);
 }
 
     /* These check parameters are as expected. They only really serve to make

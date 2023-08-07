@@ -139,7 +139,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result;
-        if( hostData.withinHost().diagnosticResult( hostData.human.rng(), diagnostic ) ){
+        if( hostData.withinHost().diagnosticResult( hostData.human.rng, diagnostic ) ){
             result = positive.exec( hostData );
         }else{
             result = negative.exec( hostData );
@@ -179,11 +179,10 @@ protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result;
 
-        const Clinical::ClinicalModel &clinicalModel = hostData.human.getClinicalModel();
-        const Clinical::Episode &latest = clinicalModel.getLatestReport();
+        const Clinical::Episode &latest = hostData.human.clinicalModel->getLatestReport();
 
         // Rely on the health system memory to not count the same episode twice
-        if( (latest.time + lookBack > sim::ts0() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
+        if( (latest.time + lookBack > sim::now() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
         {
             result = positive.exec( hostData );
         }
@@ -237,7 +236,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        auto it = branches.upper_bound( hostData.human.rng().uniform_01() );
+        auto it = branches.upper_bound( hostData.human.rng.uniform_01() );
         assert( it != branches.end() );
         return it->second->exec( hostData );
     }

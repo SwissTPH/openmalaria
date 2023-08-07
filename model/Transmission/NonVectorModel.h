@@ -81,22 +81,13 @@ public:
 
     virtual ~NonVectorModel() {}
 
-    virtual void init2(const Population &population) { simulationMode = forcedEIR; } // no set-up needed; just indicate we're ready to roll
+    virtual void init2(const vector<Host::Human> &population) { simulationMode = forcedEIR; } // no set-up needed; just indicate we're ready to roll
 
     virtual void scaleEIR(double factor)
     {
         util::vectors::scale(initialisationEIR, factor);
         annualEIR = util::vectors::sum(initialisationEIR);
     }
-
-    virtual SimTime minPreinitDuration()
-    {
-        if (interventionMode == forcedEIR) { return sim::zero(); }
-        // nYearsWarmupData years for data collection, 50 years stabilization
-        return sim::fromYearsI(50) + sim::fromYearsI(nYearsWarmupData);
-    }
-
-    virtual SimTime expectedInitDuration() { return sim::zero(); }
 
     virtual SimTime initIterate()
     {
@@ -170,7 +161,7 @@ public:
         laggedKappa.assign(laggedKappa.size(), 0.0);
     }
 
-    virtual double updateKappa(const Population &population)
+    virtual double updateKappa(const vector<Host::Human> &population)
     {
         double currentKappa = TransmissionModel::updateKappa(population);
         if (simulationMode == forcedEIR) { initialKappa[sim::moduloSteps(sim::ts1(), initialKappa.size())] = currentKappa; }
@@ -216,8 +207,8 @@ public:
 #endif
         EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge(ageYears);
 
-        auto ag = human.monAgeGroup().i();
-        auto cs = human.cohortSet();
+        auto ag = human.monitoringAgeGroup.i();
+        auto cs = human.getCohortSet();
         mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, EIR[0]);
     }
 

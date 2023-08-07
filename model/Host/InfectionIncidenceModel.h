@@ -123,7 +123,7 @@ protected:
   
   double susceptibility ();
   
-  static void ctsReportNewInfections (ostream& stream);
+  static void ctsReportNewInfections (const vector<Host::Human> &, ostream& stream);
   
   /** Probability of infection (cumulative or reset to zero in massTreatment).
    *

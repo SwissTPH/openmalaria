@@ -12,9 +12,3 @@ cxxtest
     Source:	http://cxxtest.tigris.org/
     This has been slightly modified to increase precision of floating-point output and to enable
     some tests to throw exceptions and others not to.
-
-FastDelegate_src
-    Fast delegates for C++
-    Version:	1.5 (30-Mar-05)
-    Licence:	Public domain.
-    Source:	http://www.codeproject.com/KB/cpp/FastDelegate.aspx

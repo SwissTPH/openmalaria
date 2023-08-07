@@ -15,16 +15,13 @@ configure_file(
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
   sim.cpp
-  # Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
-  # Parameters.cpp
   checkpoint.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
-  Host/ImportedInfections.cpp
   
   Clinical/ClinicalModel.cpp
   Clinical/EventScheduler.cpp
@@ -43,19 +40,9 @@ set (Model_CPP
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/LSTMTreatments.cpp
   
-  #Transmission/TransmissionModel.cpp
-  #Transmission/NonVectorModel.cpp
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
-  Transmission/Anopheles/PerHostAnoph.cpp
-  #Transmission/Anopheles/EmergenceModel.cpp
-  #Transmission/Anopheles/MosqTransmission.cpp
-  #Transmission/Anopheles/FixedEmergence.cpp
-  #Transmission/Anopheles/SimpleMPDEmergence.cpp
-  #Transmission/Anopheles/LCEmergence.cpp
-  #Transmission/Anopheles/LifeCycle.cpp
-  #Transmission/Anopheles/ResourceFitter.cpp
   
   Host/WithinHost/WHInterface.cpp
   Host/WithinHost/WHFalciparum.cpp
@@ -78,8 +65,6 @@ set (Model_CPP
   mon/misc.cpp
   mon/Continuous.cpp
   
-  # util/timer.cpp
-  # util/vectors.cpp
   util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
@@ -116,7 +101,6 @@ include_directories (SYSTEM
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
-  ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
   # ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (

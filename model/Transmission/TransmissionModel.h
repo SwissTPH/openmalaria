@@ -45,6 +45,8 @@
 #include <cfloat>
 #include <gsl/gsl_vector.h>
 
+using namespace std::placeholders;
+
 namespace OM
 {
 class Summary;
@@ -142,11 +144,10 @@ protected:
         opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
 
         using mon::Continuous;
-        Continuous.registerCallback("input EIR", "\tinput EIR", MakeDelegate(this, &TransmissionModel::ctsCbInputEIR));
-        Continuous.registerCallback("simulated EIR", "\tsimulated EIR", MakeDelegate(this, &TransmissionModel::ctsCbSimulatedEIR));
-        Continuous.registerCallback("human infectiousness", "\thuman infectiousness", MakeDelegate(this, &TransmissionModel::ctsCbKappa));
-        Continuous.registerCallback("num transmitting humans", "\tnum transmitting humans",
-                                    MakeDelegate(this, &TransmissionModel::ctsCbNumTransmittingHumans));
+        Continuous.registerCallback("input EIR", "\tinput EIR", std::bind(&TransmissionModel::ctsCbInputEIR, this, _1));
+        Continuous.registerCallback("simulated EIR", "\tsimulated EIR", std::bind(&TransmissionModel::ctsCbSimulatedEIR, this, _1));
+        Continuous.registerCallback("human infectiousness", "\thuman infectiousness", std::bind(&TransmissionModel::ctsCbKappa, this, _1));
+        Continuous.registerCallback("num transmitting humans", "\tnum transmitting humans", std::bind(&TransmissionModel::ctsCbNumTransmittingHumans, this, _1));
     }
 
 public:
@@ -155,7 +156,7 @@ public:
 
     /** Extra initialisation when not loading from a checkpoint, requiring
      * information from the human population structure. */
-    virtual void init2(const Population &population) = 0;
+    virtual void init2(const vector<Host::Human> &population) = 0;
 
     /// Checkpointing
     template <class S>
@@ -193,25 +194,12 @@ public:
      * XML data is not touched. */
     virtual void scaleEIR(double factor) = 0;
 
-    /** How many intervals are needed for transmission initialization during the
-     * "human" phase (before vector init)?
-     *
-     * Should include time for both data collection and to give the data
-     * collected time to stabilize. */
-    virtual SimTime minPreinitDuration() = 0;
-    /** Length of time that initIterate() is most likely to add: only used to
-     * estimate total runtime. */
-    virtual SimTime expectedInitDuration() = 0;
-    /** Check whether transmission has been sufficiently well initialized. If so,
-     * switch to dynamic transmission mode. If not, try to improve the situation
-     * and return the length of sim-time before this should be called again.
-     */
     virtual SimTime initIterate() = 0;
 
     /** Needs to be called each step of the simulation before Human::update().
      *
      * when the vector model is used this updates mosquito populations. */
-    virtual void vectorUpdate(const Population &population){};
+    virtual void vectorUpdate(const vector<Host::Human> &population){};
 
     virtual void changeEIRIntervention(const scnXml::NonVector &) = 0;
 
@@ -264,14 +252,14 @@ public:
     /** Needs to be called each time-step after Human::update() to update summary
      * statististics related to transmission. Also returns kappa (the average
      * human infectiousness weighted by availability to mosquitoes). */
-    virtual double updateKappa(const Population &population)
+    virtual double updateKappa(const vector<Host::Human> &population)
     {
         // We calculate kappa for output and the non-vector model.
         double sumWt_kappa = 0.0;
         double sumWeight = 0.0;
         numTransmittingHumans = 0;
 
-        for (const Host::Human &human : population.getHumans())
+        for (const Host::Human &human : population)
         {
             // NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().
@@ -286,11 +274,11 @@ public:
             // Only to be consistent with old simulation runs when set to false
             // Setting this option to true will only affect reporting
             if (opt_vaccine_genotype == false)
-                riskTrans = avail * pTransmit * human.getVaccine().getFactor(interventions::Vaccine::TBV);
+                riskTrans = avail * pTransmit * human.vaccine.getFactor(interventions::Vaccine::TBV);
             else
             {
                 for (size_t g = 0; g < WithinHost::Genotypes::N(); ++g)
-                    riskTrans += human.withinHostModel->probTransGenotype(pTransmit, sumX, g) * human.getVaccine().getFactor(interventions::Vaccine::TBV, g);
+                    riskTrans += human.withinHostModel->probTransGenotype(pTransmit, sumX, g) * human.vaccine.getFactor(interventions::Vaccine::TBV, g);
                 //cout << riskTrans << " ";
                 riskTrans *= avail;
                 //cout << riskTrans << endl;

@@ -25,19 +25,16 @@
 #include "Global.h"
 #include "Population.h"
 #include "Transmission/transmission.h"
+
 namespace OM
 {
+    /** @brief checkpointing functions
+    *
+    * readCheckpoint/writeCheckpoint prepare to read/write the file,
+    * and read/write read and write the actual data. */
+    void writeCheckpoint(const bool startedFromCheckpoint, const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission);
 
-/** @brief checkpointing functions
-*
-* readCheckpoint/writeCheckpoint prepare to read/write the file,
-* and read/write read and write the actual data. */
-//@{
-void writeCheckpoint(const bool startedFromCheckpoint, const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission);
-
-void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission);
-//@}
-
+    void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, Transmission::TransmissionModel &transmission);
 }
 
 #endif

@@ -458,8 +458,8 @@ void WHVivax::optionalPqTreatment( Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
-    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && human.rng().bernoulli(pReceivePQ)){
-        if( human.rng().bernoulli(effectivenessPQ) ){
+    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && human.rng.bernoulli(pReceivePQ)){
+        if( human.rng.bernoulli(effectivenessPQ) ){
             for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
@@ -479,7 +479,7 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
             "stages is incompatible with case-management pUseUncomplicated "
             "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
-        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || human.rng().bernoulli(effectivenessPQ)) ){
+        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || human.rng.bernoulli(effectivenessPQ)) ){
             if( timeLiver >= sim::zero() ){
                 treatExpiryLiver = max( int(treatExpiryLiver), sim::nowOrTs1() + timeLiver );
             }else{

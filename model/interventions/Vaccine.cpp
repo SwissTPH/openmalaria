@@ -136,7 +136,7 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
 
 void VaccineComponent::deploy(Host::Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits) const
 {
-    bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
+    bool administered = human.vaccine.possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineComponent::reportComponent == id() ){
         mon::reportEventMHD( mon::MHD_VACCINATIONS, human, method );
     }
@@ -240,14 +240,14 @@ bool PerHumanVaccine::possiblyVaccinate( Host::Human& human,
     const VaccineComponent& params = VaccineComponent::getParams( componentId );
     
     if( effect == 0 ){
-        effects.push_back( PerEffectPerHumanVaccine( human.rng(), componentId, params ) );
+        effects.push_back( PerEffectPerHumanVaccine( human.rng, componentId, params ) );
         effect = &effects.back();
     }
     
     effect->perGenotypeInitialEfficacy.resize(WithinHost::Genotypes::N());
 
     for(size_t g=0; g<params.perGenotypeInitialMeanEfficacy.size(); g++)
-        effect->perGenotypeInitialEfficacy[g] = params.getInitialEfficacy(human.rng(), numDosesAdministered, g);
+        effect->perGenotypeInitialEfficacy[g] = params.getInitialEfficacy(human.rng, numDosesAdministered, g);
 
     util::streamValidate(effect->perGenotypeInitialEfficacy);
     

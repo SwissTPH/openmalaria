@@ -21,7 +21,6 @@
 
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
-#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"
@@ -29,11 +28,25 @@
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
-using Anopheles::PerHostAnophParams;
 
 // -----  PerHost static  -----
 
 AgeGroupInterpolator PerHost::relAvailAge;
+vector<PerHostAnophParams> PerHostAnophParams::params;
+
+PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
+    const string &distr = mosq.getAvailability().getDistr();
+    if(distr == "const" || distr == "lognormal")
+        entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
+    else if(distr == "gamma")
+        entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
+    else
+        throw util::xml_scenario_error( "error ento availability: unknown distirbution "+distr);
+
+    probMosqBiting.setParams( mosq.getMosqProbBiting() );
+    probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
+    probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
+}
 
 void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
     relAvailAge.set( availabilityToMosquitoes, "availabilityToMosquitoes" );
@@ -43,14 +56,22 @@ void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
 
 PerHost::PerHost () :
         outsideTransmission(false),
-        _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
+        relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
+
 void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
-    _relativeAvailabilityHet = availabilityFactor;
-    speciesData.resize (PerHostAnophParams::numSpecies());
-    for(size_t i = 0; i < speciesData.size(); ++i) {
-        speciesData[i].initialise (rng, i, availabilityFactor);
+    relativeAvailabilityHet = availabilityFactor;
+    anophEntoAvailability.resize(PerHostAnophParams::numSpecies());
+    anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
+    anophProbMosqResting.resize(PerHostAnophParams::numSpecies());
+    for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
+        const PerHostAnophParams& base = PerHostAnophParams::get(i);
+        anophEntoAvailability[i] = base.entoAvailability->sample(rng) * availabilityFactor;
+        anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
+        auto pRest1 = base.probMosqFindRestSite.sample(rng);
+        auto pRest2 = base.probMosqSurvivalResting.sample(rng);
+        anophProbMosqResting[i] = pRest1 * pRest2;
     }
 }
 
@@ -81,21 +102,21 @@ void PerHost::deployComponent( LocalRng& rng, const HumanVectorInterventionCompo
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
 double PerHost::entoAvailabilityHetVecItv (size_t species) const {
-    double alpha_i = speciesData[species].getEntoAvailability();
+    double alpha_i = anophEntoAvailability[species];
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
         alpha_i *= (*iter)->relativeAttractiveness( species );
     }
     return alpha_i;
 }
 double PerHost::probMosqBiting (size_t species) const {
-    double P_B_i = speciesData[species].getProbMosqBiting();
+    double P_B_i = anophProbMosqBiting[species];
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
         P_B_i *= (*iter)->preprandialSurvivalFactor( species );
     }
     return P_B_i;
 }
 double PerHost::probMosqResting (size_t species) const {
-    double pRest = speciesData[species].getProbMosqRest();
+    double pRest = anophProbMosqResting[species];
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
         pRest *= (*iter)->postprandialSurvivalFactor( species );
     }

@@ -82,12 +82,11 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
     if (pg.indirectMortality && doomed == NOT_DOOMED)
         doomed = -sim::oneTS();
     
-    if( m_tLastTreatment == sim::ts0() ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
-    }
-    if( pgState & Episode::SICK ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
-    }
+    if( m_tLastTreatment == sim::ts0() )
+        human.removeFirstEvent(interventions::SubPopRemove::ON_FIRST_TREATMENT);
+    
+    if( pgState & Episode::SICK )
+        human.removeFirstEvent(interventions::SubPopRemove::ON_FIRST_BOUT);
 }
 
 void CM5DayCommon::severeMalaria (
@@ -147,7 +146,7 @@ void CM5DayCommon::severeMalaria (
     const double exSeq = (p2 * (p3 * (1 - p4) + (1 - p3) * (1 - p5b)) + (1 - p2) * (1 - p5a)) * p6;
     mon::reportStatMHF( mon::MHF_EXPECTED_SEQUELAE, human, exSeq );
 
-    double prandom = human.rng().uniform_01();
+    double prandom = human.rng.uniform_01();
     
     //NOTE: we do not model diagnostics in this case
     if( prandom >= q[2] ){      // treated in hospital

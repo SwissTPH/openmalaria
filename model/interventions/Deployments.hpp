@@ -33,6 +33,7 @@
 #include <schema/interventions.h>
 
 #include "util/SpeciesIndexChecker.h"
+#include "Host/Human.h"
 
 namespace OM { namespace interventions {
 
@@ -56,7 +57,7 @@ public:
     }
     virtual ~TimedDeployment() {}
     
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) =0;
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) =0;
     
     virtual void print_details( std::ostream& out )const =0;
     
@@ -75,7 +76,7 @@ public:
         // check has been done (hacky).
         date = sim::future();
     }
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {}
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {}
     virtual void print_details( std::ostream& out )const{
         out << "Dummy";
     }
@@ -87,7 +88,7 @@ public:
         TimedDeployment( date ),
         newHS( hs._clone() )
     {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         Clinical::ClinicalModel::setHS( *newHS );
         delete newHS;
         newHS = 0;
@@ -106,7 +107,7 @@ public:
         TimedDeployment( date ),
         newEIR( nv._clone() )
     {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         transmission.changeEIRIntervention( *newEIR );
         delete newEIR;
         newEIR = 0;
@@ -124,7 +125,7 @@ public:
     TimedUninfectVectorsDeployment( SimTime date ) :
         TimedDeployment( date )
     {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         transmission.uninfectVectors();
     }
     virtual void print_details( std::ostream& out )const{
@@ -207,12 +208,12 @@ public:
         }
     }
     
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                    if( human.rng().bernoulli( coverage ) ){
+                    if( human.rng.bernoulli( coverage ) ){
                         deployToHuman( human, mon::Deploy::TIMED );
                     }
                 }
@@ -255,17 +256,17 @@ public:
     {
     }
     
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
-        for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            SimTime age = iter->age(sim::now());
+        for(Host::Human &human : population) {
+            SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
                     total+=1;
-                    if( !iter->isInSubPop(cumCovInd) )
-                        unprotected.push_back( &*iter );
+                    if( !human.isInSubPop(cumCovInd) )
+                        unprotected.push_back( &human );
                 }
             }
         }
@@ -279,7 +280,7 @@ public:
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
             for(Human* human : unprotected) {
-                if( human->rng().uniform_01() < additionalCoverage ){
+                if( human->rng.uniform_01() < additionalCoverage ){
                     deployToHuman( *human, mon::Deploy::TIMED );
                 }
             }
@@ -296,7 +297,7 @@ public:
         TimedDeployment( date ),
         inst(instance)
     {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
             vectorModel->deployVectorPopInterv(inst);
@@ -314,7 +315,7 @@ public:
     TimedTrapDeployment( SimTime date, size_t instance, double ratio, SimTime lifespan ) :
         TimedDeployment(date), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
         {
@@ -395,7 +396,7 @@ public:
             checker.checkNoneMissed();
         }
     }
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission)
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission)
     {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
@@ -452,7 +453,7 @@ public:
         }
     }
 
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission)
+    virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission)
     {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
@@ -538,7 +539,7 @@ public:
      * 
      * @returns false iff this deployment (and thus all later ones in the
      *  ordered list) happens in the future. */
-    bool filterAndDeploy( Host::Human& human, const Population& population ) const{
+    bool filterAndDeploy( Host::Human& human ) const{
         SimTime age = human.age(sim::now());
         if( deployAge > age ){
             // stop processing continuous deployments for this
@@ -550,7 +551,7 @@ public:
                 ( subPop == ComponentId::wholePop() ||
                     (human.isInSubPop( subPop ) != complement)
                 ) &&
-                human.rng().uniform_01() < coverage )     // RNG call should be last test
+                human.rng.uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, mon::Deploy::CTS );
             }
