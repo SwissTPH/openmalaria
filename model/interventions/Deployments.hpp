@@ -206,7 +206,7 @@ public:
             maxAge = sim::fromYearsN( mass.getMaxAge().get() );
             
         if( minAge < sim::zero() || maxAge < minAge )
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability");
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
 
         if( mass.getMaxAvailability().present() )
             maxAvailability = mass.getMaxAvailability().get();
@@ -215,7 +215,7 @@ public:
             minAvailability = mass.getMinAvailability().get();
             
         if( minAvailability < sim::zero() || maxAvailability < minAvailability )
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability");
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
@@ -557,7 +557,7 @@ public:
             minAvailability = elt.getMinAvailability().get();
             
         if( minAvailability < sim::zero() || maxAvailability < minAvailability )
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability");
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
     }
     
     /** Apply filters and potentially deploy.
