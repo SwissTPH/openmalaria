@@ -222,7 +222,7 @@ public:
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( human.avail >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.avail <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
                     if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
                         if( human.rng.bernoulli( coverage ) ){
                             deployToHuman( human, mon::Deploy::TIMED );
@@ -276,7 +276,7 @@ public:
         for(Host::Human &human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( human.avail >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.avail <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
                     if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
                         total+=1;
                         if( !human.isInSubPop(cumCovInd) )
@@ -571,7 +571,7 @@ public:
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
-            if( human.avail >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.avail <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
+            if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
             {
                 auto now = sim::intervDate();
                 if( begin <= now && now < end &&

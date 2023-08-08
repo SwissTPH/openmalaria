@@ -91,6 +91,9 @@ public:
     /** Remove host from expired cohorts */
     void updateCohortSet();
 
+    /** Returns the base of availability of this host **/
+    double getAvailability() const;
+
     /** Checkpoint (read) */
     void checkpoint(istream &stream);
 
@@ -122,9 +125,6 @@ public:
     /** The next continuous distribution in the series */
     uint32_t nextCtsDist = 0;
 
-    /** DEBUG **/
-    double avail = 1.0;
-
 private:
     SimTime dateOfBirth = sim::never();        // date of birth; humans are always born at the end of a time step
 
@@ -133,6 +133,9 @@ private:
 
     /** The state of he human. A human cannot be revived. */
     bool dead = false;
+
+    /** Base availability **/
+    double avail = 1.0;
 
     /** This lists sub-populations of which the human is a member together with
     * expiry time.
