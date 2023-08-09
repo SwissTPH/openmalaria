@@ -91,6 +91,9 @@ public:
     /** Remove host from expired cohorts */
     void updateCohortSet();
 
+    /** Returns the base of availability of this host **/
+    double getAvailability() const;
+
     /** Checkpoint (read) */
     void checkpoint(istream &stream);
 
@@ -130,6 +133,9 @@ private:
 
     /** The state of he human. A human cannot be revived. */
     bool dead = false;
+
+    /** Base availability **/
+    double avail = 1.0;
 
     /** This lists sub-populations of which the human is a member together with
     * expiry time.

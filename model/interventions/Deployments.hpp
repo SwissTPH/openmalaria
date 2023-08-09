@@ -198,23 +198,35 @@ public:
         TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
         minAge( sim::fromYearsN( mass.getMinAge() ) ),
-        maxAge( sim::future() )
+        maxAge( sim::future() ),
+        minAvailability( 0 ),
+        maxAvailability( 100 )
     {
         if( mass.getMaxAge().present() )
             maxAge = sim::fromYearsN( mass.getMaxAge().get() );
             
-        if( minAge < sim::zero() || maxAge < minAge ){
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
-        }
+        if( minAge < sim::zero() || maxAge < minAge )
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
+
+        if( mass.getMaxAvailability().present() )
+            maxAvailability = mass.getMaxAvailability().get();
+
+        if( mass.getMinAvailability().present() )
+            minAvailability = mass.getMinAvailability().get();
+            
+        if( minAvailability < sim::zero() || maxAvailability < minAvailability )
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                    if( human.rng.bernoulli( coverage ) ){
-                        deployToHuman( human, mon::Deploy::TIMED );
+                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                    if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
+                        if( human.rng.bernoulli( coverage ) ){
+                            deployToHuman( human, mon::Deploy::TIMED );
+                        }
                     }
                 }
             }
@@ -233,6 +245,7 @@ public:
 protected:
     // restrictions on deployment
     SimTime minAge, maxAge;
+    SimTime minAvailability, maxAvailability;
 };
 
 /// Timed deployment of human-specific interventions in cumulative mode
@@ -263,10 +276,12 @@ public:
         for(Host::Human &human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                    total+=1;
-                    if( !human.isInSubPop(cumCovInd) )
-                        unprotected.push_back( &human );
+                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                    if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
+                        total+=1;
+                        if( !human.isInSubPop(cumCovInd) )
+                            unprotected.push_back( &human );
+                    }
                 }
             }
         }
@@ -515,7 +530,9 @@ public:
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
             begin( begin ), end( end ),
-            deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) )
+            deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) ),
+            minAvailability( 0 ),
+            maxAvailability( 100 )
     {
         if( begin < sim::startDate() || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have startDate <= begin <= end");
@@ -533,6 +550,14 @@ public:
             msg << sim::inYears(sim::maxHumanAge());
             throw util::xml_scenario_error( msg.str() );
         }
+        if( elt.getMaxAvailability().present() )
+            maxAvailability = elt.getMaxAvailability().get();
+
+        if( elt.getMinAvailability().present() )
+            minAvailability = elt.getMinAvailability().get();
+            
+        if( minAvailability < sim::zero() || maxAvailability < minAvailability )
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAvailability <= maxAvailability <= 100");
     }
     
     /** Apply filters and potentially deploy.
@@ -546,14 +571,17 @@ public:
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
-            auto now = sim::intervDate();
-            if( begin <= now && now < end &&
-                ( subPop == ComponentId::wholePop() ||
-                    (human.isInSubPop( subPop ) != complement)
-                ) &&
-                human.rng.uniform_01() < coverage )     // RNG call should be last test
+            if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
             {
-                deployToHuman( human, mon::Deploy::CTS );
+                auto now = sim::intervDate();
+                if( begin <= now && now < end &&
+                    ( subPop == ComponentId::wholePop() ||
+                        (human.isInSubPop( subPop ) != complement)
+                    ) &&
+                    human.rng.uniform_01() < coverage )     // RNG call should be last test
+                {
+                    deployToHuman( human, mon::Deploy::CTS );
+                }
             }
         }//else: for some reason, a deployment age was missed; ignore it
         return true;
@@ -574,7 +602,8 @@ public:
 protected:
     SimTime begin, end;    // first time step active and first time step no-longer active
     SimTime deployAge = sim::never();
-    
+    SimTime minAvailability, maxAvailability;
+
     friend ByDeployTime;
 };
 

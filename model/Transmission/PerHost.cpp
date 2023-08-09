@@ -33,6 +33,7 @@ using namespace OM::util;
 
 AgeGroupInterpolator PerHost::relAvailAge;
 vector<PerHostAnophParams> PerHostAnophParams::params;
+vector<double> PerHostAnophParams::entoAvailabilityPercentiles;
 
 PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
     const string &distr = mosq.getAvailability().getDistr();
@@ -94,7 +95,6 @@ void PerHost::deployComponent( LocalRng& rng, const HumanVectorInterventionCompo
     // no deployment for that description: must make a new one
     activeComponents.push_back( params.makeHumanPart(rng) );
 }
-
 
 // Note: in the case an intervention is not present, we can use the approximation
 // of Weibull decay over the time span now - sim::never()

@@ -28,6 +28,8 @@
 #include "util/DecayFunction.h"
 #include "util/checkpoint_containers.h"
 
+#include "util/random.h"
+
 namespace OM {
 namespace Transmission {
 
@@ -71,6 +73,45 @@ public:
         params[species].entoAvailability->scaleMean( entoAvailability );
     }
 
+    inline static void calcAvailabilityPercentiles(){
+        int nSamples = 100000;
+        vector<double> samples(nSamples, 0.0);
+
+        // Using a different seed to make sure old results will not change
+        // Does it really matter? 
+        util::MasterRng seed(0, 0);
+        seed.seed(0, 0);
+        
+        util::LocalRng rng(seed);
+
+        // Sample
+        for(int i=0; i<nSamples; i++)
+        {
+            double avail = 0.0;
+            for(size_t s = 0; s < Transmission::PerHostAnophParams::numSpecies(); ++s)
+                avail += Transmission::PerHostAnophParams::get(s).entoAvailability->sample(rng);
+            samples[i] = avail;
+        }
+
+        // Sort samples
+        sort(samples.begin(), samples.end());
+
+        entoAvailabilityPercentiles.resize(100);
+
+        // Calc percetiles threshold values
+        for(int i=0; i<100; i++)
+            entoAvailabilityPercentiles[i] = samples[int(i*nSamples/100)];
+        entoAvailabilityPercentiles[0] = 0.0;
+    }
+
+    inline static double getEntoAvailabilityPercentile(int p){
+        if(p >= 0 && p < 100)
+            return entoAvailabilityPercentiles[p];
+        else if(p == 100)
+            return std::numeric_limits<double>::max();
+        else throw util::xml_scenario_error("Availability percentiles in intervention specifications can only be in [0 and 100]");
+    }
+
     /** @brief Probabilities of finding a host and surviving a feeding cycle
      * 
      * These parameters describe the mean and heterogeneity of α_i, P_B_i,
@@ -95,6 +136,8 @@ private:
     PerHostAnophParams (const scnXml::Mosq& mosq);
 
     static vector<PerHostAnophParams> params;
+    static vector<double> entoAvailabilityPercentiles;
+
 };
 
 /**
@@ -302,14 +345,6 @@ public:
     // entoAvailability param stored in HostMosquitoInteraction.
     double relativeAvailabilityHet;
 
-private:
-    void checkpointIntervs( ostream& stream );
-    void checkpointIntervs( istream& stream );
-
-    vector<unique_ptr<PerHostInterventionData>> activeComponents;
-    
-    static AgeGroupInterpolator relAvailAge;
-
     /** Species availability rate of human to mosquitoes, including hetergeneity factor
      * and base rate, but excluding age and intervention factors. */
     vector<double> anophEntoAvailability;
@@ -322,6 +357,14 @@ private:
      * resting without dying, after biting the human (P_C_i * P_D_i) in the
      * absense of interventions. */
     vector<double> anophProbMosqResting;
+
+private:
+    void checkpointIntervs( ostream& stream );
+    void checkpointIntervs( istream& stream );
+
+    vector<unique_ptr<PerHostInterventionData>> activeComponents;
+    
+    static AgeGroupInterpolator relAvailAge;
 };
 
 }

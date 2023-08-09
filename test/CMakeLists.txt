@@ -54,6 +54,7 @@ set (OM_BOXTEST_NAMES
   TBV
   DecisionTree5DayDielmo
   HetVecDailyEIR
+  AvailabilityHeterogeneity
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
