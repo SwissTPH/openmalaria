@@ -7286,6 +7286,8 @@ those </p>
     coverage=double
   [ vaccMinPrevDoses=int ]
   [ vaccMaxCumDoses=int ]
+  [ minAvailability=int ]
+  [ maxAvailability=int ]
     targetAgeYrs=double
   [ begin=string ]
   [ end=string ]
@@ -7319,6 +7321,22 @@ vaccine to individuals who did not receive the first deployment.</p>
 <p>Applies to vaccines only: vaccine doses are only deployed by this
 deployment if the previous number of doses (for the component
 deployed) is less than this number.</p>
+<h4><a class="header" href="#minimum-ento-availability" id="minimum-ento-availability">Minimum ento availability</a></h4>
+<pre><code class="language-xml">minAvailability=int
+</code></pre>
+<p><strong>Units:</strong> percent
+<strong>Min:</strong> 0</p>
+<p>Minimum ento availability percentile. 
+This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
+The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
+<h4><a class="header" href="#maximum-ento-availability" id="maximum-ento-availability">Maximum ento availability</a></h4>
+<pre><code class="language-xml">maxAvailability=int
+</code></pre>
+<p><strong>Units:</strong> percent
+<strong>Min:</strong> 0</p>
+<p>Maximum ento availability percentile. 
+This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
+The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
 <h4><a class="header" href="#target-age" id="target-age">Target age</a></h4>
 <pre><code class="language-xml">targetAgeYrs=double
 </code></pre>
@@ -7431,6 +7449,8 @@ selecting people.</p>
     coverage=double
   [ vaccMinPrevDoses=int ]
   [ vaccMaxCumDoses=int ]
+  [ minAvailability=int ]
+  [ maxAvailability=int ]
     time=string
   [ maxAge=double ]
   [ minAge=double ] DEFAULT VALUE 0
@@ -7466,6 +7486,22 @@ vaccine to individuals who did not receive the first deployment.</p>
 <p>Applies to vaccines only: vaccine doses are only deployed by this
 deployment if the previous number of doses (for the component
 deployed) is less than this number.</p>
+<h4><a class="header" href="#minimum-ento-availability-1" id="minimum-ento-availability-1">Minimum ento availability</a></h4>
+<pre><code class="language-xml">minAvailability=int
+</code></pre>
+<p><strong>Units:</strong> percent
+<strong>Min:</strong> 0</p>
+<p>Minimum ento availability percentile. 
+This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
+The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
+<h4><a class="header" href="#maximum-ento-availability-1" id="maximum-ento-availability-1">Maximum ento availability</a></h4>
+<pre><code class="language-xml">maxAvailability=int
+</code></pre>
+<p><strong>Units:</strong> percent
+<strong>Min:</strong> 0</p>
+<p>Maximum ento availability percentile. 
+This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
+The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
 <h4><a class="header" href="#time-7" id="time-7">Time</a></h4>
 <pre><code class="language-xml">time=string
 </code></pre>
