@@ -218,6 +218,9 @@ int main(int argc, char* argv[])
         {
             Continuous.init(scenario->getMonitoring(), true);
             readCheckpoint(checkpointFileName, endTime, estEndTime, *population, *transmission);
+
+            /** Calculate ento availability percentiles **/
+            Transmission::PerHostAnophParams::calcAvailabilityPercentiles();
         }
         else
         {
