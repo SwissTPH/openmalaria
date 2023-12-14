@@ -81,6 +81,10 @@ namespace OM { namespace util {
 				clo.assign (clo, 2, clo.size()-2);
 				if (clo == "verbose") {
 					options.set (VERBOSE);
+				} else if (clo == "quiet") {
+					options.set (QUIET);
+					if (options.test(VERBOSE))
+						throw cmd_exception ("--quiet is incompatible with --verbose");
 				} else if (clo == "resource-path") {
 					if (resourcePath.size())
 						throw cmd_exception ("--resource-path (or -p) may only be given once");
