@@ -103,8 +103,8 @@ public:
     {
         bool fitted = AnophelesModel::initIterate();
 
-        int y1 = sim::oneYear(), y2 = sim::fromYearsI(2), y3 = sim::fromYearsI(3), y4 = sim::fromYearsI(4),
-                y5 = sim::fromYearsI(5);
+        int y1 = sim::oneYear(), y2 = sim::fromYearsI(2), y3 = sim::fromYearsI(3), y4 = sim::fromYearsI(4), y5 = sim::fromYearsI(5);
+
         assert((int)mosqEmergeRate.size() == y1);
 
         for (int t = 0; t < y1; t++)
@@ -123,6 +123,11 @@ public:
 
     virtual double getEmergenceRate(const SimTime &d0, const std::vector<double> &mosqEmergeRate, double nOvipositing)
     {
+        // // Get emergence at start of step:
+        // SimTime dYear1 = mod_nn(d0, sim::oneYear());
+        // // Simple model: fixed emergence scaled by larviciding
+        // return mosqEmergeRate[dYear1];
+
         // Simple Mosquito Population Dynamics model: emergence depends on the
         // adult population, resources available, and larviciding.
         // See: A Simple Periodically-Forced Difference Equation Model for
@@ -133,7 +138,16 @@ public:
         double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear())] * yt);
         nOvipositingDelayed[util::mod_nn(d1, developmentDuration)] = nOvipositing;
         quinquennialOvipositing[util::mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
-        return emergence;
+        
+        if (emergence < 0)
+        {
+            std::ostringstream oss;
+            oss << "Error: SimpleMPD model: negative emergence at t=" << d0 << ": " << emergence << ". ";
+            oss << "Check the seasonality and make sure it does not go too low. For monthly EIR values, the lowest point should not be below 1% of the peak EIR.";
+            throw util::base_exception(oss.str());
+        }
+        
+        return std::max(emergence, 0.0);
     }
 
     ///@brief Interventions and reporting
