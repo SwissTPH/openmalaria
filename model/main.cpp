@@ -119,7 +119,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
 
         sim::end_update();
 
-        if (!util::CommandLine::option(util::CommandLine::QUIET))
+        if (util::CommandLine::option(util::CommandLine::PROGRESS))
             print_progress(lastPercent, estEndTime);
         print_errno();
     }
