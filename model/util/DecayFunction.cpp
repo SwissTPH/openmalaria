@@ -106,7 +106,6 @@ public:
     {}
     
     double compute(double effectiveAge) const{
-        cout << "Linear " << effectiveAge << " " << invL << " " << hetFactor <<endl;
         if( effectiveAge * invL * hetFactor < 1.0 ){
             return 1.0 - effectiveAge * invL * hetFactor;
         }else{
