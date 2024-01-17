@@ -241,12 +241,28 @@ function plot(){
   var timeseries = textarea.value.split("\n");
   var size = timeseries.length;
 
+  var maxEIR = -1;
+
   for(var i=0; i<size; i++) {
     var v = parseFloat(timeseries[i]);
+    if (v > maxEIR)
+      maxEIR = v;
+  }
+
+  minimum = maxEIR / 100.0;
+
+  for(var i=0; i<size; i++) {
+    var v = parseFloat(timeseries[i]);
+
+    if (v < minimum)
+      v = v + minimum;
+
+    console.log(v);
+
     if(v != 0)
       v = Math.log(v);
 
-     timeseries[i] = v;
+    timeseries[i] = v;
   }
 
   const data = new ComplexArray(size).map((value, i, n) => {
