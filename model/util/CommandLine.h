@@ -39,6 +39,8 @@ namespace OM { namespace util {
 			PRINT_MODEL_OPTIONS = 0,
 	    /// Verbose output
 			VERBOSE,
+		/// Show progress
+			PROGRESS,
 	    /// Forces checkpointing just before starting the main phase.
 			CHECKPOINT,
 	    /// Exit after writing checkpoint
