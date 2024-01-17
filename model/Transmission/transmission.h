@@ -157,17 +157,18 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
             const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
             assert(seq.size() == N_m); // enforced by schema
             vector<double> months(N_m);
-            double sum = 0.0;
+            double maxEIR = months[0];
             for (size_t i = 0; i < N_m; ++i)
             {
                 months[i] = seq[i];
-                sum += months[i];
+                if(months[i] > maxEIR)
+                    maxEIR = months[i];
             }
             // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
-            double min = sum / 1000.0;
+            double min = maxEIR / 100.0;
             for (size_t i = 0; i < N_m; ++i)
             {
-                if (months[i] < min) months[i] = min;
+                if (months[i] < min) months[i] += min;
             }
 
             FSCoeffic.assign(5, 0.0);
