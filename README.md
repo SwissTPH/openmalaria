@@ -11,7 +11,9 @@ For further documentation, take a look at our
 [wiki](https://github.com/SwissTPH/openmalaria/wiki).
 
 Also find our code on zenodo, with DOI-references:
-[![DOI](https://zenodo.org/badge/15670/SwissTPH/openmalaria.svg)](https://zenodo.org/badge/latestdoi/15670/SwissTPH/openmalaria)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10534022.svg)](https://doi.org/10.5281/zenodo.10534022)
+
+
 
 Schema documentation for the XML input files can be found
 [on the wiki](https://github.com/SwissTPH/openmalaria/wiki/schema-Index)
