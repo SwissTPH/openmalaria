@@ -29,8 +29,8 @@
 
 namespace OM { namespace WithinHost {
     
-CommonInfection* createDummyInfection (LocalRng& rng, uint32_t protID) {
-    return new DummyInfection (rng, protID);
+CommonInfection* createDummyInfection (LocalRng& rng, uint32_t protID, int origin) {
+    return new DummyInfection (rng, protID, origin);
 }
 CommonInfection* checkpointedDummyInfection (istream& stream) {
     return new DummyInfection (stream);
@@ -41,8 +41,8 @@ void DummyInfection::init () {
     CommonWithinHost::checkpointedInfection = &checkpointedDummyInfection;
 }
 
-DummyInfection::DummyInfection (LocalRng& rng, uint32_t protID) :
-    CommonInfection(protID)
+DummyInfection::DummyInfection (LocalRng& rng, uint32_t protID, int origin) :
+    CommonInfection(protID, origin)
 {
     m_density=16;	// increased by DH to avoid zeros in initialKappa
 }

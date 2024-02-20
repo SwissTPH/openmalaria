@@ -48,7 +48,7 @@ public:
     virtual double probTransmissionToMosquito( double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     virtual bool summarize(Host::Human& human)const;
-    virtual void importInfection(LocalRng& rng);
+    virtual void importInfection(LocalRng& rng, int origin);
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual void optionalPqTreatment( Host::Human& human );
     virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );

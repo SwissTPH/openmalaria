@@ -36,7 +36,7 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 
-CommonInfection* (* CommonWithinHost::createInfection) (LocalRng& rng, uint32_t protID);
+CommonInfection* (* CommonWithinHost::createInfection) (LocalRng& rng, uint32_t protID, int origin);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
@@ -121,7 +121,7 @@ void CommonWithinHost::clearImmunity() {
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
 }
-void CommonWithinHost::importInfection(LocalRng& rng){
+void CommonWithinHost::importInfection(LocalRng& rng, int origin){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
@@ -129,7 +129,7 @@ void CommonWithinHost::importInfection(LocalRng& rng){
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
         uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
-        infections.push_back(createInfection(rng, genotype));
+        infections.push_back(createInfection(rng, genotype, origin));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -159,12 +159,12 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
         {
             double vaccineFactor = human.vaccine.getFactor( interventions::Vaccine::PEV, genotype );
             if(vaccineFactor == 1.0 || human.rng.bernoulli(vaccineFactor))
-                infections.push_back(createInfection (rng, genotype));
+                infections.push_back(createInfection (rng, genotype, InfectionOrigin::Indigenous));
             else
                 nNewInfsDiscarded++;
         }
         else if (opt_vaccine_genotype == false)
-            infections.push_back(createInfection (rng, genotype));
+            infections.push_back(createInfection (rng, genotype, InfectionOrigin::Indigenous));
     }
 
     // Update nNewInfs, this is the number that will be reported in Human

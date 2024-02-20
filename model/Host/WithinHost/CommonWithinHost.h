@@ -46,7 +46,7 @@ public:
     virtual ~CommonWithinHost();
     
     
-    virtual void importInfection(LocalRng& rng);
+    virtual void importInfection(LocalRng& rng, int origin);
     
     virtual void treatPkPd(size_t schedule, size_t dosage, double age, double delay_d);
     virtual void clearImmunity();
@@ -63,7 +63,7 @@ public:
      * The first variant is for creating a new infection, the second for loading
      * one from a checkpoint. */
     //@{
-    static CommonInfection* (* createInfection) (LocalRng& rng, uint32_t protID);
+    static CommonInfection* (* createInfection) (LocalRng& rng, uint32_t protID, int origin);
     static CommonInfection* (* checkpointedInfection) (istream& stream);
     //@}
     

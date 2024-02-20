@@ -58,7 +58,7 @@ public:
      * @param host      The host creating this. Not really needed, except to
      * prevent VivaxBrood being default-constructed by its container.
      */
-    VivaxBrood( LocalRng& rng, WHVivax *host );
+    VivaxBrood( LocalRng& rng, int origin, WHVivax *host );
     ~VivaxBrood();
     /** Save a checkpoint. */
     void checkpoint( ostream& stream );
@@ -119,6 +119,9 @@ private:
 
     // Whether a relapse event has been triggered by this brood
     bool hadRelapse;
+
+    // Infection origin
+    int origin;
 };
 
 /**
@@ -152,7 +155,7 @@ public:
     
     virtual bool summarize(Host::Human& human) const;
     
-    virtual void importInfection(LocalRng& rng);
+    virtual void importInfection(LocalRng& rng, int origin);
     
     virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
             double ageInYears);

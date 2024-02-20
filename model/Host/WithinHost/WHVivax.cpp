@@ -23,6 +23,7 @@
 #include "Host/WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "Host/WithinHost/Treatments.h"
 #include "Host/WithinHost/Genotypes.h"
+#include "Host/WithinHost/Infection/Infection.h"
 #include "Host/Human.h"
 #include "mon/reporting.h"
 #include "util/random.h"
@@ -153,11 +154,12 @@ SimTime sampleReleaseDelay(LocalRng& rng){
 
 // ———  per-brood code  ———
 
-VivaxBrood::VivaxBrood( LocalRng& rng, WHVivax *host ) :
+VivaxBrood::VivaxBrood( LocalRng& rng, int origin, WHVivax *host ) :
         primaryHasStarted( false ),
         relapseHasStarted( false ),
         hadEvent( false ),
-        hadRelapse( false )
+        hadRelapse( false ),
+        origin(origin)
 {
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
@@ -202,6 +204,7 @@ void VivaxBrood::checkpoint( ostream& stream ){
     relapseHasStarted & stream;
     hadEvent & stream;
     hadRelapse & stream;
+    origin & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
@@ -210,6 +213,7 @@ VivaxBrood::VivaxBrood( istream& stream ){
     relapseHasStarted & stream;
     hadEvent & stream;
     hadRelapse & stream;
+    origin & stream;
 }
 
 
@@ -344,9 +348,9 @@ bool WHVivax::summarize(Host::Human& human) const{
     return patentHost;
 }
 
-void WHVivax::importInfection(LocalRng& rng){
+void WHVivax::importInfection(LocalRng& rng, int origin){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.push_back( VivaxBrood( rng, this ) );
+    infections.push_back( VivaxBrood( rng, origin, this ) );
 }
 
 void WHVivax::update(Host::Human &human, LocalRng& rng,
@@ -357,7 +361,7 @@ void WHVivax::update(Host::Human &human, LocalRng& rng,
     
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
-        infections.push_back( VivaxBrood( rng, this ) );
+        infections.push_back( VivaxBrood( rng, InfectionOrigin::Indigenous, this ) );
     
     // update infections
     // NOTE: currently no BSV model

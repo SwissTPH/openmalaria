@@ -52,7 +52,7 @@ public:
     //@}
     
     // Initialise. Samples several parameters.
-    MolineauxInfection(LocalRng& rng, uint32_t protID);
+    MolineauxInfection(LocalRng& rng, uint32_t protID, int origin);
     // Load from a checkpoint:
     MolineauxInfection (istream& stream);
     virtual ~MolineauxInfection () {};

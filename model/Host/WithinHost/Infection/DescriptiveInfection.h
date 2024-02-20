@@ -67,7 +67,7 @@ public:
     ///@name Constructors
     //@{
     /// Default constructor
-    DescriptiveInfection (LocalRng& rng, uint32_t genotype);
+    DescriptiveInfection (LocalRng& rng, uint32_t genotype, int origin);
     /// Checkpoint loading constructor
     DescriptiveInfection (istream& stream);
     //@}

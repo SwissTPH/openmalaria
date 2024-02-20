@@ -82,7 +82,7 @@ void DescriptiveWithinHostModel::clearImmunity() {
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
 }
-void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
+void DescriptiveWithinHostModel::importInfection(LocalRng& rng, int origin){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
@@ -90,7 +90,7 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
         uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
-        infections.push_back(DescriptiveInfection(rng, genotype));
+        infections.push_back(DescriptiveInfection(rng, genotype, origin));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -118,10 +118,10 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         {
             double vaccineFactor = human.vaccine.getFactor( interventions::Vaccine::PEV, genotype );
             if(vaccineFactor == 1.0 || human.rng.bernoulli(vaccineFactor))
-                infections.push_back(DescriptiveInfection (rng, genotype));
+                infections.push_back(DescriptiveInfection (rng, genotype, InfectionOrigin::Indigenous));
         }
         else if (opt_vaccine_genotype == false)
-            infections.push_back(DescriptiveInfection (rng, genotype));
+            infections.push_back(DescriptiveInfection (rng, genotype, InfectionOrigin::Indigenous));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 

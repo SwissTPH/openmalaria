@@ -45,7 +45,7 @@ bool WHMock::summarize(Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::importInfection(LocalRng& rng){
+void WHMock::importInfection(LocalRng& rng, int origin){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

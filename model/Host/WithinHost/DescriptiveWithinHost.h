@@ -44,7 +44,7 @@ public:
     DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor );
     virtual ~DescriptiveWithinHostModel();
     
-    virtual void importInfection(LocalRng& rng);
+    virtual void importInfection(LocalRng& rng, int origin);
     /// load an infection from a checkpoint
     virtual void loadInfection(istream& stream);
     virtual void clearImmunity();
