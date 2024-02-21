@@ -194,7 +194,7 @@ double WHFalciparum::probTransmissionToMosquito( double *sumX ) const{
     }
     // Weighted sum:
     const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
-    if( sumX != 0 ) *sumX = 1.0 / x;    // copy to sumX, if set
+    if( sumX != 0 ) *sumX = x;    // copy to sumX, if set
     if( x < 0.001 ) return 0.0; // cut off for uninfectious humans
     
     // Get a zval, convert to equivalent Normal sample:
@@ -220,15 +220,15 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    const int i10 = sim::inSteps(sim::ts0() - sim::fromDays(10) + sim::oneTS()) + y_lag_len;
-    const int i5d = sim::inSteps(sim::fromDays(5));
-    const int i10d = 2 * i5d;
+    size_t d10 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(10)), y_lag_len);
+    size_t d15 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(15)), y_lag_len);
+    size_t d20 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(20)), y_lag_len);
     const double x =
-        PTM_beta1 * m_y_lag[mod_nn(i10, y_lag_len) * Genotypes::N() + genotype] +
-        PTM_beta2 * m_y_lag[mod_nn(i10 - i5d, y_lag_len) * Genotypes::N() + genotype] +
-        PTM_beta3 * m_y_lag[mod_nn(i10 - i10d, y_lag_len) * Genotypes::N() + genotype];
+        PTM_beta1 * m_y_lag[d10 * Genotypes::N() + genotype] +
+        PTM_beta2 * m_y_lag[d15 * Genotypes::N() + genotype] +
+        PTM_beta3 * m_y_lag[d20 * Genotypes::N() + genotype];
     
-    return pTrans * x * sumX;
+    return pTrans * x / sumX;
 }
 
 bool WHFalciparum::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
