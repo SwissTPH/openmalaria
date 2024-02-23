@@ -182,9 +182,19 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::moduloSteps(sim::ts1(), y_lag_len);
-    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag[y_lag_i * Genotypes::N() + g] = 0.0;
-    for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
-        m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
+
+    for( size_t g = 0; g < Genotypes::N(); ++g )
+    {
+        m_y_lag_i[y_lag_i * Genotypes::N() + g] = 0.0;
+        m_y_lag_l[y_lag_i * Genotypes::N() + g] = 0.0;
+    }
+
+    for( auto inf = infections.begin(); inf != infections.end(); ++inf )
+    {
+        if(inf->origin() == InfectionOrigin::Imported)
+            m_y_lag_i[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
+        else
+            m_y_lag_l[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
     }
 
     // This is a bug, we keep it this way to be consistent with old simulations

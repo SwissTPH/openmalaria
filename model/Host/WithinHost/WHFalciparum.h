@@ -130,7 +130,7 @@ protected:
     *
     * m_y_lag[sim::ts0().moduloSteps(y_lag_len)] corresponds to the density
     * from the previous time step (once updateInfection has been called). */
-    std::vector<double> m_y_lag;
+    std::vector<double> m_y_lag_i, m_y_lag_l;
     
     /// The PathogenesisModel introduces illness dependant on parasite density
     unique_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;

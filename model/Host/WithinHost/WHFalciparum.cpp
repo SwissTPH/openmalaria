@@ -134,7 +134,8 @@ WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
     _innateImmSurvFact = exp(-rng.gauss(0.0, sigma_i));
     
-    m_y_lag.resize(y_lag_len * Genotypes::N());
+    m_y_lag_i.resize(y_lag_len * Genotypes::N());
+    m_y_lag_l.resize(y_lag_len * Genotypes::N());
 }
 
 WHFalciparum::~WHFalciparum()
@@ -188,9 +189,9 @@ double WHFalciparum::probTransmissionToMosquito( double *sumX ) const{
     // Sum lagged densities across genotypes:
     double y10 = 0.0, y15 = 0.0, y20 = 0.0;
     for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
-        y10 += m_y_lag[d10 * Genotypes::N() + genotype];
-        y15 += m_y_lag[d15 * Genotypes::N() + genotype];
-        y20 += m_y_lag[d20 * Genotypes::N() + genotype];
+        y10 += (m_y_lag_i[d10 * Genotypes::N() + genotype] + m_y_lag_l[d10 * Genotypes::N() + genotype]);
+        y15 += (m_y_lag_i[d15 * Genotypes::N() + genotype] + m_y_lag_l[d15 * Genotypes::N() + genotype]);
+        y20 += (m_y_lag_i[d20 * Genotypes::N() + genotype] + m_y_lag_l[d20 * Genotypes::N() + genotype]);
     }
     // Weighted sum:
     const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
@@ -224,9 +225,9 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     size_t d15 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(15)), y_lag_len);
     size_t d20 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(20)), y_lag_len);
     const double x =
-        PTM_beta1 * m_y_lag[d10 * Genotypes::N() + genotype] +
-        PTM_beta2 * m_y_lag[d15 * Genotypes::N() + genotype] +
-        PTM_beta3 * m_y_lag[d20 * Genotypes::N() + genotype];
+        PTM_beta1 * (m_y_lag_i[d10 * Genotypes::N() + genotype] + m_y_lag_l[d10 * Genotypes::N() + genotype]) +
+        PTM_beta2 * (m_y_lag_i[d15 * Genotypes::N() + genotype] + m_y_lag_l[d15 * Genotypes::N() + genotype]) +
+        PTM_beta3 * (m_y_lag_i[d20 * Genotypes::N() + genotype] + m_y_lag_l[d20 * Genotypes::N() + genotype]);
     
     return pTrans * x / sumX;
 }
@@ -309,7 +310,8 @@ void WHFalciparum::checkpoint (istream& stream) {
     totalDensity & stream;
     hrp2Density & stream;
     timeStepMaxDensity & stream;
-    m_y_lag & stream;
+    m_y_lag_i & stream;
+    m_y_lag_l & stream;
     (*pathogenesisModel) & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;
@@ -323,7 +325,8 @@ void WHFalciparum::checkpoint (ostream& stream) {
     totalDensity & stream;
     hrp2Density & stream;
     timeStepMaxDensity & stream;
-    m_y_lag & stream;
+    m_y_lag_i & stream;
+    m_y_lag_l & stream;
     (*pathogenesisModel) & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;

@@ -107,7 +107,7 @@ public:
     uint32_t genotype()const{ return m_genotype; }
 
     /** Get the infection's genotype. */
-    int origin()const{ return m_origin; }
+    int origin() const{ return m_origin; }
     
     
     /// Resets immunity properties specific to the infection (should only be
