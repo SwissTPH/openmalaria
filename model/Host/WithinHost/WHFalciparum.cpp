@@ -210,10 +210,11 @@ double WHFalciparum::probTransmissionToMosquito( double *sumX ) const{
     util::streamValidate( pTransmit );
     return pTransmit;
 }
-double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
+
+double WHFalciparum::probTransGenotype(double pTrans, double sumX, size_t genotype)
 {
-    assert( pTrans > 0.0 );
-    assert( (std::isfinite)(sumX) );
+    if(pTrans <= 0.0)
+        return 0.0;
     
     // This is an extension of the original model.
     //NOTE: it is an approximation since it ignores the possibility of

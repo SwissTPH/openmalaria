@@ -107,8 +107,8 @@ public:
      * @param tbvFactor Probability that transmission is not blocked by a
      *  "transmission blocking vaccine".
      * @param sumX Optional out parameter for usage with
-     *  pTransGenotype(). Pointer may be zero if not required. May be ignored
-     *  if the local implementation of pTransGenotype does not require it.
+     *  probTransGenotype(). Pointer may be zero if not required. May be ignored
+     *  if the local implementation of probTransGenotype does not require it.
      * @returns the probability of this human infecting a feeding mosquito.
      * 
      * Calculates the value during the call, which is expensive (cache externally
@@ -119,10 +119,7 @@ public:
      * genotype to a mosquito, given the two outputs of
      * probTransmissionToMosquito(). Only available for WHFalciparum and
      * should only be called when num genotypes > 1. */
-    inline double probTransGenotype( double pTrans, double sumX, size_t genotype ){
-        if( pTrans <= 0.0 ) return 0.0;
-        else return pTransGenotype( pTrans, sumX, genotype );
-    }
+    virtual double probTransGenotype( double pTrans, double sumX, size_t genotype ) =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(Host::Human& human) const =0;
@@ -209,11 +206,7 @@ public:
      * Exact constraint is: _MOI <= MAX_INFECTIONS. */
     static const int MAX_INFECTIONS = 21;
 
-protected:
-    // See probTransGenotype; this function should only be called when pTrans > 0
-    virtual double pTransGenotype( double pTrans, double sumX,
-                                   size_t genotype ) =0;
-    
+protected:    
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 

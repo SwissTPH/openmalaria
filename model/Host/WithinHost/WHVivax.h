@@ -151,7 +151,7 @@ public:
     //@}
     
     virtual double probTransmissionToMosquito( double *sumX )const;
-    virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
+    virtual double probTransGenotype( double pTrans, double sumX, size_t genotype );
     
     virtual bool summarize(Host::Human& human) const;
     

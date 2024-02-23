@@ -327,7 +327,7 @@ double WHVivax::probTransmissionToMosquito( double *sumX )const{
     }
     return 0;   // no gametocytes
 }
-double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
+double WHVivax::probTransGenotype(double pTrans, double sumX, size_t genotype){
     throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
