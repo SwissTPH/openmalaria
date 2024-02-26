@@ -457,18 +457,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
         WithinHost::WHInterface &whm = *human.withinHostModel;
 
         probTransmission.assign(nGenotypes, 0.0);
-        // double sumX = numeric_limits<double>::quiet_NaN();
-        // const double pTrans = whm.probTransmissionToMosquito(probTransmission);
         whm.probTransmissionToMosquito(probTransmission);
-        // if (nGenotypes == 1)
-        //     probTransmission[0] = pTrans;
-        // else
-        //     for (size_t g = 0; g < nGenotypes; ++g)
-        //     {
-        //         const double k = whm.probTransGenotype(pTrans, sumX, g);
-        //         assert((std::isfinite)(k));
-        //         probTransmission[g] = k;
-        //     }
 
         for (size_t s = 0; s < speciesIndex.size(); ++s)
         {
