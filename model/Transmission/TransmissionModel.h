@@ -315,14 +315,17 @@ public:
             _sumAnnualKappa = 0.0;
         }
 
+        return laggedKappa[lKMod]; // kappa now
+    }
+
+    virtual void surveyEIR()
+    {
         tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
         tsAdultEntoInocs = 0.0;
         tsNumAdults = 0;
 
-        surveyInputEIR += initialisationEIR[tmod];
+        surveyInputEIR += initialisationEIR[sim::moduloYearSteps(sim::ts0())];
         surveySimulatedEIR += tsAdultEIR;
-
-        return laggedKappa[lKMod]; // kappa now
     }
 
 protected:
