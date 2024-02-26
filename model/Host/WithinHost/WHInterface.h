@@ -108,8 +108,11 @@ public:
      * 
      * Calculates the probability of transmitting an infection of a given
      * genotype to a mosquito and store the result in probTransGenotype[g]
-     * for a given genotype g */
-    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype)const = 0;
+     * for a given genotype g 
+     * 
+     * Calulates the probability for imported infections _i and
+     * for local infections _l */
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const = 0;
 
     /// @returns true if host has patent parasites
     virtual bool summarize(Host::Human& human) const =0;

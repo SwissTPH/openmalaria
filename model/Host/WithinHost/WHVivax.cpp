@@ -315,7 +315,7 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito(vector<double> &probTransGenotype)const{
+double WHVivax::probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const{
     assert( WithinHost::Genotypes::N() == 1 );
     for(auto inf = infections.begin(); inf != infections.end(); ++inf)
     {

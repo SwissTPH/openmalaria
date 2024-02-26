@@ -446,7 +446,7 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
 void VectorModel::vectorUpdate(const vector<Host::Human> &population)
 {
     const size_t nGenotypes = WithinHost::Genotypes::N();
-    std::vector<double> probTransmission;
+    std::vector<double> probTransmission_i, probTransmission_l;
     std::vector<double> sum_avail(speciesIndex.size());
     std::vector<double> sigma_df(speciesIndex.size());
     std::vector<double> sigma_dff(speciesIndex.size());
@@ -456,8 +456,9 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
         const OM::Transmission::PerHost &host = human.perHostTransmission;
         WithinHost::WHInterface &whm = *human.withinHostModel;
 
-        probTransmission.assign(nGenotypes, 0.0);
-        whm.probTransmissionToMosquito(probTransmission);
+        probTransmission_i.assign(nGenotypes, 0.0);
+        probTransmission_l.assign(nGenotypes, 0.0);
+        whm.probTransmissionToMosquito(probTransmission_i, probTransmission_l);
 
         for (size_t s = 0; s < speciesIndex.size(); ++s)
         {
@@ -471,7 +472,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
             for (size_t g = 0; g < nGenotypes; ++g)
             {
                 const double tbvFac = human.vaccine.getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
-                sigma_dif[s][g] += df * probTransmission[g] * tbvFac;
+                sigma_dif[s][g] += df * (probTransmission_i[g] + probTransmission_l[g]) * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);
         }

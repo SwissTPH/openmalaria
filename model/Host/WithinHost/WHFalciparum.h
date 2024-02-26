@@ -57,7 +57,7 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype)const;
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const;
 
     // No PQ treatment for falciparum in current models:
     virtual void optionalPqTreatment( Host::Human& human ){}

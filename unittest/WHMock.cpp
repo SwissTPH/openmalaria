@@ -34,7 +34,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( vector<double>& ) const{
+double WHMock::probTransmissionToMosquito(vector<double> &, vector<double> &) const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
