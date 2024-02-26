@@ -369,7 +369,7 @@ SimTime VectorModel::initIterate()
     }
 }
 
-void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
+void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l) const
 {
 
     auto ag = human.monitoringAgeGroup.i();
@@ -378,7 +378,8 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
     host.update(human);
     if(simulationMode == transientEIRknown)
     {
-        EIR.assign(1, 0.0);
+        EIR_i.assign(1, 0.0);
+        EIR_l.assign(1, 0.0);
 
         assert(simulationMode == forcedEIR);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
@@ -390,7 +391,7 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
             mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
             // cout << host.availBite(i) << endl;
             // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
-            EIR[0] += eir;
+            EIR_l[0] += eir;
         }
     }
     else if (simulationMode == forcedEIR)
@@ -401,7 +402,8 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
         // mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
         // EIR.assign(1, eir);
 
-        EIR.assign(1, 0.0);
+        EIR_i.assign(1, 0.0);
+        EIR_l.assign(1, 0.0);
 
         assert(simulationMode == forcedEIR);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
@@ -413,30 +415,36 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
             mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
             // cout << host.availBite(i) << endl;
             // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
-            EIR[0] += eir;
+            EIR_l[0] += eir;
         }
     }
     else
     {
         assert(simulationMode == dynamicEIR);
-        EIR.assign(WithinHost::Genotypes::N(), 0.0);
+        EIR_i.assign(WithinHost::Genotypes::N(), 0.0);
+        EIR_l.assign(WithinHost::Genotypes::N(), 0.0);
         const double ageFactor = host.relativeAvailabilityAge(ageYears);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
         {
-            const vector<double> &partialEIR = species[i]->getPartialEIR();
+            const vector<double> &partialEIR_i = species[i]->getPartialEIRImported();
+            const vector<double> &partialEIR_l = species[i]->getPartialEIRLocal();
 
-            assert(EIR.size() == partialEIR.size());
-            if ((std::isnan)(vectors::sum(partialEIR))) { cerr << "partialEIR is not a number; " << i << endl; }
+            assert(EIR_i.size() == partialEIR_i.size());
+            assert(EIR_l.size() == partialEIR_l.size());
+            
+            // if ((std::isnan)(vectors::sum(partialEIR_i))) { cerr << "partialEIR is not a number; " << i << endl; }
 
             /* Calculates EIR per individual (hence N_i == 1).
              *
              * See comment in AnophelesModel::advancePeriod for method. */
             double entoFactor = ageFactor * host.availBite(i);
-            for (size_t g = 0; g < EIR.size(); ++g)
+            for (size_t g = 0; g < EIR_i.size(); ++g)
             {
-                auto eir = partialEIR[g] * entoFactor;
-                mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, g, eir);
-                EIR[g] += eir;
+                double eir_i = partialEIR_i[g] * entoFactor;
+                double eir_l = partialEIR_l[g] * entoFactor;
+                mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, g, eir_i + eir_l);
+                EIR_i[g] += eir_i;
+                EIR_l[g] += eir_l;
             }
         }
     }

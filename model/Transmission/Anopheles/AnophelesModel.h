@@ -290,7 +290,8 @@ public:
     //@}
 
     /// Intermediatary from vector model equations used to calculate EIR
-    inline const vector<double>& getPartialEIR() const{ return partialEIR; }
+    inline const vector<double>& getPartialEIRImported() const{ return partialEIR_i; }
+    inline const vector<double>& getPartialEIRLocal() const{ return partialEIR_l; }
     //@}
 
 
@@ -336,7 +337,7 @@ public:
     void update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
                    const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff,
                    bool isDynamic,
-                   vector<double>& partialEIR, double EIR_factor);
+                   vector<double>& partialEIR_i, vector<double>& partialEIR_l, double EIR_factor);
     
     /// Intermediatary from vector model equations used to calculate EIR in intervention mode
     inline double getInterventionEIR() const{ return interventionEIR[sim::inSteps(sim::intervTime())] / initAvail; }
@@ -393,7 +394,8 @@ public:
         // transmission & stream;
         seekingDeathRateIntervs & stream;
         probDeathOvipositingIntervs & stream;
-        partialEIR & stream;
+        partialEIR_i & stream;
+        partialEIR_l & stream;
         EIRRotateAngle & stream;
         FSCoeffic & stream;
         forcedS_v & stream;
@@ -456,7 +458,7 @@ public:
     /** Per time-step init EIR.
     *
     * Doesn't need to be checkpointed (is calculated during initialization). */
-    std::vector<double> partialEIR;
+    std::vector<double> partialEIR_i, partialEIR_l;
 
     /** Per time-step intervention EIR
     *

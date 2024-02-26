@@ -227,16 +227,15 @@ public:
      *    the non-vector model), the length is set to one.
      * @returns the sum of EIR across genotypes
      */
-    double getEIR(Host::Human &human, SimTime age, double ageYears, vector<double> &EIR)
+    double getEIR(Host::Human &human, SimTime age, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l)
     {
         /* For the NonVector model, the EIR should just be multiplied by the
          * availability. For the Vector model, the availability is also required
          * for internal calculations, but again the EIR should be multiplied by the
          * availability. */
-        calculateEIR(human, ageYears, EIR);
-        util::streamValidate(EIR);
+        calculateEIR(human, ageYears, EIR_i, EIR_l);
 
-        double allEIR = util::vectors::sum(EIR);
+        double allEIR = util::vectors::sum(EIR_i) + util::vectors::sum(EIR_l);
         if (age >= adultAge)
         {
             tsAdultEntoInocs += allEIR;
@@ -336,8 +335,9 @@ protected:
      * @param ageGroupData Age group of this host for availablility data.
      * @param EIR Out-vector. Set to the age- and heterogeneity-specific EIR an
      *    individual human is exposed to, per parasite genotype, in units of
-     *    inoculations per day. Length set by callee. */
-    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const = 0;
+     *    inoculations per day. Length set by callee. 
+     *    _i for imported infections and _l for local infections */
+    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l) const = 0;
 
     virtual void checkpoint(istream &stream)
     {

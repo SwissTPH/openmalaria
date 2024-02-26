@@ -214,8 +214,6 @@ void Human::checkpoint(ostream &stream)
 }
 
 // -----  Non-static functions: per-time-step update  -----
-vector<double> EIR_per_genotype;        // cache (not thread safe)
-
 void summarize(Human &human, bool surveyOnlyNewEp) {
     if( surveyOnlyNewEp && human.clinicalModel->isExistingCase() ){
         // This modifies the denominator to treat the health-system-memory
@@ -257,10 +255,18 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     double age1 = sim::inYears(human.age(sim::ts1()));
 
     // age1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-    double EIR = transmission.getEIR( human, age0, age1, EIR_per_genotype );
+    vector<double> EIR_per_genotype_i, EIR_per_genotype_l;
+    transmission.getEIR(human, age0, age1, EIR_per_genotype_i, EIR_per_genotype_l);
 
-    int nNewInfs = human.infIncidence->numNewInfections( human, EIR );
+    double EIR_i = util::vectors::sum(EIR_per_genotype_i);
+    double EIR_l = util::vectors::sum(EIR_per_genotype_l);
+
+    int nNewInfs = human.infIncidence->numNewInfections( human, EIR_i+EIR_l);
     
+    vector<double> EIR_per_genotype(WithinHost::Genotypes::N());
+    for(size_t i=0; i<WithinHost::Genotypes::N(); i++)
+        EIR_per_genotype[i] = EIR_per_genotype_i[i] + EIR_per_genotype_l[i];
+
     // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
     human.withinHostModel->update(human, human.rng, nNewInfs, EIR_per_genotype, age1);
     human.infIncidence->reportNumNewInfections(human, nNewInfs);

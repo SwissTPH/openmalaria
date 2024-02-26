@@ -669,7 +669,8 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     vectors::scale(sigma_dif_l, alphaE);
 
     // Summed per day:
-    partialEIR.assign(WithinHost::Genotypes::N(), 0.0);
+    partialEIR_i.assign(WithinHost::Genotypes::N(), 0.0);
+    partialEIR_l.assign(WithinHost::Genotypes::N(), 0.0);
 
     resetTSStats();
 
@@ -683,12 +684,13 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     const SimTime nextTS = sim::ts0() + sim::oneTS();
     for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 = d0 + sim::oneDay())
     {
-        update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif_i, sigma_dif_l, tsP_dff, isDynamic, partialEIR, availDivisor);
+        update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif_i, sigma_dif_l, tsP_dff, isDynamic, partialEIR_i, partialEIR_l, availDivisor);
     }
 }
 
 void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
-    const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff, bool isDynamic, vector<double> &partialEIR, double EIR_factor)
+    const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff, bool isDynamic, 
+    vector<double> &partialEIR_i, vector<double> &partialEIR_l, double EIR_factor)
 {
     double interventionSurvival = 1.0;
     for (size_t i = 0; i < emergenceReduction.size(); ++i)
@@ -799,11 +801,10 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
                 S_v_i[t1 * n + g] = 0.0; // Removing this will break unit tests
             }
         }
-
-        double S_v_g = S_v_i[t1 * n + g] + S_v_l[t1 * n + g];
-
-        partialEIR[g] += S_v_g * EIR_factor;
-        total_S_v += S_v_g;
+        
+        partialEIR_i[g] += S_v_i[t1 * n + g] * EIR_factor;
+        partialEIR_l[g] += S_v_l[t1 * n + g] * EIR_factor;
+        total_S_v += S_v_i[t1 * n + g] + S_v_l[t1 * n + g];
         // END S_v
     }
 
