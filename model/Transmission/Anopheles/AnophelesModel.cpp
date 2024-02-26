@@ -356,11 +356,14 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
     vectors::scale(forcedS_v, initSvFromEIR);
 
     N_v.resize(N_v_length, numeric_limits<double>::quiet_NaN());
-    O_v.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN());
-    S_v.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN()); //assign(N_v_length, Genotypes::N(), numeric_limits<double>::quiet_NaN());
+    O_v_i.resize(N_v_length * Genotypes::N(), 0.0);
+    O_v_l.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN());
+    S_v_i.resize(N_v_length * Genotypes::N(), 0.0);
+    S_v_l.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN()); 
     P_A.resize(N_v_length, numeric_limits<double>::quiet_NaN());
     P_df.resize(N_v_length, numeric_limits<double>::quiet_NaN());
-    P_dif.resize(N_v_length * Genotypes::N(), 0.0); //assign(N_v_length, Genotypes::N(), 0.0); // humans start off with no infectiousness.. so just wait
+    P_dif_i.resize(N_v_length * Genotypes::N(), 0.0); 
+    P_dif_l.resize(N_v_length * Genotypes::N(), 0.0);
     P_dff.resize(N_v_length, numeric_limits<double>::quiet_NaN());
     P_Amu.resize(N_v_length, numeric_limits<double>::quiet_NaN());
     P_A1.resize(N_v_length, numeric_limits<double>::quiet_NaN());
@@ -379,8 +382,8 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
         N_v[t] = forcedS_v[t] * initNvFromSv;
         for (size_t genotype = 0; genotype < Genotypes::N(); ++genotype)
         {
-            S_v[t * Genotypes::N() + genotype] = forcedS_v[t] * Genotypes::initialFreq(genotype);
-            O_v[t * Genotypes::N() + genotype] = S_v[t * Genotypes::N() + genotype] * initOvFromSv;
+            S_v_l[t * Genotypes::N() + genotype] = forcedS_v[t] * Genotypes::initialFreq(genotype);
+            O_v_l[t * Genotypes::N() + genotype] = S_v_l[t * Genotypes::N() + genotype] * initOvFromSv;
         }
     }
 
@@ -709,8 +712,14 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
     P_Ah[t1] = tsP_Ah;
     P_df[t1] = tsP_df;
     P_dff[t1] = tsP_dff;
-    for (size_t i = 0; i < Genotypes::N(); ++i)
-        P_dif[t1 * Genotypes::N() + i] = (tsP_dif_i[i] + tsP_dif_l[i]); //.at(t1, i) = tsP_dif[i];
+
+    const size_t n = Genotypes::N();
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        P_dif_i[t1 * n + i] = tsP_dif_i[i];
+        P_dif_l[t1 * n + i] = tsP_dif_l[i];
+    }
 
     // BEGIN cache calculation: fArray, ftauArray, uninfected_v
     // Set up array with n in 1..θ_s−τ for f(d1Mod-n) (NDEMD eq. 1.6)
@@ -747,54 +756,54 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
     {
         int t = util::mod_nn(d1Mod - d, N_v_length);
         double sum = N_v[t];
-        for (size_t i = 0; i < Genotypes::N(); ++i)
-            sum -= O_v[t * Genotypes::N() + i]; // .at(t, i);
+        for (size_t i = 0; i < n; ++i)
+            sum -= (O_v_i[t * n + i] + O_v_l[t * n + i]); // .at(t, i);
         uninfected_v[d] = sum;
     }
     // END cache calculation: fArray, ftauArray, uninfected_v
 
     double total_S_v = 0.0;
-    for (size_t genotype = 0; genotype < Genotypes::N(); ++genotype)
+    for (size_t g = 0; g < n; ++g)
     {
         // Num infected seeking mosquitoes is the new ones (those who were
         // uninfected tau days ago, started a feeding cycle then, survived and
         // got infected) + those who didn't find a host yesterday + those who
         // found a host tau days ago and survived a feeding cycle.
-        // O_v.at(t1, genotype) = P_dif.at(ttau, genotype) * uninfected_v[mosq.restDuration] + P_A[t0] * O_v.at(t0, genotype) +
-        //                        P_df[ttau] * O_v.at(ttau, genotype);
-        O_v[t1 * Genotypes::N() + genotype] = P_dif[ttau * Genotypes::N() + genotype] * uninfected_v[mosq.restDuration] + P_A[t0] * O_v[t0 * Genotypes::N() + genotype] +
-                               P_df[ttau] * O_v[ttau * Genotypes::N() + genotype];            
+        // O_v.at(t1, g) = P_dif.at(ttau, g) * uninfected_v[mosq.restDuration] + P_A[t0] * O_v.at(t0, g) +
+        //                        P_df[ttau] * O_v.at(ttau, g);
+        O_v_i[t1 * n + g] = P_dif_i[ttau * n + g] * uninfected_v[mosq.restDuration] + P_A[t0] * O_v_i[t0 * n + g] + P_df[ttau] * O_v_i[ttau * n + g];
+        O_v_l[t1 * n + g] = P_dif_l[ttau * n + g] * uninfected_v[mosq.restDuration] + P_A[t0] * O_v_l[t0 * n + g] + P_df[ttau] * O_v_l[ttau * n + g];            
+        
         // BEGIN S_v
-        double sum = 0.0;
+        double sum_i = 0.0, sum_l = 0.0;
         const int ts = d1Mod - mosq.EIPDuration;
         for (int l = 1; l < mosq.restDuration; l++)
         {
             const int tsl = util::mod_nn(ts - l, N_v_length); // index d1Mod - theta_s - l
-            sum += P_dif[tsl * Genotypes::N() + genotype] * P_df[ttau] * (uninfected_v[mosq.EIPDuration + l]) *
-                   ftauArray[mosq.EIPDuration + l - mosq.restDuration];
+            sum_i += P_dif_i[tsl * n + g] * P_df[ttau] * (uninfected_v[mosq.EIPDuration + l]) * ftauArray[mosq.EIPDuration + l - mosq.restDuration];
+            sum_l += P_dif_l[tsl * n + g] * P_df[ttau] * (uninfected_v[mosq.EIPDuration + l]) * ftauArray[mosq.EIPDuration + l - mosq.restDuration];
         }
 
         const int tsm = util::mod_nn(ts, N_v_length); // index d1Mod - theta_s
-        S_v[t1 * Genotypes::N() + genotype] = P_dif[tsm * Genotypes::N() + genotype] * fArray[mosq.EIPDuration - mosq.restDuration] * (uninfected_v[mosq.EIPDuration]) +
-                               sum + P_A[t0] * S_v[t0 * Genotypes::N() + genotype] + P_df[ttau] * S_v[ttau * Genotypes::N() + genotype];
+        S_v_i[t1 * n + g] = P_dif_i[tsm * n + g] * fArray[mosq.EIPDuration - mosq.restDuration] * (uninfected_v[mosq.EIPDuration]) + sum_i + P_A[t0] * S_v_i[t0 * n + g] + P_df[ttau] * S_v_i[ttau * n + g];
+        S_v_l[t1 * n + g] = P_dif_l[tsm * n + g] * fArray[mosq.EIPDuration - mosq.restDuration] * (uninfected_v[mosq.EIPDuration]) + sum_l + P_A[t0] * S_v_l[t0 * n + g] + P_df[ttau] * S_v_l[ttau * n + g];
 
         if (isDynamic)
         {
             // We cut-off transmission when no more than X mosquitos are infected to
             // allow true elimination in simulations. Unfortunately, it may cause problems with
             // trying to simulate extremely low transmission, such as an R_0 case.
-            if (S_v[t1 * Genotypes::N() + genotype] <= mosq.minInfectedThreshold)
-            { // infectious mosquito cut-off
-                S_v[t1 * Genotypes::N() + genotype] = 0.0;
-                /* Note: could report; these reports often occur too frequently, however
-                if( S_v[t1] != 0.0 ){        // potentially reduce reporting
-            cerr << sim::ts0() <<":\t S_v cut-off"<<endl;
-                } */
+            if (S_v_i[t1 * n + g] + S_v_l[t1 * n + g] <= mosq.minInfectedThreshold)
+            {
+                S_v_l[t1 * n + g] = 0.0;
+                S_v_i[t1 * n + g] = 0.0; // Removing this will break unit tests
             }
         }
 
-        partialEIR[genotype] += S_v[t1 * Genotypes::N() + genotype] * EIR_factor;
-        total_S_v += S_v[t1 * Genotypes::N() + genotype];
+        double S_v_g = S_v_i[t1 * n + g] + S_v_l[t1 * n + g];
+
+        partialEIR[g] += S_v_g * EIR_factor;
+        total_S_v += S_v_g;
         // END S_v
     }
 
@@ -857,9 +866,12 @@ void AnophelesModel::uninfectVectors()
 {
     for(size_t i=0; i<N_v_length * Genotypes::N(); i++)
     {
-        O_v[i] = 0.0; //O_v.set_all(0.0);
-        S_v[i] = 0.0; //S_v.set_all(0.0);
-        P_dif[i] = 0.0; //P_dif.set_all(0.0);
+        O_v_i[i] = 0.0;
+        O_v_l[i] = 0.0;
+        S_v_i[i] = 0.0;
+        S_v_l[i] = 0.0;
+        P_dif_i[i] = 0.0;
+        P_dif_l[i] = 0.0;
     }
 }
 
@@ -913,10 +925,10 @@ double AnophelesModel::getLastVecStat(VecStat vs) const
     {
         case PA: return sum1(P_A, end, N_v_length);
         case PDF: return sum1(P_df, end, N_v_length);
-        case PDIF: return sum2(P_dif, end, N_v_length);
+        case PDIF: return sum2(P_dif_i, end, N_v_length) + sum2(P_dif_l, end, N_v_length);
         case NV: return sum1(N_v, end, N_v_length);
-        case OV: return sum2(O_v, end, N_v_length);
-        case SV: return sum2(S_v, end, N_v_length);
+        case OV: return sum2(O_v_i, end, N_v_length) + sum2(O_v_l, end, N_v_length);
+        case SV: return sum2(S_v_i, end, N_v_length) + sum2(S_v_l, end, N_v_length);
         case PAmu: return sum1(P_Amu, end, N_v_length);
         case PA1: return sum1(P_A1, end, N_v_length);
         case PAh: return sum1(P_Ah, end, N_v_length);
@@ -934,8 +946,8 @@ void AnophelesModel::summarize(size_t species) const
     mon::reportStatMSF(mon::MVF_LAST_NV, species, sum1(N_v, end, N_v_length));
     for (size_t g = 0; g < Genotypes::N(); ++g)
     {
-        mon::reportStatMSGF(mon::MVF_LAST_OV, species, g, sum3(O_v, g, end, N_v_length));
-        mon::reportStatMSGF(mon::MVF_LAST_SV, species, g, sum3(S_v, g, end, N_v_length));
+        mon::reportStatMSGF(mon::MVF_LAST_OV, species, g, sum3(O_v_i, g, end, N_v_length) + sum3(O_v_l, g, end, N_v_length));
+        mon::reportStatMSGF(mon::MVF_LAST_SV, species, g, sum3(S_v_i, g, end, N_v_length) + sum3(S_v_l, g, end, N_v_length));
     }
 }
 

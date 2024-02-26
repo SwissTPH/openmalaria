@@ -239,8 +239,10 @@ public:
     virtual void scale(double factor)
     {
         vectors::scale (N_v, factor);
-        vectors::scale (O_v, factor);
-        vectors::scale (S_v, factor);
+        vectors::scale (O_v_i, factor);
+        vectors::scale (O_v_l, factor);
+        vectors::scale (S_v_i, factor);
+        vectors::scale (S_v_l, factor);
     }
     
     /** Initialisation which must wait until a human population is available.
@@ -411,11 +413,14 @@ public:
         N_v_length & stream;
         P_A & stream;
         P_df & stream;
-        P_dif & stream;
+        P_dif_i & stream;
+        P_dif_l & stream;
         P_dff & stream;
         N_v & stream;
-        O_v & stream;
-        S_v & stream;
+        O_v_i & stream;
+        O_v_l & stream;
+        S_v_i & stream;
+        S_v_l & stream;
         P_Amu & stream;
         P_A1 & stream;
         P_Ah & stream;
@@ -564,8 +569,11 @@ public:
     std::vector<double> P_df;
     
     /** P_dif is the probability of a mosquito finding a host, getting
-     * infected, and successfully completing a feeding cycle. */
-    std::vector<double> P_dif;
+     * infected, and successfully completing a feeding cycle. 
+     * 
+     * We keep separate the probability of a mosquito being infected by an
+     * imported infection _i and a local infection _l */
+    std::vector<double> P_dif_i, P_dif_l;
     
     /** Like P_df but including fertility factors */
     std::vector<double> P_dff;
@@ -574,10 +582,10 @@ public:
     std::vector<double> N_v;
     
     /** Numbers of infected host-seeking mosquitoes */
-    std::vector<double> O_v;
+    std::vector<double> O_v_i, O_v_l;
 
     /** Nnumbers of infective (to humans) host-seeking mosquitoes */
-    std::vector<double> S_v;
+    std::vector<double> S_v_i, S_v_l;
 
     /** Probability of a mosquito dying */
     std::vector<double> P_Amu;
