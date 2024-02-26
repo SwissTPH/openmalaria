@@ -450,7 +450,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
     std::vector<double> sum_avail(speciesIndex.size());
     std::vector<double> sigma_df(speciesIndex.size());
     std::vector<double> sigma_dff(speciesIndex.size());
-    std::vector<std::vector<double>> sigma_dif(speciesIndex.size(), std::vector<double>(nGenotypes));
+    std::vector<std::vector<double>> sigma_dif_i(speciesIndex.size(), std::vector<double>(nGenotypes)), sigma_dif_l(speciesIndex.size(), std::vector<double>(nGenotypes));
     for (const Host::Human &human : population)
     {
         const OM::Transmission::PerHost &host = human.perHostTransmission;
@@ -472,7 +472,8 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
             for (size_t g = 0; g < nGenotypes; ++g)
             {
                 const double tbvFac = human.vaccine.getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
-                sigma_dif[s][g] += df * (probTransmission_i[g] + probTransmission_l[g]) * tbvFac;
+                sigma_dif_i[s][g] += df * probTransmission_i[g] * tbvFac;
+                sigma_dif_l[s][g] += df * probTransmission_l[g] * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);
         }
@@ -480,7 +481,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
 
     for (size_t s = 0; s < speciesIndex.size(); ++s)
     {
-        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s], sigma_dff[s], simulationMode == dynamicEIR);
+        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif_i[s], sigma_dif_l[s], sigma_dff[s], simulationMode == dynamicEIR);
     }
 }
 

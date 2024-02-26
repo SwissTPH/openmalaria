@@ -281,7 +281,7 @@ public:
      * @param sigma_dff sum_i α_i * N_i * P_Bi * P_Ci * P_Di * rel_mosq_fecundity for human hosts i
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
+    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif_i, vector<double>& sigma_dif_l, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
     inline double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
@@ -332,7 +332,7 @@ public:
      * @param EIR_factor see parameter partialEIR
      */
     void update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
-                   const vector<double> tsP_dif, double tsP_dff,
+                   const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff,
                    bool isDynamic,
                    vector<double>& partialEIR, double EIR_factor);
     

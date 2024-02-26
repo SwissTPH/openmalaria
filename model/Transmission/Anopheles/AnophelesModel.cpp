@@ -461,7 +461,7 @@ void AnophelesModel::deployVectorTrap(LocalRng &rng, size_t species, size_t inst
 }
 
 // Every sim::oneTS() days:
-void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<double> &sigma_dif, double sigma_dff, bool isDynamic)
+void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<double> &sigma_dif_i, vector<double> &sigma_dif_l, double sigma_dff, bool isDynamic)
 {
     /* Largely equations correspond to Nakul Chitnis's model in
       "A mathematic model for the dynamics of malaria in
@@ -662,7 +662,8 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     double tsP_dff = sigma_dff * alphaE;
 
     // from now, sigma_dif becomes P_dif (but we can't simply rename):
-    vectors::scale(sigma_dif, alphaE);
+    vectors::scale(sigma_dif_i, alphaE);
+    vectors::scale(sigma_dif_l, alphaE);
 
     // Summed per day:
     partialEIR.assign(WithinHost::Genotypes::N(), 0.0);
@@ -679,12 +680,12 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     const SimTime nextTS = sim::ts0() + sim::oneTS();
     for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 = d0 + sim::oneDay())
     {
-        update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor);
+        update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif_i, sigma_dif_l, tsP_dff, isDynamic, partialEIR, availDivisor);
     }
 }
 
 void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
-                            const vector<double> tsP_dif, double tsP_dff, bool isDynamic, vector<double> &partialEIR, double EIR_factor)
+    const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff, bool isDynamic, vector<double> &partialEIR, double EIR_factor)
 {
     double interventionSurvival = 1.0;
     for (size_t i = 0; i < emergenceReduction.size(); ++i)
@@ -709,7 +710,7 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
     P_df[t1] = tsP_df;
     P_dff[t1] = tsP_dff;
     for (size_t i = 0; i < Genotypes::N(); ++i)
-        P_dif[t1 * Genotypes::N() + i] = tsP_dif[i]; //.at(t1, i) = tsP_dif[i];
+        P_dif[t1 * Genotypes::N() + i] = (tsP_dif_i[i] + tsP_dif_l[i]); //.at(t1, i) = tsP_dif[i];
 
     // BEGIN cache calculation: fArray, ftauArray, uninfected_v
     // Set up array with n in 1..θ_s−τ for f(d1Mod-n) (NDEMD eq. 1.6)
