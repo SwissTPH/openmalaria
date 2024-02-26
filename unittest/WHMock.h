@@ -45,8 +45,7 @@ public:
     WHMock();
     virtual ~WHMock();
     
-    virtual double probTransmissionToMosquito( double *sumX ) const;
-    virtual double probTransGenotype( double pTrans, double sumX, size_t genotype );
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype) const;
     virtual bool summarize(Host::Human& human)const;
     virtual void importInfection(LocalRng& rng, int origin);
     virtual void treatment( Host::Human& human, TreatmentId treatId );

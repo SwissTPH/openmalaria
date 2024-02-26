@@ -315,10 +315,9 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito( double *sumX )const{
+double WHVivax::probTransmissionToMosquito(vector<double> &probTransGenotype)const{
     assert( WithinHost::Genotypes::N() == 1 );
-    for(auto inf = infections.begin();
-         inf != infections.end(); ++inf)
+    for(auto inf = infections.begin(); inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
             // we have gametocytes from at least one brood
@@ -326,9 +325,6 @@ double WHVivax::probTransmissionToMosquito( double *sumX )const{
         }
     }
     return 0;   // no gametocytes
-}
-double WHVivax::probTransGenotype(double pTrans, double sumX, size_t genotype){
-    throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
 bool WHVivax::summarize(Host::Human& human) const{

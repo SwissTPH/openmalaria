@@ -104,23 +104,13 @@ public:
     /** Return the infectiousness of this human to biting mosquitoes.
      * This step is independent of parasite genetics.
      * 
-     * @param tbvFactor Probability that transmission is not blocked by a
-     *  "transmission blocking vaccine".
-     * @param sumX Optional out parameter for usage with
-     *  probTransGenotype(). Pointer may be zero if not required. May be ignored
-     *  if the local implementation of probTransGenotype does not require it.
      * @returns the probability of this human infecting a feeding mosquito.
      * 
-     * Calculates the value during the call, which is expensive (cache externally
-     * if the value is needed multiple times). */
-    virtual double probTransmissionToMosquito(double *sumX )const =0;
-    
-    /** Calculates a probability of transmitting an infection of a given
-     * genotype to a mosquito, given the two outputs of
-     * probTransmissionToMosquito(). Only available for WHFalciparum and
-     * should only be called when num genotypes > 1. */
-    virtual double probTransGenotype( double pTrans, double sumX, size_t genotype ) =0;
-    
+     * Calculates the probability of transmitting an infection of a given
+     * genotype to a mosquito and store the result in probTransGenotype[g]
+     * for a given genotype g */
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype)const = 0;
+
     /// @returns true if host has patent parasites
     virtual bool summarize(Host::Human& human) const =0;
 

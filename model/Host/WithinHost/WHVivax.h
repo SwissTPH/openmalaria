@@ -150,8 +150,7 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( double *sumX )const;
-    virtual double probTransGenotype( double pTrans, double sumX, size_t genotype );
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype)const;
     
     virtual bool summarize(Host::Human& human) const;
     
