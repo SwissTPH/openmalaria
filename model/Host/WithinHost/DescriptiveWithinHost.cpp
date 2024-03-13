@@ -103,12 +103,11 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng, int &
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    int nNewInfsToBeCreated = nNewInfs_i + nNewInfs_l;
+    int nNewInfsToBeCreated_i = nNewInfs_i;
+    int nNewInfsToBeCreated_l = nNewInfs_l;
 
     nNewInfs_l = min(nNewInfs_l,MAX_INFECTIONS-numInfs);
-    
-    if(nNewInfs_l == MAX_INFECTIONS-numInfs)
-        nNewInfs_i = 0;
+    nNewInfs_i = min(nNewInfs_i,MAX_INFECTIONS-numInfs-nNewInfs_l);
 
     numInfs += nNewInfs_i;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
@@ -218,7 +217,10 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng, int &
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(opt_vaccine_genotype == false)
-        nNewInfs_l = nNewInfsToBeCreated;
+    {
+        nNewInfs_i = nNewInfsToBeCreated_i;
+        nNewInfs_l = nNewInfsToBeCreated_l;
+    }
 }
 
 
