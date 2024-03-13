@@ -260,9 +260,22 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
 
     double EIR_i = util::vectors::sum(EIR_per_genotype_i);
     double EIR_l = util::vectors::sum(EIR_per_genotype_l);
+    double EIR = EIR_i + EIR_l;
 
-    int nNewInfs = human.infIncidence->numNewInfections( human, EIR_i+EIR_l);
+    double x = 0.0;
     
+    if(EIR > 0)
+        x = EIR_i / EIR;
+
+    double expectedNNewInfs = human.infIncidence->expectedNumNewInfections( human, EIR);
+    double expectedNNewInfs_i = x * expectedNNewInfs;
+    double expectedNNewInfs_l = (1.0-x) * expectedNNewInfs;
+
+    // int nNewInfs_i = human.infIncidence->numNewInfections( human, expectedNNewInfs_i);
+    int nNewInfs_l = human.infIncidence->numNewInfections( human, expectedNNewInfs_l+expectedNNewInfs_i);
+    // int nNewInfs = nNewInfs_i + nNewInfs_l;
+    int nNewInfs = nNewInfs_l;
+
     vector<double> EIR_per_genotype(WithinHost::Genotypes::N());
     for(size_t i=0; i<WithinHost::Genotypes::N(); i++)
         EIR_per_genotype[i] = EIR_per_genotype_i[i] + EIR_per_genotype_l[i];
