@@ -272,17 +272,18 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     double expectedNNewInfs_l = (1.0-x) * expectedNNewInfs;
 
     // int nNewInfs_i = human.infIncidence->numNewInfections( human, expectedNNewInfs_i);
+    int nNewInfs_i = 0;
     int nNewInfs_l = human.infIncidence->numNewInfections( human, expectedNNewInfs_l+expectedNNewInfs_i);
     // int nNewInfs = nNewInfs_i + nNewInfs_l;
-    int nNewInfs = nNewInfs_l;
+    // int nNewInfs = nNewInfs_l;
 
-    vector<double> EIR_per_genotype(WithinHost::Genotypes::N());
+    // vector<double> EIR_per_genotype(WithinHost::Genotypes::N());
     for(size_t i=0; i<WithinHost::Genotypes::N(); i++)
-        EIR_per_genotype[i] = EIR_per_genotype_i[i] + EIR_per_genotype_l[i];
+        EIR_per_genotype_l[i] += EIR_per_genotype_i[i];
 
     // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-    human.withinHostModel->update(human, human.rng, nNewInfs, EIR_per_genotype, age1);
-    human.infIncidence->reportNumNewInfections(human, nNewInfs);
+    human.withinHostModel->update(human, human.rng, nNewInfs_i, nNewInfs_l, EIR_per_genotype_i, EIR_per_genotype_l, age1);
+    human.infIncidence->reportNumNewInfections(human, nNewInfs_i+nNewInfs_l);
     
     // age1 used to get case fatality and sequelae probabilities, determine pathogenesis
     human.clinicalModel->update( human, age1, age0 == sim::zero() );

@@ -137,22 +137,43 @@ void CommonWithinHost::importInfection(LocalRng& rng, int origin){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
-        int &nNewInfs, vector<double>& genotype_weights,
-        double ageInYears)
+void CommonWithinHost::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    nNewInfs_l = min(nNewInfs_l,MAX_INFECTIONS-numInfs);
+    
+    if(nNewInfs_l == MAX_INFECTIONS-numInfs)
+        nNewInfs_i = 0;
 
-    int nNewInfsIgnored = nNewInfs - (MAX_INFECTIONS-numInfs);
-
-    int nNewInfsDiscarded = 0;
+    int nNewInfsIgnored = nNewInfs_i + nNewInfs_l - (MAX_INFECTIONS-numInfs);
 
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
 
-    for( int i=0; i<nNewInfs; ++i ) {
-        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
+    int nNewInfsDiscarded = 0;
+    for( int i=0; i<nNewInfs_i; ++i ) {
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights_i);
+
+        // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_vaccine_genotype )
+        {
+            double vaccineFactor = human.vaccine.getFactor( interventions::Vaccine::PEV, genotype );
+            if(vaccineFactor == 1.0 || human.rng.bernoulli(vaccineFactor))
+                infections.push_back(createInfection (rng, genotype, InfectionOrigin::Introduced));
+            else
+                nNewInfsDiscarded++;
+        }
+        else if (opt_vaccine_genotype == false)
+            infections.push_back(createInfection (rng, genotype, InfectionOrigin::Introduced));
+    }
+    // Update nNewInfs, this is the number that will be reported in Human
+    nNewInfs_i -= nNewInfsDiscarded;
+    numInfs += nNewInfs_i;
+
+    nNewInfsDiscarded = 0;
+    for( int i=0; i<nNewInfs_l; ++i ) {
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights_l);
 
         // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
         if( opt_vaccine_genotype )
@@ -166,10 +187,9 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
         else if (opt_vaccine_genotype == false)
             infections.push_back(createInfection (rng, genotype, InfectionOrigin::Indigenous));
     }
-
     // Update nNewInfs, this is the number that will be reported in Human
-    nNewInfs -= nNewInfsDiscarded;
-    numInfs += nNewInfs;
+    nNewInfs_l -= nNewInfsDiscarded;
+    numInfs += nNewInfs_l;
 
     assert( numInfs == static_cast<int>(infections.size()) );
     
@@ -227,7 +247,7 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities, thus we
     // increment these after the update.
-    m_cumulative_h += nNewInfs;
+    m_cumulative_h += nNewInfs_i + nNewInfs_l;
     m_cumulative_Y += totalDensity;
     
     util::streamValidate(totalDensity);
@@ -252,7 +272,7 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(nNewInfsIgnored > 0)
-        nNewInfs += nNewInfsIgnored;
+        nNewInfs_l += nNewInfsIgnored;
 }
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {

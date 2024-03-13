@@ -98,20 +98,39 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng, int origin){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
-        int &nNewInfs, vector<double>& genotype_weights,
-        double ageInYears)
+void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    int nNewInfsToBeCreated = nNewInfs;
+    int nNewInfsToBeCreated = nNewInfs_i + nNewInfs_l;
 
-    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    nNewInfs_l = min(nNewInfs_l,MAX_INFECTIONS-numInfs);
     
-    numInfs += nNewInfs;
+    if(nNewInfs_l == MAX_INFECTIONS-numInfs)
+        nNewInfs_i = 0;
+
+    numInfs += nNewInfs_i;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for( int i=0; i<nNewInfs; ++i ) {
-        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
+    for( int i=0; i<nNewInfs_i; ++i ) {
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights_i);
+
+        // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_vaccine_genotype )
+        {
+            double vaccineFactor = human.vaccine.getFactor( interventions::Vaccine::PEV, genotype );
+            if(vaccineFactor == 1.0 || human.rng.bernoulli(vaccineFactor))
+                infections.push_back(DescriptiveInfection (rng, genotype, InfectionOrigin::Introduced));
+        }
+        else if (opt_vaccine_genotype == false)
+            infections.push_back(DescriptiveInfection (rng, genotype, InfectionOrigin::Introduced));
+    }
+    assert( numInfs == static_cast<int>(infections.size()) );
+
+    numInfs += nNewInfs_l;
+    assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
+    for( int i=0; i<nNewInfs_l; ++i ) {
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights_l);
 
         // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
         if( opt_vaccine_genotype )
@@ -173,7 +192,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities.
-    m_cumulative_h += nNewInfs;
+    m_cumulative_h += nNewInfs_i + nNewInfs_l;
     m_cumulative_Y += sim::oneTS() * totalDensity;
     
     util::streamValidate( totalDensity );
@@ -199,7 +218,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(opt_vaccine_genotype == false)
-        nNewInfs = nNewInfsToBeCreated;
+        nNewInfs_l = nNewInfsToBeCreated;
 }
 
 

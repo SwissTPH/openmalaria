@@ -349,14 +349,16 @@ void WHVivax::importInfection(LocalRng& rng, int origin){
     infections.push_back( VivaxBrood( rng, origin, this ) );
 }
 
-void WHVivax::update(Host::Human &human, LocalRng& rng,
-        int &nNewInfs, vector<double>&,
-        double ageInYears)
+void WHVivax::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears)
 {
     pSevere = 0.0;
     
     // create new infections, letting the constructor do the initialisation work:
-    for( int i = 0; i < nNewInfs; ++i )
+    for( int i = 0; i < nNewInfs_i; ++i )
+        infections.push_back( VivaxBrood( rng, InfectionOrigin::Introduced, this ) );
+
+    for( int i = 0; i < nNewInfs_l; ++i )
         infections.push_back( VivaxBrood( rng, InfectionOrigin::Indigenous, this ) );
     
     // update infections

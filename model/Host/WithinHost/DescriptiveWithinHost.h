@@ -49,8 +49,8 @@ public:
     virtual void loadInfection(istream& stream);
     virtual void clearImmunity();
     
-    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
-            double ageInYears);
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears);
     
     virtual bool summarize( Host::Human& human )const;
     
