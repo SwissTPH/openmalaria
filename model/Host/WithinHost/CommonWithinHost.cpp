@@ -145,8 +145,7 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i
     nNewInfs_l = min(nNewInfs_l,MAX_INFECTIONS-numInfs);
     nNewInfs_i = min(nNewInfs_i,MAX_INFECTIONS-numInfs-nNewInfs_l);
 
-    int nNewInfsIgnored_l = nNewInfs_l - (MAX_INFECTIONS-numInfs);
-    int nNewInfsIgnored_i = nNewInfs_i + nNewInfs_l - (MAX_INFECTIONS-numInfs);
+    int nNewInfsIgnored = nNewInfs_i + nNewInfs_l - (MAX_INFECTIONS-numInfs);
 
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
 
@@ -270,8 +269,8 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i
     }
 
     // This is a bug, we keep it this way to be consistent with old simulations
-    if(nNewInfsIgnored_i > 0)
-        nNewInfs_i += nNewInfsIgnored_i;
+    if(nNewInfsIgnored > 0)
+        nNewInfs_l += nNewInfsIgnored;
 }
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {
