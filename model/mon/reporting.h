@@ -44,13 +44,13 @@ enum Measure{
     // Number of hosts. Units: humans
     MHR_HOSTS,
     // Number of infected hosts. Units: humans
-    MHR_INFECTED_HOSTS,
+    MHR_INFECTED_HOSTS, MHR_INFECTED_HOSTS_IMPORTED, MHR_INFECTED_HOSTS_INTRODUCED, MHR_INFECTED_HOSTS_INDIGENOUS,
     // Number of patent infected hosts. Units: humans
-    MHR_PATENT_HOSTS,
+    MHR_PATENT_HOSTS, MHR_PATENT_HOSTS_IMPORTED, MHR_PATENT_HOSTS_INTRODUCED, MHR_PATENT_HOSTS_INDIGENOUS,
     // Number of infections in humans. Units: infections
-    MHR_INFECTIONS,
+    MHR_INFECTIONS, MHR_INFECTIONS_IMPORTED, MHR_INFECTIONS_INTRODUCED, MHR_INFECTIONS_INDIGENOUS,
     // Number of patent infections in humans. Units: infections
-    MHR_PATENT_INFECTIONS,
+    MHR_PATENT_INFECTIONS, MHR_PATENT_INFECTIONS_IMPORTED, MHR_PATENT_INFECTIONS_INTRODUCED, MHR_PATENT_INFECTIONS_INDIGENOUS,
     // Number of new infections in humans. Units: infections
     MHR_NEW_INFECTIONS,
     // Number of sub-population removals due to first event. Units: humans
