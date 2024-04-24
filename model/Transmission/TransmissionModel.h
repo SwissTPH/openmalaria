@@ -181,10 +181,14 @@ public:
         {
             mon::reportStatMF(mon::MVF_INPUT_EIR, surveyInputEIR / duration);
             mon::reportStatMF(mon::MVF_SIM_EIR, surveySimulatedEIR / duration);
+            mon::reportStatMF(mon::MVF_SIM_EIR_INTRODUCED, surveySimulatedEIR_i / duration);
+            mon::reportStatMF(mon::MVF_SIM_EIR_INDIGENOUS, surveySimulatedEIR_l / duration);
         }
 
         surveyInputEIR = 0.0;
         surveySimulatedEIR = 0.0;
+        surveySimulatedEIR_i = 0.0;
+        surveySimulatedEIR_l = 0.0;
         lastSurveyTime = sim::now();
     }
 
@@ -235,9 +239,14 @@ public:
          * availability. */
         calculateEIR(human, ageYears, EIR_i, EIR_l);
 
-        double allEIR = util::vectors::sum(EIR_i) + util::vectors::sum(EIR_l);
+        double sum_EIR_i = util::vectors::sum(EIR_i);
+        double sum_EIR_l = util::vectors::sum(EIR_l);
+
+        double allEIR = sum_EIR_i + sum_EIR_l;
         if (age >= adultAge)
         {
+            tsAdultEntoInocs_i += sum_EIR_i;
+            tsAdultEntoInocs_l += sum_EIR_l;
             tsAdultEntoInocs += allEIR;
             tsNumAdults += 1;
         }
@@ -320,10 +329,20 @@ public:
     {
         tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
         tsAdultEntoInocs = 0.0;
+
+        tsAdultEIR_i = tsAdultEntoInocs_i / tsNumAdults;
+        tsAdultEntoInocs_i = 0.0;
+
+        tsAdultEIR_l = tsAdultEntoInocs_l / tsNumAdults;
+        tsAdultEntoInocs_l = 0.0;
+
         tsNumAdults = 0;
 
         surveyInputEIR += initialisationEIR[sim::moduloYearSteps(sim::ts0())];
+
         surveySimulatedEIR += tsAdultEIR;
+        surveySimulatedEIR_i += tsAdultEIR_i;
+        surveySimulatedEIR_l += tsAdultEIR_l;
     }
 
 protected:
@@ -348,9 +367,9 @@ protected:
         annualEIR &stream;
         _annualAverageKappa &stream;
         _sumAnnualKappa &stream;
-        tsAdultEIR &stream;
-        surveyInputEIR &stream;
-        surveySimulatedEIR &stream;
+        // tsAdultEIR &stream;
+        // surveyInputEIR &stream;
+        // surveySimulatedEIR &stream;
         lastSurveyTime &stream;
         adultAge &stream;
         numTransmittingHumans &stream;
@@ -365,9 +384,9 @@ protected:
         annualEIR &stream;
         _annualAverageKappa &stream;
         _sumAnnualKappa &stream;
-        tsAdultEIR &stream;
-        surveyInputEIR &stream;
-        surveySimulatedEIR &stream;
+        // tsAdultEIR &stream;
+        // surveyInputEIR &stream;
+        // surveySimulatedEIR &stream;
         lastSurveyTime &stream;
         adultAge &stream;
         numTransmittingHumans &stream;
@@ -442,14 +461,16 @@ private:
     double _sumAnnualKappa;
 
     /// Adult-only EIR over the last update
-    double tsAdultEIR;
+    double tsAdultEIR, tsAdultEIR_i, tsAdultEIR_l;
 
     /** Per-time-step input EIR summed over inter-survey period.
      * Units: infectious bites/adult/inter-survey period. */
-    double surveyInputEIR;
+    double surveyInputEIR, surveyInputEIR_i, surveyInputEIR_l;
+
     /** Per-time-step simulated EIR summed over inter-survey period.
      * Units: infectious bites/adult/inter-survey period. */
-    double surveySimulatedEIR;
+    double surveySimulatedEIR, surveySimulatedEIR_i, surveySimulatedEIR_l;
+
     /** Time of last survey. */
     SimTime lastSurveyTime = sim::never();
 
@@ -460,7 +481,8 @@ private:
     int numTransmittingHumans;
 
     // Reporting data. Doesn't need checkpointing due to reset every time-step.
-    double tsAdultEntoInocs = 0.0;  // accumulator for time step EIR of adults
+    // accumulator for time step EIR of adults
+    double tsAdultEntoInocs = 0.0, tsAdultEntoInocs_i = 0.0, tsAdultEntoInocs_l = 0.0;
     int tsNumAdults = 0; // accumulator for time step adults requesting EIR
 
     bool opt_vaccine_genotype = false;

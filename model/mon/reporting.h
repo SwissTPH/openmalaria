@@ -179,7 +179,7 @@ enum Measure{
     // Input EIR (Expected EIR entered into scenario file). Units: inoculations per adult per time step.
     MVF_INPUT_EIR,
     // Simulated EIR (EIR output by the transmission model). Units: inoculations per adult per time step.
-    MVF_SIM_EIR,
+    MVF_SIM_EIR, MVF_SIM_EIR_INTRODUCED, MVF_SIM_EIR_INDIGENOUS,
     // Total inoculations over survey period per group (age, cohort). Units: inoculations.
     MVF_INOCS,
     // N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day

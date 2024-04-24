@@ -258,6 +258,8 @@ void defineOutMeasures(){
      * Units: inoculations per adult per time step (children are excluded
      * when measuring). */
     namedOutMeasures["simulatedEIR"] = OutMeasure::value( 36, MVF_SIM_EIR, true );
+    namedOutMeasures["simulatedEIR_Introduced"] = OutMeasure::value( 2036, MVF_SIM_EIR_INTRODUCED, true );
+    namedOutMeasures["simulatedEIR_Indigenous"] = OutMeasure::value( 3036, MVF_SIM_EIR_INDIGENOUS, true );
     /// Number of Rapid Diagnostic Tests used
     namedOutMeasures["Clinical_RDTs"] = OutMeasure::obsolete( 39 );
     /* Effective total quanty of each drug used orally, in mg.
