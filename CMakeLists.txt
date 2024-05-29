@@ -2,7 +2,7 @@
 # Copyright © 2005-2013 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.5)
 
 project (OpenMalaria CXX)
 
