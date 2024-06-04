@@ -674,6 +674,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="caseType" type="om:DTCaseType"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic"/>
    <xs:element name="fever" type="om:DTFever"/>
+   <xs:element name="complicated" type="om:DTComplicated"/>
    <xs:element name="random" type="om:DTRandom"/>
    <xs:element name="age" type="om:DTAge"/>
    <!-- actions -->
@@ -712,6 +713,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="fever" type="om:DTFever" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="complicated" type="om:DTComplicated" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
    <!-- actions -->
@@ -783,6 +785,40 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:attribute>
  </xs:complexType>
  <xs:complexType name="DTFever">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on the outcome
+        of some type of diagnostic.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (diagnostic);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="positive" type="om:DecisionTree"/>
+   <xs:element name="negative" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="lookBack" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DTComplicated">
   <xs:annotation>
    <xs:documentation>
         A switch which choses a branch deterministically, based on the outcome
