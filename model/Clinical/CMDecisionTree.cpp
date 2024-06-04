@@ -161,14 +161,14 @@ private:
     const CMDecisionTree& negative;
 };
 
-class CMDTFever : public CMDecisionTree {
+class CMDTUncomplicated : public CMDecisionTree {
 public:
-    static const CMDecisionTree& create( const ::scnXml::DTFever& node, bool isUC );
+    static const CMDecisionTree& create( const ::scnXml::DTUncomplicated& node, bool isUC );
     
 protected:
     virtual bool operator==( const CMDecisionTree& that ) const{
         if( this == &that ) return true; // short cut: same object thus equivalent
-        const CMDTFever* p = dynamic_cast<const CMDTFever*>( &that );
+        const CMDTUncomplicated* p = dynamic_cast<const CMDTUncomplicated*>( &that );
         if( p == 0 ) return false;      // different type of node
         // if( diagnostic != p->diagnostic ) return false;
         if( positive != p->positive ) return false;
@@ -195,7 +195,7 @@ protected:
     }
     
 private:
-    CMDTFever(
+    CMDTUncomplicated(
         const SimTime lookBack,
         const CMDecisionTree& positive,
         const CMDecisionTree& negative ) :
@@ -576,7 +576,7 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
     // branching nodes
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC );
-    if( node.getFever().present() ) return CMDTFever::create( node.getFever().get(), isUC );
+    if( node.getUncomplicated().present() ) return CMDTUncomplicated::create( node.getUncomplicated().get(), isUC );
     if( node.getComplicated().present() ) return CMDTComplicated::create( node.getComplicated().get(), isUC );
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get(), isUC );
     if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC );
@@ -601,8 +601,8 @@ const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool
     for( const scnXml::DTDiagnostic& sn : node.getDiagnostic() ){
         self->children.push_back( &CMDTDiagnostic::create(sn, isUC) );
     }
-    for( const scnXml::DTFever& sn : node.getFever() ){
-        self->children.push_back( &CMDTFever::create(sn, isUC) );
+    for( const scnXml::DTUncomplicated& sn : node.getUncomplicated() ){
+        self->children.push_back( &CMDTUncomplicated::create(sn, isUC) );
     }
     for( const scnXml::DTComplicated& sn : node.getComplicated() ){
         self->children.push_back( &CMDTComplicated::create(sn, isUC) );
@@ -646,8 +646,8 @@ const CMDecisionTree& CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, 
     ) );
 }
 
-const CMDecisionTree& CMDTFever::create( const scnXml::DTFever& node, bool isUC ){
-    return save_decision( new CMDTFever(
+const CMDecisionTree& CMDTUncomplicated::create( const scnXml::DTUncomplicated& node, bool isUC ){
+    return save_decision( new CMDTUncomplicated(
         UnitParse::readShortDuration(node.getLookBack(), UnitParse::STEPS),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )

@@ -673,7 +673,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic"/>
-   <xs:element name="fever" type="om:DTFever"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated"/>
    <xs:element name="complicated" type="om:DTComplicated"/>
    <xs:element name="random" type="om:DTRandom"/>
    <xs:element name="age" type="om:DTAge"/>
@@ -712,7 +712,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
-   <xs:element name="fever" type="om:DTFever" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="complicated" type="om:DTComplicated" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
@@ -784,7 +784,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>
- <xs:complexType name="DTFever">
+ <xs:complexType name="DTUncomplicated">
   <xs:annotation>
    <xs:documentation>
         A switch which choses a branch deterministically, based on the outcome
