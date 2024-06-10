@@ -28,6 +28,7 @@
 #include "util/errors.h"
 #include "util/UnitParse.h"
 #include "interventions/Interfaces.hpp"
+#include "interventions/InterventionManager.hpp"
 
 #include <limits>
 #include <list>
@@ -139,12 +140,13 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result;
-        if( hostData.withinHost().diagnosticResult( hostData.human.rng, diagnostic ) ){
+        
+        if( hostData.withinHost().diagnosticResult( hostData.human.rng, diagnostic ) )
             result = positive.exec( hostData );
-        }else{
+        else
             result = negative.exec( hostData );
-        }
         result.screened = true;
+
         return result;
     }
     
@@ -183,14 +185,11 @@ protected:
 
         // Rely on the health system memory to not count the same episode twice
         if( (latest.time + lookBack > sim::now() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
-        {
             result = positive.exec( hostData );
-        }
-        else{
+        else
             result = negative.exec( hostData );
-        }
 
-        result.screened = true;
+        // result.screened = true;
         return result;
     }
     
@@ -210,14 +209,14 @@ private:
     const CMDecisionTree& negative;
 };
 
-class CMDTComplicated : public CMDecisionTree {
+class CMDTSevere : public CMDecisionTree {
 public:
-    static const CMDecisionTree& create( const ::scnXml::DTComplicated& node, bool isUC );
+    static const CMDecisionTree& create( const ::scnXml::DTSevere& node, bool isUC );
     
 protected:
     virtual bool operator==( const CMDecisionTree& that ) const{
         if( this == &that ) return true; // short cut: same object thus equivalent
-        const CMDTComplicated* p = dynamic_cast<const CMDTComplicated*>( &that );
+        const CMDTSevere* p = dynamic_cast<const CMDTSevere*>( &that );
         if( p == 0 ) return false;      // different type of node
         // if( diagnostic != p->diagnostic ) return false;
         if( positive != p->positive ) return false;
@@ -232,26 +231,23 @@ protected:
 
         // Rely on the health system memory to not count the same episode twice
         if( (latest.time + lookBack > sim::now() - sim::oneTS()) && (latest.state & Episode::COMPLICATED ) )
-        {
             result = positive.exec( hostData );
-        }
-        else{
+        else
             result = negative.exec( hostData );
-        }
 
-        result.screened = true;
+        // result.screened = true;
         return result;
     }
     
 private:
-    CMDTComplicated(
+    CMDTSevere(
         const SimTime lookBack,
         const CMDecisionTree& positive,
         const CMDecisionTree& negative ) :
         lookBack(lookBack), positive(positive), negative(negative)
     {
         if(lookBack > ClinicalModel::hsMemory())
-            throw util::xml_scenario_error( "<complicated> lookBack parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
+            throw util::xml_scenario_error( "<severe> lookBack parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
     }
     
     const SimTime lookBack;
@@ -547,6 +543,47 @@ protected:
     }
 };
 
+class CMDTCohort : public CMDecisionTree {
+public:
+    static const CMDecisionTree& create( const ::scnXml::DTCohort& node, bool isUC );
+    
+protected:
+    virtual bool operator==( const CMDecisionTree& that ) const{
+        if( this == &that ) return true; // short cut: same object thus equivalent
+        const CMDTCohort* p = dynamic_cast<const CMDTCohort*>( &that );
+        if( p == 0 ) return false;      // different type of node
+        // if( diagnostic != p->diagnostic ) return false;
+        if( positive != p->positive ) return false;
+        if( negative != p->negative ) return false;
+        return true;    // no tests failed; must be the same
+    }
+    
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        CMDTOut result;
+
+        // Rely on the health system memory to not count the same episode twice
+        if(hostData.human.isInSubPop(component))
+            result = positive.exec( hostData );
+        else
+            result = negative.exec( hostData );
+
+        // result.screened = true;
+        return result;
+    }
+    
+private:
+    CMDTCohort(
+        const std::string component,
+        const CMDecisionTree& positive,
+        const CMDecisionTree& negative ) :
+        component(interventions::InterventionManager::getComponentId(component)), positive(positive), negative(negative)
+    {
+    }
+    
+    interventions::ComponentId component;
+    const CMDecisionTree& positive;
+    const CMDecisionTree& negative;
+};
 
 // ———  static functions  ———
 
@@ -577,9 +614,11 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC );
     if( node.getUncomplicated().present() ) return CMDTUncomplicated::create( node.getUncomplicated().get(), isUC );
-    if( node.getComplicated().present() ) return CMDTComplicated::create( node.getComplicated().get(), isUC );
+    if( node.getSevere().present() ) return CMDTSevere::create( node.getSevere().get(), isUC );
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get(), isUC );
     if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC );
+    if( node.getCohort().present() ) return CMDTCohort::create( node.getCohort().get(), isUC );
+
     // action nodes
     if( node.getNoTreatment().present() ) return save_decision( new CMDTNoTreatment() );
     if( node.getReport().size() ) return save_decision( new CMDTReport(node.getReport()) );
@@ -604,14 +643,17 @@ const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool
     for( const scnXml::DTUncomplicated& sn : node.getUncomplicated() ){
         self->children.push_back( &CMDTUncomplicated::create(sn, isUC) );
     }
-    for( const scnXml::DTComplicated& sn : node.getComplicated() ){
-        self->children.push_back( &CMDTComplicated::create(sn, isUC) );
+    for( const scnXml::DTSevere& sn : node.getSevere() ){
+        self->children.push_back( &CMDTSevere::create(sn, isUC) );
     }
     for( const scnXml::DTRandom& sn : node.getRandom() ){
         self->children.push_back( &CMDTRandom::create(sn, isUC) );
     }
     for( const scnXml::DTAge& sn : node.getAge() ){
         self->children.push_back( &CMDTAge::create(sn, isUC) );
+    }
+    for( const scnXml::DTCohort& sn : node.getCohort() ){
+        self->children.push_back( &CMDTCohort::create(sn, isUC) );
     }
     if( node.getTreatPKPD().size() ){
         self->children.push_back( &save_decision(new CMDTTreatPKPD(node.getTreatPKPD())) );
@@ -654,13 +696,22 @@ const CMDecisionTree& CMDTUncomplicated::create( const scnXml::DTUncomplicated& 
     ) );
 }
 
-const CMDecisionTree& CMDTComplicated::create( const scnXml::DTComplicated& node, bool isUC ){
-    return save_decision( new CMDTComplicated(
+const CMDecisionTree& CMDTSevere::create( const scnXml::DTSevere& node, bool isUC ){
+    return save_decision( new CMDTSevere(
         UnitParse::readShortDuration(node.getLookBack(), UnitParse::STEPS),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );
 }
+
+const CMDecisionTree& CMDTCohort::create( const scnXml::DTCohort& node, bool isUC ){
+    return save_decision( new CMDTCohort(
+        node.getComponent(),
+        CMDecisionTree::create( node.getPositive(), isUC ),
+        CMDecisionTree::create( node.getNegative(), isUC )
+    ) );
+}
+
 
 const CMDecisionTree& CMDTRandom::create(
     const scnXml::DTRandom& node, bool isUC )
