@@ -174,12 +174,15 @@ void ImmediateOutcomes::uncomplicatedEvent (
     Human& human,
     Episode::State pgState
 ) {
+    // If last treatment prescribed was in recent memory, consider second line.
+    CaseType regimen = FirstLine;
+    if (m_tLastTreatment + healthSystemMemory > sim::ts0()){
+        pgState = Episode::State (pgState | Episode::SECOND_CASE);
+        regimen = SecondLine;
+    }
+
     latestReport.update (human, Episode::State( pgState ) );
 
-    // If last treatment prescribed was in recent memory, consider second line.
-    CaseType regimen = (m_tLastTreatment + healthSystemMemory > sim::ts0()) ?
-        SecondLine : FirstLine;
-    
     double x = human.rng.uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
         // UC1: official care OR self treatment

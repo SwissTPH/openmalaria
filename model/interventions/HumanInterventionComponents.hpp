@@ -326,7 +326,7 @@ public:
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
         Clinical::CMDTOut out = tree.exec( Clinical::CMHostData(human,
                 sim::inYears(human.age(sim::nowOrTs1())),
-                Clinical::Episode::NONE /*parameter not needed*/) );
+                human.clinicalModel->getLatestReport().state) );
         if( out.treated ){
             mon::reportEventMHD( mon::MHD_TREAT, human, method );
         }

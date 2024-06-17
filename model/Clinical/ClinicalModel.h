@@ -106,6 +106,9 @@ public:
         return latestReport;
     }
     
+    inline const Episode::State &getLatestState () const{
+        return latestState;
+    }
     
     /// Checkpointing
     template<class S>
@@ -123,13 +126,14 @@ protected:
      * @param hostTransmission per-host transmission data of human.
      * @param ageYears Age of human.
      * @param ageGroup Survey age group of human. */
-    virtual void doClinicalUpdate (Human& human, double ageYears) =0;
+    virtual void doClinicalUpdate (Human& human, double ageYears, WithinHost::Pathogenesis::StatePair &pg) =0;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
     /** Last episode; report to survey pending a new episode or human's death. */
     Episode latestReport;
+    Episode::State latestState;
     
     /** @brief Positive values of _doomed variable (codes). */
     enum {

@@ -61,9 +61,7 @@ CM5DayCommon::CM5DayCommon (double tSF) :
 
 // ———  per-human, update  ———
 
-void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
-    const bool isDoomed = doomed != NOT_DOOMED;
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( human, ageYears, isDoomed );
+void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears, WithinHost::Pathogenesis::StatePair &pg) {
     Episode::State pgState = static_cast<Episode::State>( pg.state );
 
     if (pgState & Episode::MALARIA) {

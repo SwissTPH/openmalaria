@@ -60,7 +60,7 @@ protected:
     static double cureRateSevere;
     static WithinHost::TreatmentId treatmentSevere;
     
-    virtual void doClinicalUpdate (Human& human, double ageYears);
+    virtual void doClinicalUpdate (Human& human, double ageYears, WithinHost::Pathogenesis::StatePair &pg);
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
