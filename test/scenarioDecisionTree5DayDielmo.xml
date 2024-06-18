@@ -81,7 +81,7 @@
               </negative>
             </diagnostic>
 
-            <fever lookBack="5d">
+            <uncomplicated>
               <positive>
                 <multiple>
                   <!-- Treat 87.2% as in the original study, but report all -->
@@ -99,8 +99,7 @@
               <negative>
                 <noTreatment/>
               </negative>
-            </fever>
-
+            </uncomplicated>
           </multiple>
         </decisionTree>
       </component>

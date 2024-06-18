@@ -179,32 +179,31 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        CMDTOut result;
-
         const Clinical::Episode &latest = hostData.human.clinicalModel->getLatestReport();
 
-        // Rely on the health system memory to not count the same episode twice
-        if( (latest.time + lookBack > sim::now() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
-            result = positive.exec( hostData );
+        if ( ((hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED)) || (hostData.pgState & Episode::MALARIA) )
+        {
+            if (latest.time + memory >= sim::ts0())
+                return positive.exec( hostData );
+            else
+                return negative.exec( hostData );
+        }
         else
-            result = negative.exec( hostData );
-
-        // result.screened = true;
-        return result;
+            return negative.exec( hostData );
     }
     
 private:
     CMDTUncomplicated(
-        const SimTime lookBack,
+        const SimTime memory,
         const CMDecisionTree& positive,
         const CMDecisionTree& negative ) :
-        lookBack(lookBack), positive(positive), negative(negative)
+        memory(memory), positive(positive), negative(negative)
     {
-        if(lookBack > ClinicalModel::hsMemory())
-            throw util::xml_scenario_error( "<fever> lookBack parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
+        if(memory > ClinicalModel::hsMemory())
+            throw util::xml_scenario_error( "<uncomplicated> memory parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
     }
     
-    const SimTime lookBack;
+    const SimTime memory;
     const CMDecisionTree& positive;
     const CMDecisionTree& negative;
 };
@@ -227,10 +226,7 @@ protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result;
 
-        const Clinical::Episode &latest = hostData.human.clinicalModel->getLatestReport();
-
-        // Rely on the health system memory to not count the same episode twice
-        if( (latest.time + lookBack > sim::now() - sim::oneTS()) && (latest.state & Episode::COMPLICATED ) )
+        if (hostData.pgState & Episode::COMPLICATED)
             result = positive.exec( hostData );
         else
             result = negative.exec( hostData );
@@ -241,16 +237,11 @@ protected:
     
 private:
     CMDTSevere(
-        const SimTime lookBack,
         const CMDecisionTree& positive,
         const CMDecisionTree& negative ) :
-        lookBack(lookBack), positive(positive), negative(negative)
-    {
-        if(lookBack > ClinicalModel::hsMemory())
-            throw util::xml_scenario_error( "<severe> lookBack parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
-    }
+        positive(positive), negative(negative)
+    {}
     
-    const SimTime lookBack;
     const CMDecisionTree& positive;
     const CMDecisionTree& negative;
 };
@@ -608,16 +599,16 @@ const CMDecisionTree& save_decision( CMDecisionTree* decision ){
     return *decision_library.back();
 }
 
-const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, bool isUC ){
-    if( node.getMultiple().present() ) return CMDTMultiple::create( node.getMultiple().get(), isUC );
+const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, bool isUC){
+    if( node.getMultiple().present() ) return CMDTMultiple::create( node.getMultiple().get(), isUC);
     // branching nodes
-    if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC );
-    if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC );
-    if( node.getUncomplicated().present() ) return CMDTUncomplicated::create( node.getUncomplicated().get(), isUC );
-    if( node.getSevere().present() ) return CMDTSevere::create( node.getSevere().get(), isUC );
-    if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get(), isUC );
-    if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC );
-    if( node.getCohort().present() ) return CMDTCohort::create( node.getCohort().get(), isUC );
+    if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC);
+    if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC);
+    if( node.getUncomplicated().present() ) return CMDTUncomplicated::create( node.getUncomplicated().get(), isUC);
+    if( node.getSevere().present() ) return CMDTSevere::create( node.getSevere().get(), true);
+    if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get(), isUC);
+    if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC);
+    if( node.getCohort().present() ) return CMDTCohort::create( node.getCohort().get(), isUC);
 
     // action nodes
     if( node.getNoTreatment().present() ) return save_decision( new CMDTNoTreatment() );
@@ -690,7 +681,7 @@ const CMDecisionTree& CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, 
 
 const CMDecisionTree& CMDTUncomplicated::create( const scnXml::DTUncomplicated& node, bool isUC ){
     return save_decision( new CMDTUncomplicated(
-        UnitParse::readShortDuration(node.getLookBack(), UnitParse::STEPS),
+        UnitParse::readShortDuration(node.getMemory(), UnitParse::STEPS),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );
@@ -698,7 +689,6 @@ const CMDecisionTree& CMDTUncomplicated::create( const scnXml::DTUncomplicated& 
 
 const CMDecisionTree& CMDTSevere::create( const scnXml::DTSevere& node, bool isUC ){
     return save_decision( new CMDTSevere(
-        UnitParse::readShortDuration(node.getLookBack(), UnitParse::STEPS),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );

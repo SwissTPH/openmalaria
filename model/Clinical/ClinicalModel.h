@@ -115,6 +115,9 @@ public:
     void operator& (S& stream) {
         checkpoint (stream);
     }
+
+    /** Time of the last treatment (sim::never() if never treated). */
+    SimTime m_tLastTreatment = sim::never();
     
 protected:
     /// Constructor.
@@ -134,7 +137,7 @@ protected:
     /** Last episode; report to survey pending a new episode or human's death. */
     Episode latestReport;
     Episode::State latestState;
-    
+
     /** @brief Positive values of _doomed variable (codes). */
     enum {
         DOOMED_EXPIRED = -35,   // codes less than or equal to this mean "dead now"

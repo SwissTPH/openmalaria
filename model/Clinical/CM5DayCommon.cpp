@@ -54,7 +54,6 @@ void CM5DayCommon::init(){
 // ———  per-human, construction and destruction  ———
 
 CM5DayCommon::CM5DayCommon (double tSF) :
-        m_tLastTreatment (sim::never()),
         m_treatmentSeekingFactor (tSF)
 {}
 

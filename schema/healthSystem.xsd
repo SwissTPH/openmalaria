@@ -805,7 +805,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Name;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="lookBack" type="xs:string" use="required">
+  <xs:attribute name="memory" type="xs:string" use="optional" default="1">
    <xs:annotation>
     <xs:documentation>
           Follow-up period during which a recurrence is
@@ -838,7 +838,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Name;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="lookBack" type="xs:string" use="required">
+  <xs:attribute name="memory" type="xs:string" use="optional">
    <xs:annotation>
     <xs:documentation>
           Follow-up period during which a recurrence is
