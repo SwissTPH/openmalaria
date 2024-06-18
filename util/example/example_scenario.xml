@@ -124,7 +124,14 @@
             <pSeekOfficialCareUncomplicated2 value="0.04"/><!-- 5-day probability that a patient with recurrence seeks official care -->
             <pSeekOfficialCareSevere value="0.48"/><!-- 5-day probability that a patient with severe case seeks official care -->
             <treeUCOfficial>
-                <treatSimple durationLiver="0" durationBlood="1t"/>
+                <caseType>
+                    <firstLine>
+                        <treatSimple durationLiver="0" durationBlood="1t"/>
+                    </firstLine>
+                    <secondLine>
+                        <treatSimple durationLiver="0" durationBlood="1t"/>
+                    </secondLine>
+                </caseType>
             </treeUCOfficial>
             <treeUCSelfTreat>
                 <noTreatment/>
