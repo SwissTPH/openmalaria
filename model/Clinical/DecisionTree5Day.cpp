@@ -77,16 +77,16 @@ void DecisionTree5Day::setHealthSystem(const scnXml::HSDT5Day& hsDescription){
 
 // ———  per-human, update  ———
 
-void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState ){
-    latestReport.update (human, Episode::State( pgState ) );
-    
+void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState ){    
     // If last treatment prescribed was in recent memory, consider second line.
     CaseType regimen = FirstLine;
     if (m_tLastTreatment + healthSystemMemory > sim::ts0()){
         pgState = Episode::State (pgState | Episode::SECOND_CASE);
         regimen = SecondLine;
     }
-    
+
+    latestReport.update (human, Episode::State( pgState ) );
+
     double x = human.rng.uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
         CMHostData hostData( human, sim::inYears(human.age(sim::ts0())), pgState );

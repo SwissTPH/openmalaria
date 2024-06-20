@@ -673,7 +673,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic"/>
-   <xs:element name="fever" type="om:DTFever"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated"/>
+   <xs:element name="severe" type="om:DTSevere"/>
    <xs:element name="random" type="om:DTRandom"/>
    <xs:element name="age" type="om:DTAge"/>
    <!-- actions -->
@@ -682,7 +683,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="treatFailure" type="om:DTTreatFailure"/>
    <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
    <xs:element name="treatSimple" type="om:DTTreatSimple" maxOccurs="unbounded"/>
-   <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
+   <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="cohort" type="om:DTCohort"/>
   </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
@@ -711,7 +713,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
-   <xs:element name="fever" type="om:DTFever" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="severe" type="om:DTSevere" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
    <!-- actions -->
@@ -719,6 +722,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
    <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="report" type="om:DTReport" maxOccurs="unbounded" minOccurs="0"/>
+   <xs:element name="cohort" type="om:DTCohort" minOccurs="0" maxOccurs="unbounded"/>
   </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
@@ -782,13 +786,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>
- <xs:complexType name="DTFever">
+ <xs:complexType name="DTUncomplicated">
   <xs:annotation>
    <xs:documentation>
-        A switch which choses a branch deterministically, based on the outcome
-        of some type of diagnostic.
+        A switch which choses a branch deterministically, based on whether the host has an uncomplicated case. This could be a Malaria fever or a non-Malaria fever. If non-Malaria fevers are enable, it is possible to add a &lt;diagnostic&gt; node.
       </xs:documentation>
-   <xs:appinfo>name:Switch (diagnostic);</xs:appinfo>
+   <xs:appinfo>name:Switch (uncomplicated);</xs:appinfo>
   </xs:annotation>
   <xs:all>
    <xs:element name="positive" type="om:DecisionTree"/>
@@ -802,7 +805,40 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Name;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="lookBack" type="xs:string" use="required">
+  <xs:attribute name="memory" type="xs:string" use="optional" default="1">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DTSevere">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the host has a severe case or not. Note that this include severe cases due to comorbidities.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (severe);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="positive" type="om:DecisionTree"/>
+   <xs:element name="negative" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="memory" type="xs:string" use="optional">
    <xs:annotation>
     <xs:documentation>
           Follow-up period during which a recurrence is
@@ -1063,6 +1099,39 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           The identifier (short name) of a component.
         </xs:documentation>
     <xs:appinfo>name:Component identifier;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DTCohort">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the host is part of the cohort (defined by the intervention component) or not.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (cohort);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="positive" type="om:DecisionTree"/>
+   <xs:element name="negative" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="component" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>

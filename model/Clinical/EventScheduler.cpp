@@ -159,12 +159,8 @@ bool ClinicalEventScheduler::isExistingCase() {
         return sim::now() > timeLastTreatment && sim::now() <= timeLastTreatment + healthSystemMemory;
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
+void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears, WithinHost::Pathogenesis::StatePair &pg){
     WHInterface& withinHostModel = *human.withinHostModel;
-    // Run pathogenesisModel
-    // Note: we use Episode::COMPLICATED instead of Episode::SEVERE.
-    const bool isDoomed = doomed != NOT_DOOMED;
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( human, ageYears, isDoomed );
     Episode::State newState = static_cast<Episode::State>( pg.state );
     util::streamValidate( (newState << 16) & pgState );
     
