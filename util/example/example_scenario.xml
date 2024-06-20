@@ -124,7 +124,14 @@
             <pSeekOfficialCareUncomplicated2 value="0.04"/><!-- 5-day probability that a patient with recurrence seeks official care -->
             <pSeekOfficialCareSevere value="0.48"/><!-- 5-day probability that a patient with severe case seeks official care -->
             <treeUCOfficial>
-                <treatSimple durationLiver="0" durationBlood="1t"/>
+                <caseType>
+                    <firstLine>
+                        <treatSimple durationLiver="0" durationBlood="1t"/>
+                    </firstLine>
+                    <secondLine>
+                        <treatSimple durationLiver="0" durationBlood="1t"/>
+                    </secondLine>
+                </caseType>
             </treeUCOfficial>
             <treeUCSelfTreat>
                 <noTreatment/>
@@ -299,7 +306,7 @@
         </human>
 
         <!-- DO NOT CHANGE THE MODEL PARAMETERS BELOW -->
-        <parameters interval="5" iseed="1" latentp="3">
+        <parameters interval="5" iseed="1" latentp="15d">
            <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
            <parameter include="0" name="Estar" number="2" value="0.03247"/>
            <parameter include="0" name="Simm" number="3" value="0.138161050830301"/>
