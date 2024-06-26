@@ -43,6 +43,10 @@ jobs:
       matrix:
         # os: [] #for testing with act
         include:
+          - os: ubuntu-24.04
+            compiler: g++
+            target: Linux
+
           - os: ubuntu-22.04
             compiler: g++
             target: Linux
@@ -51,10 +55,13 @@ jobs:
             compiler: g++
             target: Linux
           
-          - os: macos-12
+          - os: macos-14
+            compiler: clang
+
+          - os: macos-13
             compiler: clang
           
-          - os: macos-11
+          - os: macos-12
             compiler: clang
           
     steps:
