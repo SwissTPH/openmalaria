@@ -188,8 +188,10 @@ void defineOutMeasures(){
     /// number of blood-stage treatments (inpatient)
     namedOutMeasures["nTreatments3"] = OutMeasure::humanAC( 13, MHT_TREATMENTS_3, false );
     /// number of episodes (uncomplicated)
-    namedOutMeasures["nUncomp"] =
-        OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
+    namedOutMeasures["nUncomp"] = OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
+        namedOutMeasures["nUncomp_Imported"] = OutMeasure::humanAC( 1014, MHE_UNCOMPLICATED_EPISODES_IMPORTED, false );
+        namedOutMeasures["nUncomp_Introduced"] = OutMeasure::humanAC( 2014, MHE_UNCOMPLICATED_EPISODES_INTRODUCED, false );
+        namedOutMeasures["nUncomp_Indigenous"] = OutMeasure::humanAC( 3014, MHE_UNCOMPLICATED_EPISODES_INDIGENOUS, false );
     /// Number of severe episodes (severe malaria or malaria + coinfection)
     namedOutMeasures["nSevere"] =
         OutMeasure::humanAC( 15, MHE_SEVERE_EPISODES, false );

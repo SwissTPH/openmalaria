@@ -151,7 +151,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng, int &
 
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
-    
+
     for(auto inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
@@ -207,13 +207,29 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng, int &
         m_y_lag_l[y_lag_i * Genotypes::N() + g] = 0.0;
     }
 
+    int nImported = 0, nIntroduced = 0, nIndigenous = 0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf )
     {
         if(inf->origin() == InfectionOrigin::Imported)
             m_y_lag_i[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
         else
             m_y_lag_l[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
+
+        if(inf->origin() == InfectionOrigin::Indigenous) nIndigenous++;
+        else if(inf->origin() == InfectionOrigin::Introduced) nIntroduced++;
+        else nImported++;
     }
+
+    /* The rules are:
+    - Imported only if all infections are imported
+    - Introduced if at least one Introduced
+    - Indigenous otherwise (Imported + Indigenous or just Indigenous infections) */
+    if(nIntroduced > 0)
+        infectionType = InfectionOrigin::Introduced;
+    else if(nIndigenous > 0)
+        infectionType = InfectionOrigin::Indigenous;
+    else
+        infectionType = InfectionOrigin::Imported;
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(opt_vaccine_genotype == false)
@@ -230,27 +246,7 @@ bool DescriptiveWithinHostModel::summarize( Host::Human& human )const{
     pathogenesisModel->summarize( human );
     
     // If the number of infections is 0 and parasite density is positive we default to Indigenous
-    InfectionOrigin infectionType = InfectionOrigin::Indigenous;
     if( infections.size() > 0 ){
-        int nImported = 0, nIntroduced = 0, nIndigenous = 0;
-        for(const auto& infection : infections)
-        {
-            if(infection.origin() == InfectionOrigin::Indigenous) nIndigenous++;
-            else if(infection.origin() == InfectionOrigin::Introduced) nIntroduced++;
-            else nImported++;
-        }
-
-        /* The rules are:
-        - Imported only if all infections are imported
-        - Introduced if at least one Introduced
-        - Indigenous otherwise (Imported + Indigenous or just Indigenous infections) */
-        if(nIntroduced > 0)
-            infectionType = InfectionOrigin::Introduced;
-        else if(nIndigenous > 0)
-            infectionType = InfectionOrigin::Indigenous;
-        else
-            infectionType = InfectionOrigin::Imported;
-
         mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
         if(infectionType == InfectionOrigin::Indigenous)
             mon::reportStatMHI( mon::MHR_INFECTED_HOSTS_INDIGENOUS, human, 1 );
@@ -258,6 +254,14 @@ bool DescriptiveWithinHostModel::summarize( Host::Human& human )const{
             mon::reportStatMHI( mon::MHR_INFECTED_HOSTS_INTRODUCED, human, 1 );
         else
             reportStatMHI( mon::MHR_INFECTED_HOSTS_IMPORTED, human, 1 );
+
+        int nImported = 0, nIntroduced = 0, nIndigenous = 0;
+        for( auto inf = infections.begin(); inf != infections.end(); ++inf )
+        {
+            if(inf->origin() == InfectionOrigin::Indigenous) nIndigenous++;
+            else if(inf->origin() == InfectionOrigin::Introduced) nIntroduced++;
+            else nImported++;
+        }
 
         // (patent) infections are reported by genotype, even though we don't have
         // genotype in this model

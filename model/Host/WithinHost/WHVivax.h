@@ -164,6 +164,10 @@ public:
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     
     virtual void clearImmunity();
+
+    virtual InfectionOrigin getInfectionType() const {
+        return InfectionOrigin::Indigenous;
+    }
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );

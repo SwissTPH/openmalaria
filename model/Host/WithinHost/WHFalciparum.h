@@ -70,6 +70,10 @@ public:
     
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
 
+    virtual InfectionOrigin getInfectionType() const {
+        return infectionType;
+    }
+
     inline double getCumulative_h() const {
         return m_cumulative_h;
     }
@@ -136,6 +140,8 @@ protected:
     
     /// End of step on which treatment expires = start of first step after expiry
     SimTime treatExpiryLiver, treatExpiryBlood;
+
+    InfectionOrigin infectionType = InfectionOrigin::Indigenous;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

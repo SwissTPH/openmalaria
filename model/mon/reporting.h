@@ -81,7 +81,7 @@ enum Measure{
     
     // ———  MHE: measures for human episodes (integers)  ———
     // Number of uncomplicated fever episodes in humans. Units: cases
-    MHE_UNCOMPLICATED_EPISODES,
+    MHE_UNCOMPLICATED_EPISODES, MHE_UNCOMPLICATED_EPISODES_IMPORTED, MHE_UNCOMPLICATED_EPISODES_INTRODUCED, MHE_UNCOMPLICATED_EPISODES_INDIGENOUS,
     // Number of severe fever episodes in humans. Units: cases
     MHE_SEVERE_EPISODES,
     // Number of severe fever episodes without counting episodes due to comorbidities in humans. Units: cases

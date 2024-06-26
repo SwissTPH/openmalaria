@@ -260,13 +260,29 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i
         m_y_lag_l[y_lag_i * Genotypes::N() + g] = 0.0;
     }
 
+    int nImported = 0, nIntroduced = 0, nIndigenous = 0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf )
     {
         if((*inf)->origin() == InfectionOrigin::Imported)
             m_y_lag_i[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
         else
             m_y_lag_l[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
+
+        if((*inf)->origin() == InfectionOrigin::Indigenous) nIndigenous++;
+        else if((*inf)->origin() == InfectionOrigin::Introduced) nIntroduced++;
+        else nImported++;
     }
+
+    /* The rules are:
+    - Imported only if all infections are imported
+    - Introduced if at least one Introduced
+    - Indigenous otherwise (Imported + Indigenous or just Indigenous infections) */
+    if(nIntroduced > 0)
+        infectionType = InfectionOrigin::Introduced;
+    else if(nIndigenous > 0)
+        infectionType = InfectionOrigin::Indigenous;
+    else
+        infectionType = InfectionOrigin::Imported;
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(nNewInfsIgnored > 0)
@@ -294,16 +310,7 @@ bool CommonWithinHost::summarize( Host::Human& human )const{
     pkpdModel.summarize( human );
     
     // If the number of infections is 0 and parasite density is positive we default to Indigenous
-    InfectionOrigin infectionType = InfectionOrigin::Indigenous;
     if( infections.size() > 0 ){
-        int nImported = 0, nIntroduced = 0, nIndigenous = 0;
-        for(const auto infection : infections)
-        {
-            if(infection->origin() == InfectionOrigin::Indigenous) nIndigenous++;
-            else if(infection->origin() == InfectionOrigin::Introduced) nIntroduced++;
-            else nImported++;
-        }
-
         mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
         if(infectionType == InfectionOrigin::Indigenous)
             mon::reportStatMHI( mon::MHR_INFECTED_HOSTS_INDIGENOUS, human, 1 );

@@ -26,6 +26,8 @@
 #include "util/random.h"
 #include "Host/WithinHost/Diagnostic.h"
 #include "Host/WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Infection/Infection.h"
+
 #include "Parameters.h"
 
 using namespace std;
@@ -191,6 +193,8 @@ public:
     // TODO(monitoring): these shouldn't have to be exposed (perhaps use summarize to report the data):
     virtual double getCumulative_h() const =0;
     virtual double getCumulative_Y() const =0;
+
+    virtual InfectionOrigin getInfectionType() const =0;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of
