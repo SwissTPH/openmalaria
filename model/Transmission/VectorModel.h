@@ -69,7 +69,7 @@ public:
 
     virtual void vectorUpdate(const vector<Host::Human> &population);
 
-    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const;
+    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l) const;
 
     virtual void deployVectorPopInterv(size_t instance);
     virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan);

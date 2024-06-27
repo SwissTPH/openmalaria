@@ -214,30 +214,36 @@ double InfectionIncidenceModel::susceptibility () {
   }
 }
 
-int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR) {
-  double expectedNumInfections = getModelExpectedInfections (human.rng, effectiveEIR, human.perHostTransmission);
-  // error check (should be OK if kappa is checked, for nonVector model):
-  if( !(std::isfinite)(effectiveEIR) ){
-    ostringstream out;
-    out << "effectiveEIR is not finite: " << effectiveEIR << endl;
-    throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
-  }
+double InfectionIncidenceModel::expectedNumNewInfections(OM::Host::Human& human, double effectiveEIR)
+{
+    double expectedNumInfections = getModelExpectedInfections (human.rng, effectiveEIR, human.perHostTransmission);
+    // error check (should be OK if kappa is checked, for nonVector model):
+    if( !(std::isfinite)(effectiveEIR) ){
+        ostringstream out;
+        out << "effectiveEIR is not finite: " << effectiveEIR << endl;
+        throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
+    }
   
-  // Only to be consistent with old simulation runs when set to false
-  // Setting this option to true will only affect reporting
-  if(opt_vaccine_genotype == false)
-      //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-      expectedNumInfections *= human.vaccine.getFactor( interventions::Vaccine::PEV );
+    // Only to be consistent with old simulation runs when set to false
+    // Setting this option to true will only affect reporting
+    if(opt_vaccine_genotype == false)
+        //Introduce the effect of vaccination. Note that this does not affect cumEIR.
+        expectedNumInfections *= human.vaccine.getFactor( interventions::Vaccine::PEV );
   
-  //Update pre-erythrocytic immunity
-  m_cumulativeEIRa+=effectiveEIR;
-  
-  m_pInfected = 1.0 - exp(-expectedNumInfections) * (1.0-m_pInfected);
-  if (m_pInfected < 0.0)
-    m_pInfected = 0.0;
-  else if (m_pInfected > 1.0)
-    m_pInfected = 1.0;
-  
+    //Update pre-erythrocytic immunity
+    m_cumulativeEIRa+=effectiveEIR;
+
+    m_pInfected = 1.0 - exp(-expectedNumInfections) * (1.0-m_pInfected);
+    if (m_pInfected < 0.0)
+        m_pInfected = 0.0;
+    else if (m_pInfected > 1.0)
+        m_pInfected = 1.0;
+
+    return expectedNumInfections;
+}
+
+int InfectionIncidenceModel::numNewInfections (Human& human, double expectedNumInfections)
+{ 
   if (expectedNumInfections > 0.0000001){
     int n = human.rng.poisson(expectedNumInfections);
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){

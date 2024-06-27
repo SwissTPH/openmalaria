@@ -116,6 +116,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
         transmission.updateKappa(population.humans);
+        transmission.surveyEIR();
 
         sim::end_update();
 

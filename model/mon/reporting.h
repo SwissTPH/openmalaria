@@ -44,13 +44,13 @@ enum Measure{
     // Number of hosts. Units: humans
     MHR_HOSTS,
     // Number of infected hosts. Units: humans
-    MHR_INFECTED_HOSTS,
+    MHR_INFECTED_HOSTS, MHR_INFECTED_HOSTS_IMPORTED, MHR_INFECTED_HOSTS_INTRODUCED, MHR_INFECTED_HOSTS_INDIGENOUS,
     // Number of patent infected hosts. Units: humans
-    MHR_PATENT_HOSTS,
+    MHR_PATENT_HOSTS, MHR_PATENT_HOSTS_IMPORTED, MHR_PATENT_HOSTS_INTRODUCED, MHR_PATENT_HOSTS_INDIGENOUS,
     // Number of infections in humans. Units: infections
-    MHR_INFECTIONS,
+    MHR_INFECTIONS, MHR_INFECTIONS_IMPORTED, MHR_INFECTIONS_INTRODUCED, MHR_INFECTIONS_INDIGENOUS,
     // Number of patent infections in humans. Units: infections
-    MHR_PATENT_INFECTIONS,
+    MHR_PATENT_INFECTIONS, MHR_PATENT_INFECTIONS_IMPORTED, MHR_PATENT_INFECTIONS_INTRODUCED, MHR_PATENT_INFECTIONS_INDIGENOUS,
     // Number of new infections in humans. Units: infections
     MHR_NEW_INFECTIONS,
     // Number of sub-population removals due to first event. Units: humans
@@ -81,7 +81,7 @@ enum Measure{
     
     // ———  MHE: measures for human episodes (integers)  ———
     // Number of uncomplicated fever episodes in humans. Units: cases
-    MHE_UNCOMPLICATED_EPISODES,
+    MHE_UNCOMPLICATED_EPISODES, MHE_UNCOMPLICATED_EPISODES_IMPORTED, MHE_UNCOMPLICATED_EPISODES_INTRODUCED, MHE_UNCOMPLICATED_EPISODES_INDIGENOUS,
     // Number of severe fever episodes in humans. Units: cases
     MHE_SEVERE_EPISODES,
     // Number of severe fever episodes without counting episodes due to comorbidities in humans. Units: cases
@@ -179,7 +179,7 @@ enum Measure{
     // Input EIR (Expected EIR entered into scenario file). Units: inoculations per adult per time step.
     MVF_INPUT_EIR,
     // Simulated EIR (EIR output by the transmission model). Units: inoculations per adult per time step.
-    MVF_SIM_EIR,
+    MVF_SIM_EIR, MVF_SIM_EIR_INTRODUCED, MVF_SIM_EIR_INDIGENOUS,
     // Total inoculations over survey period per group (age, cohort). Units: inoculations.
     MVF_INOCS,
     // N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day

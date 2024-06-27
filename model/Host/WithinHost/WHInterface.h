@@ -26,6 +26,8 @@
 #include "util/random.h"
 #include "Host/WithinHost/Diagnostic.h"
 #include "Host/WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Infection/Infection.h"
+
 #include "Parameters.h"
 
 using namespace std;
@@ -104,31 +106,21 @@ public:
     /** Return the infectiousness of this human to biting mosquitoes.
      * This step is independent of parasite genetics.
      * 
-     * @param tbvFactor Probability that transmission is not blocked by a
-     *  "transmission blocking vaccine".
-     * @param sumX Optional out parameter for usage with
-     *  pTransGenotype(). Pointer may be zero if not required. May be ignored
-     *  if the local implementation of pTransGenotype does not require it.
      * @returns the probability of this human infecting a feeding mosquito.
      * 
-     * Calculates the value during the call, which is expensive (cache externally
-     * if the value is needed multiple times). */
-    virtual double probTransmissionToMosquito(double *sumX )const =0;
-    
-    /** Calculates a probability of transmitting an infection of a given
-     * genotype to a mosquito, given the two outputs of
-     * probTransmissionToMosquito(). Only available for WHFalciparum and
-     * should only be called when num genotypes > 1. */
-    inline double probTransGenotype( double pTrans, double sumX, size_t genotype ){
-        if( pTrans <= 0.0 ) return 0.0;
-        else return pTransGenotype( pTrans, sumX, genotype );
-    }
-    
+     * Calculates the probability of transmitting an infection of a given
+     * genotype to a mosquito and store the result in probTransGenotype[g]
+     * for a given genotype g 
+     * 
+     * Calulates the probability for imported infections _i and
+     * for local infections _l */
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const = 0;
+
     /// @returns true if host has patent parasites
     virtual bool summarize(Host::Human& human) const =0;
 
     /// Create a new infection within this human
-    virtual void importInfection(LocalRng& rng) =0;
+    virtual void importInfection(LocalRng& rng, int origin) =0;
 
     /**
      * Carry out the effects of some treatment option, optionally with intervention deployment.
@@ -166,8 +158,8 @@ public:
      * @param ageInYears Age of human
      * @param bsvFactor Parasite survival factor for blood-stage vaccines
      */
-    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
-            double ageInYears) =0;
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears) =0;
 
     /** TODO: this should not need to be exposed. It is currently used by a
      * severe outcome (pDeath) model inside the EventScheduler "case
@@ -202,6 +194,8 @@ public:
     virtual double getCumulative_h() const =0;
     virtual double getCumulative_Y() const =0;
 
+    virtual InfectionOrigin getInfectionType() const =0;
+
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of
      * infections to baloon stupidly.
@@ -209,11 +203,7 @@ public:
      * Exact constraint is: _MOI <= MAX_INFECTIONS. */
     static const int MAX_INFECTIONS = 21;
 
-protected:
-    // See probTransGenotype; this function should only be called when pTrans > 0
-    virtual double pTransGenotype( double pTrans, double sumX,
-                                   size_t genotype ) =0;
-    
+protected:    
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 

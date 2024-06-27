@@ -29,18 +29,31 @@
 class UnittestUtil;
 
 namespace OM { namespace WithinHost {
-    
+
+enum InfectionOrigin
+{
+    /** Imported infections are directly added to the human population dependent on the importation rate. **/
+    Imported,
+
+    /** Introduced infections are locally transmitted infections from mosquitoes who got infected from imported infections. **/
+    Introduced,
+
+    /** Indigenous infections are locally transmitted infections from mosquitoes who got infected from introduced or indigenous infections. **/
+    Indigenous,
+};
+
 class Infection {
 public:
     inline static void init( SimTime latentP ){
         s_latentP = latentP;
     }
     
-    Infection (uint32_t genotype) :
+    Infection (uint32_t genotype, int origin) :
         m_startDate(sim::nowOrTs0()),
         m_density(0.0),
         m_cumulativeExposureJ(0.0),
-        m_genotype(genotype)
+        m_genotype(genotype),
+        m_origin(origin)
     {}
     Infection (istream& stream) :
         m_startDate(sim::never())
@@ -49,6 +62,7 @@ public:
         m_density & stream;
         m_cumulativeExposureJ & stream;
         m_genotype & stream;
+        m_origin & stream;
     }
     virtual ~Infection () {}
     
@@ -91,6 +105,9 @@ public:
     
     /** Get the infection's genotype. */
     uint32_t genotype()const{ return m_genotype; }
+
+    /** Get the infection's genotype. */
+    int origin() const{ return m_origin; }
     
     
     /// Resets immunity properties specific to the infection (should only be
@@ -111,6 +128,7 @@ protected:
         m_density & stream;
         m_cumulativeExposureJ & stream;
         m_genotype & stream;
+        m_origin & stream;
     }
     
     /// Date of inoculation of infection (start of liver stage)
@@ -126,6 +144,8 @@ protected:
 private:
     /// Genotype of infection (a code; see Genotypes class).
     uint32_t m_genotype;
+
+    int m_origin;
     
 protected:
     /// Pre-erythrocytic latent period (instantiated in WHFalciparum.cpp)

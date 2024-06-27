@@ -69,7 +69,7 @@ public:
         UnittestUtil::initTime(1);
         UnittestUtil::PkPdSuiteSetup();
         proxy = new LSTMModel ();
-        inf = createDummyInfection(m_rng, 0);
+        inf = createDummyInfection(m_rng, 0, InfectionOrigin::Indigenous);
         schedule.clear();
     }
     

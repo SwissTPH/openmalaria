@@ -58,7 +58,7 @@ public:
      * @param host      The host creating this. Not really needed, except to
      * prevent VivaxBrood being default-constructed by its container.
      */
-    VivaxBrood( LocalRng& rng, WHVivax *host );
+    VivaxBrood( LocalRng& rng, int origin, WHVivax *host );
     ~VivaxBrood();
     /** Save a checkpoint. */
     void checkpoint( ostream& stream );
@@ -119,6 +119,9 @@ private:
 
     // Whether a relapse event has been triggered by this brood
     bool hadRelapse;
+
+    // Infection origin
+    int origin;
 };
 
 /**
@@ -147,21 +150,24 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( double *sumX )const;
-    virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const;
     
     virtual bool summarize(Host::Human& human) const;
     
-    virtual void importInfection(LocalRng& rng);
+    virtual void importInfection(LocalRng& rng, int origin);
     
-    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
-            double ageInYears);
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+        vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears);
     
     virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
 
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     
     virtual void clearImmunity();
+
+    virtual InfectionOrigin getInfectionType() const {
+        return InfectionOrigin::Indigenous;
+    }
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );

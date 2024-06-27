@@ -45,7 +45,7 @@ public:
         UnittestUtil::Infection_init_latentP_and_NaN ();
         EmpiricalInfection::init();
         // pkpdID (1st value) isn't important since we're not using drug model here:
-        infection = CommonWithinHost::createInfection( m_rng, 0xFFFFFFFF );
+        infection = CommonWithinHost::createInfection( m_rng, 0xFFFFFFFF, InfectionOrigin::Indigenous);
         for( SimTime d = sim::ts1(), end = sim::ts1() + sim::fromDays(15); d < end; d = d + sim::oneDay() ){
             // blood stage starts 15 days after creation
             UnittestUtil::incrTime( sim::oneDay() );

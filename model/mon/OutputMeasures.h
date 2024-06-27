@@ -136,15 +136,20 @@ void defineOutMeasures(){
     /** The number of human hosts with an infection (patent or not) at the time
      * the survey is taken. */
     namedOutMeasures["nInfect"] = OutMeasure::humanAC( 1, MHR_INFECTED_HOSTS, false );
+    namedOutMeasures["nInfect_Imported"] = OutMeasure::humanAC( 1001, MHR_INFECTED_HOSTS_IMPORTED, false );
+    namedOutMeasures["nInfect_Introduced"] = OutMeasure::humanAC( 2001, MHR_INFECTED_HOSTS_INTRODUCED, false );
+    namedOutMeasures["nInfect_Indigenous"] = OutMeasure::humanAC( 3001, MHR_INFECTED_HOSTS_INDIGENOUS, false );
     /** Expected number of infected hosts
      * 
      * This is the sum of the probabilities, across all time steps since the
      * last survey, of each host becoming infected on that time step. */
-    namedOutMeasures["nExpectd"] =
-        OutMeasure::humanAC( 2, MHF_EXPECTED_INFECTED, true );
+    namedOutMeasures["nExpectd"] = OutMeasure::humanAC( 2, MHF_EXPECTED_INFECTED, true );
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
     namedOutMeasures["nPatent"] = OutMeasure::humanAC( 3, MHR_PATENT_HOSTS, false );
+    namedOutMeasures["nPatent_Imported"] = OutMeasure::humanAC( 1003, MHR_PATENT_HOSTS_IMPORTED, false );
+    namedOutMeasures["nPatent_Introduced"] = OutMeasure::humanAC( 2003, MHR_PATENT_HOSTS_INTRODUCED, false );
+    namedOutMeasures["nPatent_Indigenous"] = OutMeasure::humanAC( 3003, MHR_PATENT_HOSTS_INDIGENOUS, false );
     /// Sum of log(1 + p) where p is the pyrogenic threshold
     namedOutMeasures["sumLogPyrogenThres"] =
         OutMeasure::humanAC( 4, MHF_LOG_PYROGENIC_THRESHOLD, true );
@@ -155,6 +160,9 @@ void defineOutMeasures(){
     /** The total number of infections in the population: includes both blood
      * and liver stages. Vivax: this is the number of broods. */
     namedOutMeasures["totalInfs"] = OutMeasure::humanACG( 6, MHR_INFECTIONS, false );
+        namedOutMeasures["totalInfs_Imported"] = OutMeasure::humanACG( 1006, MHR_INFECTIONS_IMPORTED, false );
+        namedOutMeasures["totalInfs_Introduced"] = OutMeasure::humanACG( 2006, MHR_INFECTIONS_INTRODUCED, false );
+        namedOutMeasures["totalInfs_Indigenous"] = OutMeasure::humanACG( 3006, MHR_INFECTIONS_INDIGENOUS, false );
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. proportion of
@@ -164,8 +172,10 @@ void defineOutMeasures(){
     /** The sum of all detectable infections (where blood stage parasite
      * density is above the detection limit) across all human hosts.
      * Vivax: the number of broods with an active blood stage. */
-    namedOutMeasures["totalPatentInf"] =
-        OutMeasure::humanACG( 8, MHR_PATENT_INFECTIONS, false );
+    namedOutMeasures["totalPatentInf"] = OutMeasure::humanACG( 8, MHR_PATENT_INFECTIONS, false );
+        namedOutMeasures["totalPatentInf_Imported"] = OutMeasure::humanACG( 1008, MHR_PATENT_INFECTIONS_IMPORTED, false );
+        namedOutMeasures["totalPatentInf_Introduced"] = OutMeasure::humanACG( 2008, MHR_PATENT_INFECTIONS_INTRODUCED, false );
+        namedOutMeasures["totalPatentInf_Indigenous"] = OutMeasure::humanACG( 3008, MHR_PATENT_INFECTIONS_INDIGENOUS, false );
     /// Contribuion to immunity functions (removed)
     namedOutMeasures["contrib"] = OutMeasure::obsolete( 9 );
     /// Sum of the pyrogenic threshold
@@ -178,8 +188,10 @@ void defineOutMeasures(){
     /// number of blood-stage treatments (inpatient)
     namedOutMeasures["nTreatments3"] = OutMeasure::humanAC( 13, MHT_TREATMENTS_3, false );
     /// number of episodes (uncomplicated)
-    namedOutMeasures["nUncomp"] =
-        OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
+    namedOutMeasures["nUncomp"] = OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
+        namedOutMeasures["nUncomp_Imported"] = OutMeasure::humanAC( 1014, MHE_UNCOMPLICATED_EPISODES_IMPORTED, false );
+        namedOutMeasures["nUncomp_Introduced"] = OutMeasure::humanAC( 2014, MHE_UNCOMPLICATED_EPISODES_INTRODUCED, false );
+        namedOutMeasures["nUncomp_Indigenous"] = OutMeasure::humanAC( 3014, MHE_UNCOMPLICATED_EPISODES_INDIGENOUS, false );
     /// Number of severe episodes (severe malaria or malaria + coinfection)
     namedOutMeasures["nSevere"] =
         OutMeasure::humanAC( 15, MHE_SEVERE_EPISODES, false );
@@ -258,6 +270,8 @@ void defineOutMeasures(){
      * Units: inoculations per adult per time step (children are excluded
      * when measuring). */
     namedOutMeasures["simulatedEIR"] = OutMeasure::value( 36, MVF_SIM_EIR, true );
+    namedOutMeasures["simulatedEIR_Introduced"] = OutMeasure::value( 2036, MVF_SIM_EIR_INTRODUCED, true );
+    namedOutMeasures["simulatedEIR_Indigenous"] = OutMeasure::value( 3036, MVF_SIM_EIR_INDIGENOUS, true );
     /// Number of Rapid Diagnostic Tests used
     namedOutMeasures["Clinical_RDTs"] = OutMeasure::obsolete( 39 );
     /* Effective total quanty of each drug used orally, in mg.

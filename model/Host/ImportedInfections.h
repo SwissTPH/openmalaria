@@ -28,6 +28,7 @@
 #include "util/UnitParse.h"
 #include "Host/Human.h"
 #include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Infection/Infection.h"
 
 namespace OM {
     class Population;
@@ -115,7 +116,7 @@ namespace Host {
             if( rateNow > 0.0 ){
                 for(Human& human : population){
                     if(human.rng.bernoulli( rateNow )){
-                        human.withinHostModel->importInfection(human.rng);
+                        human.withinHostModel->importInfection(human.rng, WithinHost::InfectionOrigin::Imported);
                     }
                 }
             }

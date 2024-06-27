@@ -239,8 +239,10 @@ public:
     virtual void scale(double factor)
     {
         vectors::scale (N_v, factor);
-        vectors::scale (O_v, factor);
-        vectors::scale (S_v, factor);
+        vectors::scale (O_v_i, factor);
+        vectors::scale (O_v_l, factor);
+        vectors::scale (S_v_i, factor);
+        vectors::scale (S_v_l, factor);
     }
     
     /** Initialisation which must wait until a human population is available.
@@ -281,14 +283,15 @@ public:
      * @param sigma_dff sum_i α_i * N_i * P_Bi * P_Ci * P_Di * rel_mosq_fecundity for human hosts i
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
+    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif_i, vector<double>& sigma_dif_l, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
     inline double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
     //@}
 
     /// Intermediatary from vector model equations used to calculate EIR
-    inline const vector<double>& getPartialEIR() const{ return partialEIR; }
+    inline const vector<double>& getPartialEIRImported() const{ return partialEIR_i; }
+    inline const vector<double>& getPartialEIRLocal() const{ return partialEIR_l; }
     //@}
 
 
@@ -332,9 +335,9 @@ public:
      * @param EIR_factor see parameter partialEIR
      */
     void update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
-                   const vector<double> tsP_dif, double tsP_dff,
+                   const vector<double> &tsP_dif_i, const vector<double> &tsP_dif_l, double tsP_dff,
                    bool isDynamic,
-                   vector<double>& partialEIR, double EIR_factor);
+                   vector<double>& partialEIR_i, vector<double>& partialEIR_l, double EIR_factor);
     
     /// Intermediatary from vector model equations used to calculate EIR in intervention mode
     inline double getInterventionEIR() const{ return interventionEIR[sim::inSteps(sim::intervTime())] / initAvail; }
@@ -391,7 +394,8 @@ public:
         // transmission & stream;
         seekingDeathRateIntervs & stream;
         probDeathOvipositingIntervs & stream;
-        partialEIR & stream;
+        partialEIR_i & stream;
+        partialEIR_l & stream;
         EIRRotateAngle & stream;
         FSCoeffic & stream;
         forcedS_v & stream;
@@ -411,11 +415,14 @@ public:
         N_v_length & stream;
         P_A & stream;
         P_df & stream;
-        P_dif & stream;
+        P_dif_i & stream;
+        P_dif_l & stream;
         P_dff & stream;
         N_v & stream;
-        O_v & stream;
-        S_v & stream;
+        O_v_i & stream;
+        O_v_l & stream;
+        S_v_i & stream;
+        S_v_l & stream;
         P_Amu & stream;
         P_A1 & stream;
         P_Ah & stream;
@@ -451,7 +458,7 @@ public:
     /** Per time-step init EIR.
     *
     * Doesn't need to be checkpointed (is calculated during initialization). */
-    std::vector<double> partialEIR;
+    std::vector<double> partialEIR_i, partialEIR_l;
 
     /** Per time-step intervention EIR
     *
@@ -564,8 +571,11 @@ public:
     std::vector<double> P_df;
     
     /** P_dif is the probability of a mosquito finding a host, getting
-     * infected, and successfully completing a feeding cycle. */
-    std::vector<double> P_dif;
+     * infected, and successfully completing a feeding cycle. 
+     * 
+     * We keep separate the probability of a mosquito being infected by an
+     * imported infection _i and a local infection _l */
+    std::vector<double> P_dif_i, P_dif_l;
     
     /** Like P_df but including fertility factors */
     std::vector<double> P_dff;
@@ -574,10 +584,10 @@ public:
     std::vector<double> N_v;
     
     /** Numbers of infected host-seeking mosquitoes */
-    std::vector<double> O_v;
+    std::vector<double> O_v_i, O_v_l;
 
     /** Nnumbers of infective (to humans) host-seeking mosquitoes */
-    std::vector<double> S_v;
+    std::vector<double> S_v_i, S_v_l;
 
     /** Probability of a mosquito dying */
     std::vector<double> P_Amu;

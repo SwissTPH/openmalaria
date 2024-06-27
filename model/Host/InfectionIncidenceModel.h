@@ -91,7 +91,7 @@ public:
   /// Output _pinfected to the summary
   void summarize (const Host::Human& human);
   
-  /** Calculate the number of new infections to introduce.
+    /** Calculate the expected number of new infections to introduce.
    * 
    * Firstly converts the EIR into an expected number of infections (what
    * getExpectedNumberOfInfections() used to do):
@@ -106,7 +106,15 @@ public:
    * @param effectiveEIR    EIR adjusted for availability (age, het,
    *        outside transmission due to hospitalisation)
    */
-  int numNewInfections(OM::Host::Human& human, double effectiveEIR);
+  double expectedNumNewInfections(OM::Host::Human& human, double effectiveEIR);
+
+  /** Calculate the number of new infections to introduce.
+   * 
+   * @param human   Reference to human
+   * @param expectedNumNewInfections   Expected number of infections
+   * to be introduced
+   */
+  int numNewInfections(OM::Host::Human& human, double expectedNumNewInfections);
 
   /** Report the number of new infections
    * 

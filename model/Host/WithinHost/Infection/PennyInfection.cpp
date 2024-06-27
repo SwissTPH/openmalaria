@@ -138,8 +138,8 @@ const double Omega=0.00025;
 
 //@}
 
-CommonInfection* createPennyInfection (LocalRng& rng, uint32_t protID) {
-    return new PennyInfection (rng, protID);
+CommonInfection* createPennyInfection (LocalRng& rng, uint32_t protID, int origin) {
+    return new PennyInfection (rng, protID, origin);
 }
 
 CommonInfection* checkpointedPennyInfection (istream& stream) {
@@ -163,8 +163,8 @@ void PennyInfection::init() {
     }
 }
 
-PennyInfection::PennyInfection(LocalRng& rng, uint32_t protID):
-        CommonInfection(protID),
+PennyInfection::PennyInfection(LocalRng& rng, uint32_t protID, int origin):
+        CommonInfection(protID, origin),
         variantSpecificSummation(0),
         clonalSummation(0)
 {

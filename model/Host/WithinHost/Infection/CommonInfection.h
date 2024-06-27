@@ -46,8 +46,8 @@ public:
         Infection(stream)
     {}
     /// Per instance initialisation; create new inf.
-    CommonInfection(uint32_t genotype) :
-	Infection(genotype)
+    CommonInfection(uint32_t genotype, int origin) :
+	Infection(genotype, origin)
     {}
     virtual ~CommonInfection();
     //@}

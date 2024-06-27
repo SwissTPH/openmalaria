@@ -43,7 +43,7 @@ public:
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
-        infection = new PennyInfection (m_rng, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
+        infection = new PennyInfection (m_rng, 0xFFFFFFFF, InfectionOrigin::Indigenous);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
         delete infection;

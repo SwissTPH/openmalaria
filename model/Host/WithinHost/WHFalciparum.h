@@ -57,9 +57,8 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( double *sumX )const;
-    virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
-    
+    virtual double probTransmissionToMosquito(vector<double> &probTransGenotype_i, vector<double> &probTransGenotype_l)const;
+
     // No PQ treatment for falciparum in current models:
     virtual void optionalPqTreatment( Host::Human& human ){}
     
@@ -70,6 +69,10 @@ public:
     virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
+
+    virtual InfectionOrigin getInfectionType() const {
+        return infectionType;
+    }
 
     inline double getCumulative_h() const {
         return m_cumulative_h;
@@ -130,13 +133,15 @@ protected:
     *
     * m_y_lag[sim::ts0().moduloSteps(y_lag_len)] corresponds to the density
     * from the previous time step (once updateInfection has been called). */
-    std::vector<double> m_y_lag;
+    std::vector<double> m_y_lag_i, m_y_lag_l;
     
     /// The PathogenesisModel introduces illness dependant on parasite density
     unique_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
     
     /// End of step on which treatment expires = start of first step after expiry
     SimTime treatExpiryLiver, treatExpiryBlood;
+
+    InfectionOrigin infectionType = InfectionOrigin::Indigenous;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

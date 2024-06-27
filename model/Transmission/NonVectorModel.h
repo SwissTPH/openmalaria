@@ -168,27 +168,28 @@ public:
         return currentKappa;
     }
 
-    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
+    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l) const
     {
-        EIR.resize(1); // no support for per-genotype tracking in this model (possible, but we're lazy)
+        EIR_i.resize(1);
+        EIR_l.resize(1); // no support for per-genotype tracking in this model (possible, but we're lazy)
         // where the full model, with estimates of human mosquito transmission is in use, use this:
-        if (simulationMode == forcedEIR) { EIR[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())]; }
+        if (simulationMode == forcedEIR) { EIR_l[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())]; }
         else if (simulationMode == transientEIRknown)
         {
             // where the EIR for the intervention phase is known, obtain this from
             // the interventionEIR array
-            EIR[0] = interventionEIR[sim::inSteps(sim::intervTime())];
+            EIR_l[0] = interventionEIR[sim::inSteps(sim::intervTime())];
         }
         else if (simulationMode == dynamicEIR)
         {
-            EIR[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())];
+            EIR_l[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())];
             if (sim::intervTime() >= sim::zero())
             {
                 // we modulate the initialization based on the human infectiousness time steps ago in the
                 // simulation relative to infectiousness at the same time-of-year, pre-intervention.
                 // nspore gives the sporozoite development delay.
                 size_t t = sim::inSteps(sim::ts1() - nSpore);
-                EIR[0] *= laggedKappa[mod_nn(t, laggedKappa.size())] / initialKappa[mod_nn(t, sim::stepsPerYear())];
+                EIR_l[0] *= laggedKappa[mod_nn(t, laggedKappa.size())] / initialKappa[mod_nn(t, sim::stepsPerYear())];
             }
         }
         else
@@ -196,20 +197,20 @@ public:
             throw util::xml_scenario_error("Invalid simulation mode");
         }
 #ifndef NDEBUG
-        if (!(std::isfinite)(EIR[0]))
+        if (!(std::isfinite)(EIR_l[0]))
         {
             size_t t = sim::inSteps(sim::ts1() - nSpore);
             ostringstream msg;
-            msg << "Error: non-vect eir is: " << EIR[0] << "\nlaggedKappa:\t" << laggedKappa[mod_nn(t, laggedKappa.size())]
+            msg << "Error: non-vect eir is: " << EIR_l[0] << "\nlaggedKappa:\t" << laggedKappa[mod_nn(t, laggedKappa.size())]
                 << "\ninitialKappa:\t" << initialKappa[mod_nn(t, sim::stepsPerYear())] << endl;
             throw TRACED_EXCEPTION(msg.str(), util::Error::InitialKappa);
         }
 #endif
-        EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge(ageYears);
+        EIR_l[0] *= human.perHostTransmission.relativeAvailabilityHetAge(ageYears);
 
         auto ag = human.monitoringAgeGroup.i();
         auto cs = human.getCohortSet();
-        mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, EIR[0]);
+        mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, EIR_l[0]);
     }
 
 private:

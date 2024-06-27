@@ -150,8 +150,8 @@ const double case_specific_data[] = {
 
 // ———  static (non-class-member) code  ———
 
-CommonInfection* createMolineauxInfection (LocalRng& rng, uint32_t protID) {
-    return new MolineauxInfection (rng, protID);
+CommonInfection* createMolineauxInfection (LocalRng& rng, uint32_t protID, int origin) {
+    return new MolineauxInfection (rng, protID, origin);
 }
 
 CommonInfection* checkpointedMolineauxInfection (istream& stream) {
@@ -201,8 +201,8 @@ void MolineauxInfection::init( const Parameters& parameters ){
 
 // ———  MolineauxInfection: initialisation  ———
 
-MolineauxInfection::MolineauxInfection(LocalRng& rng, uint32_t genotype):
-        CommonInfection(genotype)
+MolineauxInfection::MolineauxInfection(LocalRng& rng, uint32_t genotype, int origin):
+        CommonInfection(genotype, origin)
 {
     for( size_t i = 0; i < v; i++ ){
         // Molineaux paper, equation 11

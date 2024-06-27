@@ -22,6 +22,7 @@
 #include "Clinical/Episode.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
+#include "Host/WithinHost/WHInterface.h"
 
 namespace OM {
 namespace Clinical {
@@ -40,6 +41,8 @@ void Episode::flush() {
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
     if( time + ClinicalModel::hsMemory() <= sim::ts0() ){
+        infectionType = human.withinHostModel->getInfectionType();
+
         report ();
 
         time = sim::ts0();
@@ -66,6 +69,12 @@ void Episode::report () {
             }
         } else { // UC or UC2
             mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES, surveyPeriod, ageGroup, cohortSet, 1 );
+            if(infectionType == WithinHost::InfectionOrigin::Indigenous)
+                mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES_INDIGENOUS, surveyPeriod, ageGroup, cohortSet, 1 );
+            else if(infectionType == WithinHost::InfectionOrigin::Introduced)
+                mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES_INTRODUCED, surveyPeriod, ageGroup, cohortSet, 1 );
+            else
+                mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES_IMPORTED, surveyPeriod, ageGroup, cohortSet, 1 );
         }
 
         // Report outcomes of malarial fevers

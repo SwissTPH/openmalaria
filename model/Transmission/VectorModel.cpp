@@ -369,7 +369,7 @@ SimTime VectorModel::initIterate()
     }
 }
 
-void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
+void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR_i, vector<double> &EIR_l) const
 {
 
     auto ag = human.monitoringAgeGroup.i();
@@ -378,7 +378,8 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
     host.update(human);
     if(simulationMode == transientEIRknown)
     {
-        EIR.assign(1, 0.0);
+        EIR_i.assign(1, 0.0);
+        EIR_l.assign(1, 0.0);
 
         assert(simulationMode == forcedEIR);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
@@ -390,7 +391,7 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
             mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
             // cout << host.availBite(i) << endl;
             // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
-            EIR[0] += eir;
+            EIR_l[0] += eir;
         }
     }
     else if (simulationMode == forcedEIR)
@@ -401,7 +402,8 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
         // mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
         // EIR.assign(1, eir);
 
-        EIR.assign(1, 0.0);
+        EIR_i.assign(1, 0.0);
+        EIR_l.assign(1, 0.0);
 
         assert(simulationMode == forcedEIR);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
@@ -413,30 +415,36 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
             mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
             // cout << host.availBite(i) << endl;
             // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
-            EIR[0] += eir;
+            EIR_l[0] += eir;
         }
     }
     else
     {
         assert(simulationMode == dynamicEIR);
-        EIR.assign(WithinHost::Genotypes::N(), 0.0);
+        EIR_i.assign(WithinHost::Genotypes::N(), 0.0);
+        EIR_l.assign(WithinHost::Genotypes::N(), 0.0);
         const double ageFactor = host.relativeAvailabilityAge(ageYears);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
         {
-            const vector<double> &partialEIR = species[i]->getPartialEIR();
+            const vector<double> &partialEIR_i = species[i]->getPartialEIRImported();
+            const vector<double> &partialEIR_l = species[i]->getPartialEIRLocal();
 
-            assert(EIR.size() == partialEIR.size());
-            if ((std::isnan)(vectors::sum(partialEIR))) { cerr << "partialEIR is not a number; " << i << endl; }
+            assert(EIR_i.size() == partialEIR_i.size());
+            assert(EIR_l.size() == partialEIR_l.size());
+            
+            // if ((std::isnan)(vectors::sum(partialEIR_i))) { cerr << "partialEIR is not a number; " << i << endl; }
 
             /* Calculates EIR per individual (hence N_i == 1).
              *
              * See comment in AnophelesModel::advancePeriod for method. */
             double entoFactor = ageFactor * host.availBite(i);
-            for (size_t g = 0; g < EIR.size(); ++g)
+            for (size_t g = 0; g < EIR_i.size(); ++g)
             {
-                auto eir = partialEIR[g] * entoFactor;
-                mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, g, eir);
-                EIR[g] += eir;
+                double eir_i = partialEIR_i[g] * entoFactor;
+                double eir_l = partialEIR_l[g] * entoFactor;
+                mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, g, eir_i + eir_l);
+                EIR_i[g] += eir_i;
+                EIR_l[g] += eir_l;
             }
         }
     }
@@ -446,28 +454,19 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
 void VectorModel::vectorUpdate(const vector<Host::Human> &population)
 {
     const size_t nGenotypes = WithinHost::Genotypes::N();
-    std::vector<double> probTransmission;
+    std::vector<double> probTransmission_i, probTransmission_l;
     std::vector<double> sum_avail(speciesIndex.size());
     std::vector<double> sigma_df(speciesIndex.size());
     std::vector<double> sigma_dff(speciesIndex.size());
-    std::vector<std::vector<double>> sigma_dif(speciesIndex.size(), std::vector<double>(nGenotypes));
+    std::vector<std::vector<double>> sigma_dif_i(speciesIndex.size(), std::vector<double>(nGenotypes)), sigma_dif_l(speciesIndex.size(), std::vector<double>(nGenotypes));
     for (const Host::Human &human : population)
     {
         const OM::Transmission::PerHost &host = human.perHostTransmission;
         WithinHost::WHInterface &whm = *human.withinHostModel;
 
-        probTransmission.assign(nGenotypes, 0.0);
-        double sumX = numeric_limits<double>::quiet_NaN();
-        const double pTrans = whm.probTransmissionToMosquito(&sumX);
-        if (nGenotypes == 1)
-            probTransmission[0] = pTrans;
-        else
-            for (size_t g = 0; g < nGenotypes; ++g)
-            {
-                const double k = whm.probTransGenotype(pTrans, sumX, g);
-                assert((std::isfinite)(k));
-                probTransmission[g] = k;
-            }
+        probTransmission_i.assign(nGenotypes, 0.0);
+        probTransmission_l.assign(nGenotypes, 0.0);
+        whm.probTransmissionToMosquito(probTransmission_i, probTransmission_l);
 
         for (size_t s = 0; s < speciesIndex.size(); ++s)
         {
@@ -481,7 +480,8 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
             for (size_t g = 0; g < nGenotypes; ++g)
             {
                 const double tbvFac = human.vaccine.getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
-                sigma_dif[s][g] += df * probTransmission[g] * tbvFac;
+                sigma_dif_i[s][g] += df * probTransmission_i[g] * tbvFac;
+                sigma_dif_l[s][g] += df * probTransmission_l[g] * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);
         }
@@ -489,7 +489,7 @@ void VectorModel::vectorUpdate(const vector<Host::Human> &population)
 
     for (size_t s = 0; s < speciesIndex.size(); ++s)
     {
-        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s], sigma_dff[s], simulationMode == dynamicEIR);
+        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif_i[s], sigma_dif_l[s], sigma_dff[s], simulationMode == dynamicEIR);
     }
 }
 

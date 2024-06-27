@@ -34,10 +34,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( double* ) const{
-    throw util::unimplemented_exception( "not needed in unit test" );
-}
-double WHMock::pTransGenotype( double, double, size_t ){
+double WHMock::probTransmissionToMosquito(vector<double> &, vector<double> &) const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -45,7 +42,7 @@ bool WHMock::summarize(Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::importInfection(LocalRng& rng){
+void WHMock::importInfection(LocalRng& rng, int origin){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -65,7 +62,7 @@ void WHMock::treatPkPd(size_t schedule, size_t dosages, double age, double delay
     pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN(), delay_d );
 }
 
-void WHMock::update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>&, double ageInYears){
+void WHMock::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears) {
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -95,6 +92,10 @@ double WHMock::getCumulative_h() const{
 
 double WHMock::getCumulative_Y() const{
     throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+InfectionOrigin WHMock::getInfectionType() const{
+    return InfectionOrigin::Indigenous;
 }
 
 void WHMock::checkpoint (istream& stream){

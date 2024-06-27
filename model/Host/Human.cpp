@@ -214,8 +214,6 @@ void Human::checkpoint(ostream &stream)
 }
 
 // -----  Non-static functions: per-time-step update  -----
-vector<double> EIR_per_genotype;        // cache (not thread safe)
-
 void summarize(Human &human, bool surveyOnlyNewEp) {
     if( surveyOnlyNewEp && human.clinicalModel->isExistingCase() ){
         // This modifies the denominator to treat the health-system-memory
@@ -257,14 +255,30 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     double age1 = sim::inYears(human.age(sim::ts1()));
 
     // age1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-    double EIR = transmission.getEIR( human, age0, age1, EIR_per_genotype );
+    vector<double> EIR_per_genotype_i, EIR_per_genotype_l;
+    transmission.getEIR(human, age0, age1, EIR_per_genotype_i, EIR_per_genotype_l);
 
-    int nNewInfs = human.infIncidence->numNewInfections( human, EIR );
+    double EIR_i = util::vectors::sum(EIR_per_genotype_i);
+    double EIR_l = util::vectors::sum(EIR_per_genotype_l);
+    double EIR = EIR_i + EIR_l;
+
+    double x = 0.0;
     
+    if(EIR > 0)
+        x = EIR_i / EIR;
+
+    double expectedNNewInfs = human.infIncidence->expectedNumNewInfections( human, EIR);
+    double expectedNNewInfs_i = x * expectedNNewInfs;
+    double expectedNNewInfs_l = (1.0-x) * expectedNNewInfs;
+
+    // One more rng call if imported infection
+    int nNewInfs_l = human.infIncidence->numNewInfections( human, expectedNNewInfs_l);
+    int nNewInfs_i = human.infIncidence->numNewInfections( human, expectedNNewInfs_i);
+
     // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-    human.withinHostModel->update(human, human.rng, nNewInfs, EIR_per_genotype, age1);
-    human.infIncidence->reportNumNewInfections(human, nNewInfs);
-    
+    human.withinHostModel->update(human, human.rng, nNewInfs_i, nNewInfs_l, EIR_per_genotype_i, EIR_per_genotype_l, age1);
+    human.infIncidence->reportNumNewInfections(human, nNewInfs_i+nNewInfs_l);
+
     // age1 used to get case fatality and sequelae probabilities, determine pathogenesis
     human.clinicalModel->update( human, age1, age0 == sim::zero() );
     human.clinicalModel->updateInfantDeaths( age0 );
