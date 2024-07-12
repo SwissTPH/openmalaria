@@ -78,6 +78,7 @@ namespace OM { namespace util {
         codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
         codeMap["VACCINE_GENOTYPE"] = VACCINE_GENOTYPE;
         codeMap["CFR_PF_USE_HOSPITAL"] = CFR_PF_USE_HOSPITAL;
+        codeMap["HEALTH_SYSTEM_MEMORY_FIX"] = HEALTH_SYSTEM_MEMORY_FIX;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -120,8 +121,9 @@ namespace OM { namespace util {
 	// State of all default options:
 	bitset<NUM_OPTIONS> defaultOptSet;
 	defaultOptSet.set (MAX_DENS_CORRECTION);
-        defaultOptSet.set (INNATE_MAX_DENS);
-        defaultOptSet.set (INDIRECT_MORTALITY_FIX);
+    defaultOptSet.set (INNATE_MAX_DENS);
+    defaultOptSet.set (INDIRECT_MORTALITY_FIX);
+    defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);
 	
 	// Set options to defaults, then override any given in the XML file:
 	options = defaultOptSet;

@@ -40,7 +40,14 @@ void Episode::flush() {
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if( time + ClinicalModel::hsMemory() <= sim::ts0() ){
+    bool toReport = false;
+
+    if (healthSystemMemoryFix && (time + ClinicalModel::hsMemory() <= sim::ts0()))
+        toReport = true;
+    else if (!healthSystemMemoryFix && (time + ClinicalModel::hsMemory() < sim::ts0()))
+        toReport = true;
+
+    if(toReport) {
         infectionType = human.withinHostModel->getInfectionType();
 
         report ();

@@ -27,6 +27,7 @@
 #include "Host/WithinHost/Infection/Infection.h"
 #include "mon/AgeGroup.h"
 #include "mon/info.h"
+#include "util/ModelOptions.h"
 #include <ostream>
 
 namespace OM {
@@ -85,7 +86,10 @@ public:
             ageGroup(),
             cohortSet(0),
             state(NONE)
-    {};
+    {
+        healthSystemMemoryFix = util::ModelOptions::option (util::HEALTH_SYSTEM_MEMORY_FIX);
+    };
+
   ~Episode();
     
     /// Report anything pending, as on destruction
@@ -124,6 +128,8 @@ private:
      * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
      * (both in and out of hospital). */
     void report();
+
+    bool healthSystemMemoryFix = false;
 };
 
 } }
