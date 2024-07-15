@@ -1,4 +1,4 @@
-<xs:schema xmlns:om="http://openmalaria.org/schema/scenario_46" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://openmalaria.org/schema/scenario_47">
+<xs:schema xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://openmalaria.org/schema/scenario_47">
   
   
   
@@ -552,89 +552,6 @@
           <xs:enumeration value="HRP2"/>
         </xs:restriction>
       </xs:simpleType>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!---HumanPopulationStructure-->
-  <xs:complexType name="Demography">
-    <xs:sequence>
-      <xs:element name="ageGroup" type="om:DemogAgeGroup">
-        <xs:annotation>
-          <xs:documentation>
-            list of age groups included in demography
-          </xs:documentation>
-          <xs:appinfo>name:Age groups;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of demography data
-        </xs:documentation>
-        <xs:appinfo>name:Name of demography data;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="popSize" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>Population size</xs:documentation>
-        <xs:appinfo>units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Maximum age of simulated humans in years
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="growthRate" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          Growth rate of human population.
-            (we should be able to implement this with non-zero values)
-        </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <!-- ageGroup -->
-  <xs:complexType name="DemogAgeGroup">
-    <xs:annotation>
-      <xs:documentation>
-        list of age groups included in demography or surveys
-      </xs:documentation>
-      <xs:appinfo>name:list of age groups;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="om:DemogGroupBounds"/>
-    </xs:sequence>
-    <xs:attribute name="lowerbound" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Lower bound of age group
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Lower bound of age group</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="DemogGroupBounds">
-    <xs:attribute name="poppercent" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Percentage of human population in age group
-        </xs:documentation>
-        <xs:appinfo>units:Percentage;min:0;max:100;name:Percentage in age group</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="upperbound" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Upper bound of age group
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Upper bound of age group</xs:appinfo>
-      </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
@@ -1307,7 +1224,8 @@
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic"/>
-   <xs:element name="fever" type="om:DTFever"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated"/>
+   <xs:element name="severe" type="om:DTSevere"/>
    <xs:element name="random" type="om:DTRandom"/>
    <xs:element name="age" type="om:DTAge"/>
    <!-- actions -->
@@ -1316,7 +1234,8 @@
    <xs:element name="treatFailure" type="om:DTTreatFailure"/>
    <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
    <xs:element name="treatSimple" type="om:DTTreatSimple" maxOccurs="unbounded"/>
-   <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
+   <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="cohort" type="om:DTCohort"/>
   </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
@@ -1345,7 +1264,8 @@
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
-   <xs:element name="fever" type="om:DTFever" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="uncomplicated" type="om:DTUncomplicated" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="severe" type="om:DTSevere" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
    <!-- actions -->
@@ -1353,6 +1273,7 @@
    <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
    <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="report" type="om:DTReport" maxOccurs="unbounded" minOccurs="0"/>
+   <xs:element name="cohort" type="om:DTCohort" minOccurs="0" maxOccurs="unbounded"/>
   </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
@@ -1416,13 +1337,12 @@
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>
- <xs:complexType name="DTFever">
+ <xs:complexType name="DTUncomplicated">
   <xs:annotation>
    <xs:documentation>
-        A switch which choses a branch deterministically, based on the outcome
-        of some type of diagnostic.
+        A switch which choses a branch deterministically, based on whether the host has an uncomplicated case. This could be a Malaria fever or a non-Malaria fever. If non-Malaria fevers are enable, it is possible to add a &lt;diagnostic&gt; node.
       </xs:documentation>
-   <xs:appinfo>name:Switch (diagnostic);</xs:appinfo>
+   <xs:appinfo>name:Switch (uncomplicated);</xs:appinfo>
   </xs:annotation>
   <xs:all>
    <xs:element name="positive" type="om:DecisionTree"/>
@@ -1436,7 +1356,40 @@
     <xs:appinfo>name:Name;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="lookBack" type="xs:string" use="required">
+  <xs:attribute name="memory" type="xs:string" use="optional" default="1">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DTSevere">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the host has a severe case or not. Note that this include severe cases due to comorbidities.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (severe);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="positive" type="om:DecisionTree"/>
+   <xs:element name="negative" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="memory" type="xs:string" use="optional">
    <xs:annotation>
     <xs:documentation>
           Follow-up period during which a recurrence is
@@ -1700,6 +1653,39 @@
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>
+ <xs:complexType name="DTCohort">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the host is part of the cohort (defined by the intervention component) or not.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (cohort);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="positive" type="om:DecisionTree"/>
+   <xs:element name="negative" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="component" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
  <!-- treatments -->
  <!-- unused: we could use a list like this to describe all options
   <xs:complexType name="TreatmentDescriptions">
@@ -1846,6 +1832,395 @@
    </xs:extension>
   </xs:complexContent>
  </xs:complexType>
+
+  
+  <xs:complexType name="Monitoring">
+    <xs:sequence>
+      <xs:element name="continuous" minOccurs="0">
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="om:OptionSet">
+              <xs:attribute name="period" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Delay between reports; typically one time step but can be
+                    greater.
+                    
+                    Can be specified in steps (e.g. 1t) or days (e.g. 5d).
+                  </xs:documentation>
+                  <xs:appinfo>units:User defined (default: steps);name:Delay between reports;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="duringInit" type="xs:boolean" use="optional">
+                <xs:annotation>
+                  <xs:documentation>
+                    Also output during initialization. By default this is
+                    disabled (only intervention-period data is output). This
+                    should not be used for predictions, but can be useful for
+                    model validation.
+                    
+                    In this mode, 'simulation time' is output as the first
+                    column (in addition to 'timestep'), since 'timestep' is dis-
+                    continuous across the start of the intervention period.
+                  </xs:documentation>
+                  <xs:appinfo>units:Days;min:1;max:unbounded;name:During initialization;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SurveyOptions" type="om:MonitoringOptions">
+        <xs:annotation>
+          <xs:documentation>
+            List of all active survey options. See model/mon/OutputMeasures.h for a list of
+            supported outputs. Should also be on the wiki.
+          </xs:documentation>
+          <xs:appinfo>name:Name of quantity;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="surveys">
+        <xs:annotation>
+          <xs:documentation>
+            List of survey times
+          </xs:documentation>
+          <xs:appinfo>name:Survey times (time steps);</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="surveyTime" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  Time of a survey. A report will be made for those measures
+                  enabled under SurveyOptions. Reported data is either from the
+                  moment the survey is done (immediate data) or is collected 
+                  over the time since the previous survey, or in some cases
+                  over a fixed time span (usually one year).
+                  
+                  Times can be specified in time steps, starting from 0, or as
+                  a date (see monitoring/startDate), or in days (e.g. 15d) or
+                  years (e.g. 1y). Relative times mean the time since the start
+                  of the intervention period, and must be non-negative (zero is
+                  valid, but some measures, e.g. nUncomp, will be zero).
+                  
+                  The simulation ends immediately after the last survey is taken.
+                </xs:documentation>
+                <xs:appinfo>units:User defined (defaults to steps);min:0;name:Survey time;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <!--NOTE: this is an extension of xs:int for backwards compatibility.-->
+                <xs:simpleContent>
+                  <xs:extension base="xs:string">
+                    <xs:attribute name="repeatStep" type="xs:string" use="optional">
+                      <xs:annotation>
+                        <xs:documentation>See repeatEnd's documentation.</xs:documentation>
+                        <xs:appinfo>name:Step of repetition;units:User defined;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="repeatEnd" type="xs:string" use="optional">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Either both repeatStep and repeatEnd should be present
+                          or neither. If present, the survey is repeated every
+                          repeatStep timesteps (i.e. if t0 is the initial time
+                          and x is repeatStep, surveys are done at times t0,
+                          t0+x, t0+2*x, ...), ending before repeatEnd
+                          (final repetition is the one before repeatEnd).
+                          
+                          Note that repeatEnd may be specified as a date but
+                          repeatStep must be a duration (days, steps or years).
+                        </xs:documentation>
+                        <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="reported" type="xs:boolean" default="true">
+                      <xs:annotation>
+                        <xs:documentation>For normal surveys, reporting=true. If set false,
+                          quantities are measured but not reported. The reason for doing this is
+                          to update conditions set on reportable measures.
+                          
+                          Multiple surveys may be given here for the same date, e.g. if using
+                          &quot;repeatStep&quot; for both reporting and non-reporting surveys. These are
+                          combined such that a maximum of one survey is carried out per time-step,
+                          and the survey is reported if any of the listed surveys for this date is
+                          configured as &quot;reporting&quot;.
+                          
+                          Note that adding non-reporting surveys will not affect value output by
+                          reported surveys, with the exception that generated psuedo-random numbers
+                          may be altered (specifically, when any stochastic diagnostics are used in
+                          surveys).
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:simpleContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="detectionLimit" type="xs:double" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Deprecated: limit above which a human's infection is reported
+                as patent.
+                
+                Alternative: do not specify this; instead specify &quot;diagnostic&quot;.
+              </xs:documentation>
+              <xs:appinfo>units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="diagnostic" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of a parameterised diagnostic to use in surveys (see
+                scenario/diagnostics).
+              </xs:documentation>
+              <xs:appinfo>name:Name of monitoring diagnostic;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ageGroup" type="om:MonAgeGroup">
+        <xs:annotation>
+          <xs:documentation>
+            List of age groups included in demography or surveys
+          </xs:documentation>
+          <xs:appinfo>name:Age groups;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="cohorts" minOccurs="0" type="om:Cohorts">
+        <xs:annotation>
+          <xs:documentation>
+            Allows the configuration of multiple cohorts (output segregated
+            according to membership within specific sub-populations).
+            
+            If this element is omitted, monitoring surveys cover the entire
+            simulated human population.
+            
+            It does not affect the &quot;continuous&quot; outputs (these never take
+            cohorts into account).
+          </xs:documentation>
+          <xs:appinfo>name:Cohorts;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of monitoring settings
+        </xs:documentation>
+        <xs:appinfo>name:Name of monitoring settings;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="startDate" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional date for the start of monitoring. If given, dates may be
+          used to specify when other events (surveys, intervention deployments)
+          occur; alternately times relative to the start of the intervention
+          period may be used to specify event times.
+          
+          Setting this to 1st January of some year might simplify usage of
+          dates, and putting the start a couple of years before the start of
+          intervention deployment (along with some extra surveys) may be useful
+          to check transmission stabilises to the expected pre-intervention
+          levels.
+          
+          As an example, if this date is set to 2000-01-01, then the following
+          event times are equivalent (assuming 1t=5d):
+          15t, 75d, 0.2y, 2000-03-16.
+          
+          Must be in the form YYYY-MM-DD, e.g. 2003-01-01.
+        </xs:documentation>
+        <xs:appinfo>name:Start of monitoring;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MonAgeGroup">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="group" type="om:MonGroupBounds"/>
+    </xs:sequence>
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Lower bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MonGroupBounds">
+    <xs:attribute name="upperbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Upper bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Cohorts">
+    <xs:sequence>
+      <xs:element name="subPop" maxOccurs="unbounded" type="om:CohortSubPop">
+        <xs:annotation>
+          <xs:documentation>
+            Consider a certain sup-population a cohort, and segregate outputs
+            according to membership. Where multiple sub-populations are listed,
+            segregate output according to all combinations of membership: e.g.
+            if sub-populations A and B are listed, there will be outputs for
+            &quot;member of A and B&quot;, &quot;member of A but not B&quot;, &quot;B but not A&quot; and
+            &quot;not a member of A or B&quot;. Listing n sub-populations implies 2^n
+            sets of outputs (each is further segregated by age groups, survey
+            times and enabled output measures, which could lead to excessive
+            program memory usage and output file size).
+            
+            To identify outputs, each sub-population has a power of two number
+            as identifier (see &quot;number&quot; attribute). Each of the 2^n output sets
+            is identified by a number: the output set is the output from humans
+            who are members in some set of sub-populations (S1, S2, ...) and
+            not members in some others (T1, T2, ...); the number identifying
+            the set is the sum of the numbers identifying the sets S1, S2, etc.
+            
+            In the output file, the output set is identified by multiplying
+            this number by 1000 then adding it to the age group column.
+          </xs:documentation>
+          <xs:appinfo>name:Sub-population;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CohortSubPop">
+    <xs:attribute name="id" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Textual identifier for the sub-population (i.e. for an intervention
+          component, since sub-populations are defined as the hosts an
+          intervention component is deployed to).
+        </xs:documentation>
+        <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="number" type="xs:integer" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Number identifying a sub-population; used to define identifiers of
+          output sets. This number must be a power of 2 (i.e. 1, 2, 4, 8, ...).
+          See documentation of subPop element.
+        </xs:documentation>
+        <xs:appinfo>name:Sub-population number;units:dimensionless;min:1;max:2097152;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MonitoringOptions">
+    <xs:sequence>
+      <xs:element name="option" type="om:MonitoringOption" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="onlyNewEpisode" type="xs:boolean" default="false">
+      <xs:annotation>
+        <xs:documentation>
+          If set, some statistics exclude humans who have been treated in the
+          recent past (precisely, when the time of last treatment was before
+          the current step and no more than health-system-memory days/steps
+          ago).
+          
+          This is a rough replacement for the REPORT_ONLY_AT_RISK option,
+          with one difference: the maximum age of treatment for
+          REPORT_ONLY_AT_RISK was fixed at 20 days.
+          
+          Affected measures include (as of version 35):
+          nHost (0),
+          nInfect(1),
+          nExpectd (2),
+          nPatent (3),
+          sumLogPyrogenThres (4),
+          sumlogDens (5),
+          totalInfs (6),
+          totalPatentInf (8),
+          sumPyrogenThresh (10),
+          nSubPopRemovalFirstEvent (62),
+          sumAge (68),
+          nInfectByGenotype (69),
+          nPatentByGenotype (70),
+          logDensByGenotype (71),
+          nHostDrugConcNonZero (72),
+          sumLogDrugConcNonZero (73).
+        </xs:documentation>
+        <xs:appinfo>name:Report only for new cases;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MonitoringOption">
+    <xs:complexContent>
+      <xs:extension base="om:Option">
+        <xs:attribute name="outputNumber" type="xs:int" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              Number identifying this monitoring measure in the output
+              file (3rd column). Normally this is determined from the
+              measure, but it can be set manually, e.g. for when the same
+              measure is recorded twice (to accumulate across different
+              categories).
+            </xs:documentation>
+            <xs:appinfo>name:Number identifying measure in output;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byAge" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each age category. If
+              false, values are summed across all age categories and only
+              the sum reported. If not specified, separate categories
+              will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by age category;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byCohort" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each cohort separately.
+              If false, values are summed across all cohorts and only
+              the sum reported. If not specified, separate categories
+              will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by cohort;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="bySpecies" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each mosquito species
+              separately. If false, values are summed across all species
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by mosquito species;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byGenotype" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each parasite genotype
+              separately. If false, values are summed across all genotypes
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by parasite genotype;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byDrugType" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each drug type
+              separately. If false, values are summed across all drug types
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by drug type;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 
  
  
@@ -4783,393 +5158,606 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
   </xs:attribute>
  </xs:complexType>
 
-  
-  <xs:complexType name="Monitoring">
-    <xs:sequence>
-      <xs:element name="continuous" minOccurs="0">
-        <xs:complexType>
-          <xs:complexContent>
-            <xs:extension base="om:OptionSet">
-              <xs:attribute name="period" type="xs:string" use="required">
-                <xs:annotation>
-                  <xs:documentation>
-                    Delay between reports; typically one time step but can be
-                    greater.
-                    
-                    Can be specified in steps (e.g. 1t) or days (e.g. 5d).
-                  </xs:documentation>
-                  <xs:appinfo>units:User defined (default: steps);name:Delay between reports;</xs:appinfo>
-                </xs:annotation>
-              </xs:attribute>
-              <xs:attribute name="duringInit" type="xs:boolean" use="optional">
-                <xs:annotation>
-                  <xs:documentation>
-                    Also output during initialization. By default this is
-                    disabled (only intervention-period data is output). This
-                    should not be used for predictions, but can be useful for
-                    model validation.
-                    
-                    In this mode, 'simulation time' is output as the first
-                    column (in addition to 'timestep'), since 'timestep' is dis-
-                    continuous across the start of the intervention period.
-                  </xs:documentation>
-                  <xs:appinfo>units:Days;min:1;max:unbounded;name:During initialization;</xs:appinfo>
-                </xs:annotation>
-              </xs:attribute>
-            </xs:extension>
-          </xs:complexContent>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="SurveyOptions" type="om:MonitoringOptions">
-        <xs:annotation>
-          <xs:documentation>
-            List of all active survey options. See model/mon/OutputMeasures.h for a list of
-            supported outputs. Should also be on the wiki.
-          </xs:documentation>
-          <xs:appinfo>name:Name of quantity;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="surveys">
-        <xs:annotation>
-          <xs:documentation>
-            List of survey times
-          </xs:documentation>
-          <xs:appinfo>name:Survey times (time steps);</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="surveyTime" maxOccurs="unbounded">
-              <xs:annotation>
-                <xs:documentation>
-                  Time of a survey. A report will be made for those measures
-                  enabled under SurveyOptions. Reported data is either from the
-                  moment the survey is done (immediate data) or is collected 
-                  over the time since the previous survey, or in some cases
-                  over a fixed time span (usually one year).
-                  
-                  Times can be specified in time steps, starting from 0, or as
-                  a date (see monitoring/startDate), or in days (e.g. 15d) or
-                  years (e.g. 1y). Relative times mean the time since the start
-                  of the intervention period, and must be non-negative (zero is
-                  valid, but some measures, e.g. nUncomp, will be zero).
-                  
-                  The simulation ends immediately after the last survey is taken.
-                </xs:documentation>
-                <xs:appinfo>units:User defined (defaults to steps);min:0;name:Survey time;</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <!--NOTE: this is an extension of xs:int for backwards compatibility.-->
-                <xs:simpleContent>
-                  <xs:extension base="xs:string">
-                    <xs:attribute name="repeatStep" type="xs:string" use="optional">
-                      <xs:annotation>
-                        <xs:documentation>See repeatEnd's documentation.</xs:documentation>
-                        <xs:appinfo>name:Step of repetition;units:User defined;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                    <xs:attribute name="repeatEnd" type="xs:string" use="optional">
-                      <xs:annotation>
-                        <xs:documentation>
-                          Either both repeatStep and repeatEnd should be present
-                          or neither. If present, the survey is repeated every
-                          repeatStep timesteps (i.e. if t0 is the initial time
-                          and x is repeatStep, surveys are done at times t0,
-                          t0+x, t0+2*x, ...), ending before repeatEnd
-                          (final repetition is the one before repeatEnd).
-                          
-                          Note that repeatEnd may be specified as a date but
-                          repeatStep must be a duration (days, steps or years).
-                        </xs:documentation>
-                        <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                    <xs:attribute name="reported" type="xs:boolean" default="true">
-                      <xs:annotation>
-                        <xs:documentation>For normal surveys, reporting=true. If set false,
-                          quantities are measured but not reported. The reason for doing this is
-                          to update conditions set on reportable measures.
-                          
-                          Multiple surveys may be given here for the same date, e.g. if using
-                          &quot;repeatStep&quot; for both reporting and non-reporting surveys. These are
-                          combined such that a maximum of one survey is carried out per time-step,
-                          and the survey is reported if any of the listed surveys for this date is
-                          configured as &quot;reporting&quot;.
-                          
-                          Note that adding non-reporting surveys will not affect value output by
-                          reported surveys, with the exception that generated psuedo-random numbers
-                          may be altered (specifically, when any stochastic diagnostics are used in
-                          surveys).
-                        </xs:documentation>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:simpleContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="detectionLimit" type="xs:double" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Deprecated: limit above which a human's infection is reported
-                as patent.
+ <!-- Component and TriggeredDeployments would be in interventions.xsd, except
+    that they are needed from healthSystem.xsd -->
+ <xs:complexType name="Component">
+  <xs:annotation>
+   <xs:documentation>
+        The list of components deployed to eligible humans.
+      </xs:documentation>
+   <xs:appinfo>name:Component to be deployed;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="id" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The identifier (short name) of a component.
+        </xs:documentation>
+    <xs:appinfo>name:Identifier;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="TriggeredDeployments">
+  <xs:annotation>
+   <xs:documentation>
+        Lists intervention components which are deployed according to some
+        external trigger (for example, screening with a negative patency
+        outcome or health-system treatment).
+        
+        Components are referenced from one or more sub-lists. Each of these
+        lists is deployed independently if and only if its age constraints are
+        met by the human host and a random sample with the given probability of
+        a positive outcome is positive.
+      </xs:documentation>
+   <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
+     </xs:sequence>
+     <xs:attribute name="maxAge" type="xs:double" use="optional">
+      <xs:annotation>
+       <xs:documentation>
+                Maximum age of eligible humans (defaults to no limit).
                 
-                Alternative: do not specify this; instead specify &quot;diagnostic&quot;.
+                Input is rounded to the nearest time step.
               </xs:documentation>
-              <xs:appinfo>units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="diagnostic" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of a parameterised diagnostic to use in surveys (see
-                scenario/diagnostics).
+       <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="minAge" type="xs:double" default="0">
+      <xs:annotation>
+       <xs:documentation>
+                Minimum age of eligible humans (defaults to 0).
+                
+                Input is rounded to the nearest time step.
               </xs:documentation>
-              <xs:appinfo>name:Name of monitoring diagnostic;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="ageGroup" type="om:MonAgeGroup">
+       <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="p" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
+                Probability of this list of components being deployed, given
+                that other constraints are met.
+              </xs:documentation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="OptionSet">
+  <xs:sequence>
+   <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="Option">
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of an option (monitoring measure or model option).
+        </xs:documentation>
+    <xs:appinfo>name:Option name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="value" type="xs:boolean" default="true">
+   <xs:annotation>
+    <xs:documentation>
+          Option on/off switch (true/false). Specifying value=&quot;true&quot; is
+          the same as not specifying a value; specifying value=&quot;false&quot;
+          explicitly turns the option off. If an option is not mentioned
+          at all, it is left at its default value (normally off, but
+          in a few cases, such as some bug-fix options, on).
+        </xs:documentation>
+    <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DoubleList">
+  <xs:sequence>
+   <xs:element name="item" maxOccurs="unbounded" type="xs:double"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="DecayFunction">
+  <xs:annotation>
+   <xs:documentation>
+        Specification of decay or survival of a parameter.
+      </xs:documentation>
+   <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+   <xs:element name="decay" type="om:DecayFunction"/>
+  </xs:sequence>
+  <xs:attribute name="function" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Determines which decay function to use. Available decay functions,
+          for age t in years:
+          
+          constant: 1
+          
+          step: 1 for t less than L, otherwise 0
+          
+          linear: 1 - t/L for t less than L, otherwise 0
+          
+          exponential: exp( - t/L * log(2) )
+          
+          weibull: exp( -(t/L)^k * log(2) )
+          
+          hill: 1 / (1 + (t/L)^k)
+          
+          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+        </xs:documentation>
+    <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="constant"/>
+     <xs:enumeration value="step"/>
+     <xs:enumeration value="linear"/>
+     <xs:enumeration value="exponential"/>
+     <xs:enumeration value="weibull"/>
+     <xs:enumeration value="hill"/>
+     <xs:enumeration value="smooth-compact"/>
+     <xs:enumeration value="plus"/>
+     <xs:enumeration value="minus"/>
+     <xs:enumeration value="divides"/>
+     <xs:enumeration value="multiplies"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="L" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          (Time) scale parameter of distribution: this is either the age of
+          complete decay (smooth-compact, step and linear functions) or the age
+          at which the parameter has decayed to half its original value
+          (exponential, weibull and hill). Not used when function=&quot;constant&quot;
+          (i.e. no decay).
+          
+          This value can be specified in years, days or steps (e.g. 2y, 180d or
+          100t). When the unit is not specified years are assumed. The value is
+          used without rounding except when sampling an age of decay, when the
+          rounding happens as late as possible.
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="k" type="xs:double" default="1.0">
+   <xs:annotation>
+    <xs:documentation>
+          Shape parameter of distribution. If not specified, default value of
+          1 is used. Meaning depends on function; not used in some cases.
+        </xs:documentation>
+    <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="CV" type="xs:double" default="0">
+   <xs:annotation>
+    <xs:documentation>
+        If CV is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution. This distribution is
+        parameterised with mean=1 and CV as given.
+        
+        The effective age of decay is the real age multiplied by this variable
+        (for decay functions with a half-life, this is equivalent to dividing
+        the half-life by the variable).
+        </xs:documentation>
+    <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="increasing" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
+          (Boolean) If True, this tells OpenMalaria to use the complement of the
+          DecayFunction defined as 1-f(x). This is useful to model increasing
+          functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+          between 0 and 1.
+</xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="initialEfficacy" type="xs:double" use="optional" default="1">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Efficacy between 0 and 1.
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="rho" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Proportion between 0 and 1, proportion of the response that is short-lived.</xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_short" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of short lived component (default to years).
+
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_long" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of long lived component (default to years).
+
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueN">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional heterogeneity.
+        
+        Optionally, a distribution (&quot;distr&quot;) and standard of deviation (&quot;SD&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value (normal);</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="mean" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The mean value.
+        </xs:documentation>
+    <xs:appinfo>name:mean;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="SD" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+    <xs:appinfo>name:standard deviation;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="optional" default="const">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          
+          Valid options are as follows.
+          
+          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
+          same effect as not specifying distr at all.
+          
+          &quot;normal&quot;: the parameter is sampled from a normal distribution.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="const"/>
+     <xs:enumeration value="normal"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="BetaMeanSample">
+  <xs:annotation>
+   <xs:documentation>
+        Parameters of a normal distribution, provided as mean and variance.
+        
+        Variates are sampled from Be(α,β) where α and β are determined from the
+        mean and variance as follows: let v be the variance and c=mean/(1-mean).
+        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
+      </xs:documentation>
+   <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="mean" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The mean of the beta distribution (must be in the open range (0,1)).
+        </xs:documentation>
+    <xs:appinfo>units:none;name:mean;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="variance" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+    <xs:appinfo>units:none;name:variance;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueCV">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional heterogeneity.
+        
+        The mean cannot be specified (unless this type is extended).
+        Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value (log normal);</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="CV" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The (linear) coefficient of variation.
+          
+          This value must be specified when a (non-constant) distribution is used. 
+          Note: since version 46, variance can be used instead.
+          
+          Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
+        </xs:documentation>
+    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="optional" default="const">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          
+          Valid options are as follows.
+          
+          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
+          same effect as not specifying distr at all.
+          
+          &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
+          Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
+          of the distribution and not log-space properties.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="const"/>
+     <xs:enumeration value="lognormal"/>
+     <xs:enumeration value="gamma"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="variance" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The variance parameter of the distirbution.
+          
+          This value can be specified when a (non-constant) distribution is used.
+          
+          Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
+        </xs:documentation>
+    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueLN">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional log-normal heterogeneity.
+        
+        The mean value must be specified. Optionally, a distribution (&quot;distr&quot;)
+        and coefficient of variation (&quot;CV&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value;</xs:appinfo>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="om:SampledValueCV">
+    <xs:attribute name="mean" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:documentation>
+              The (linear) mean value.
+            </xs:documentation>
+      <xs:appinfo>name:mean;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="WeibullSample">
+  <xs:annotation>
+   <xs:documentation>
+        Parameters of a Weibull distribution.
+      </xs:documentation>
+   <xs:appinfo>name:Weibull parameters;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="scale" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The Weibull scale parameter (λ).
+        </xs:documentation>
+    <xs:appinfo>name:Scale;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="shape" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The Weibull shape parameter (k).
+        </xs:documentation>
+    <xs:appinfo>name:shape;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          In this case, only &quot;weibull&quot; is allowed.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="weibull"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DoubleValue">
+  <xs:attribute name="value" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>A double-precision floating-point value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="IntValue">
+  <xs:attribute name="value" type="xs:int" use="required">
+   <xs:annotation>
+    <xs:documentation>An integer value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="BooleanValue">
+  <xs:attribute name="value" type="xs:boolean" use="required">
+   <xs:annotation>
+    <xs:documentation>A boolean value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="AgeGroupValues">
+  <xs:sequence>
+   <xs:element maxOccurs="unbounded" name="group">
+    <xs:annotation>
+     <xs:documentation>
+            A series of values according to age groups, each specified with
+            a lower-bound and a value. The first lower-bound specified must be
+            zero; a final upper-bound of infinity is added to complete the last
+            age group. At least one age group is required. Normally these are
+            interpolated by a continuous function (see interpolation attribute).
+          </xs:documentation>
+     <xs:appinfo>name:age group;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:complexContent>
+      <xs:extension base="om:DoubleValue">
+       <xs:attribute name="lowerbound" type="xs:double" use="required">
+        <xs:annotation>
+         <xs:documentation>
+                    Lower bound of age group
+                  </xs:documentation>
+         <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
+        </xs:annotation>
+       </xs:attribute>
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <!-- NOTE: would specify default="linear" except for a possible bug in Code
+    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
+  <xs:attribute name="interpolation" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          Interpolation algorithm. Normally it is desirable for age-based
+          values to be continuous w.r.t. age. By default linear interpolation
+          is used.
+          
+          With all algorithms except &quot;none&quot;, the age groups are converted to a
+          set of points centred within each age range. Extra
+          points are added at each end (zero and infinity) to keep value
+          constant at both ends of the function. A zero-length age group may
+          be used as a kind of barrier to adjust the distribution; e.g. with
+          age group boundaries at 15, 20 and 25 years, a (linear) spline would
+          be drawn between ages 17.5 and 22.5, whereas with boundaries at
+          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
+          years (may be desired if individuals are assumed to reach adult size
+          at 20).
+          
+          Algorithms:
+          1. none: input values are used directly
+          2. linear: straight lines (on an age vs. value graph) are used to
+          interpolate data points.
+        </xs:documentation>
+    <xs:appinfo>name:interpolation;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="none"/>
+     <xs:enumeration value="linear"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+
+  <!---HumanPopulationStructure-->
+  <xs:complexType name="Demography">
+    <xs:sequence>
+      <xs:element name="ageGroup" type="om:DemogAgeGroup">
         <xs:annotation>
           <xs:documentation>
-            List of age groups included in demography or surveys
+            list of age groups included in demography
           </xs:documentation>
           <xs:appinfo>name:Age groups;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="cohorts" minOccurs="0" type="om:Cohorts">
-        <xs:annotation>
-          <xs:documentation>
-            Allows the configuration of multiple cohorts (output segregated
-            according to membership within specific sub-populations).
-            
-            If this element is omitted, monitoring surveys cover the entire
-            simulated human population.
-            
-            It does not affect the &quot;continuous&quot; outputs (these never take
-            cohorts into account).
-          </xs:documentation>
-          <xs:appinfo>name:Cohorts;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Name of monitoring settings
+          Name of demography data
         </xs:documentation>
-        <xs:appinfo>name:Name of monitoring settings;</xs:appinfo>
+        <xs:appinfo>name:Name of demography data;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="startDate" type="xs:string" use="optional">
+    <xs:attribute name="popSize" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>Population size</xs:documentation>
+        <xs:appinfo>units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          An optional date for the start of monitoring. If given, dates may be
-          used to specify when other events (surveys, intervention deployments)
-          occur; alternately times relative to the start of the intervention
-          period may be used to specify event times.
-          
-          Setting this to 1st January of some year might simplify usage of
-          dates, and putting the start a couple of years before the start of
-          intervention deployment (along with some extra surveys) may be useful
-          to check transmission stabilises to the expected pre-intervention
-          levels.
-          
-          As an example, if this date is set to 2000-01-01, then the following
-          event times are equivalent (assuming 1t=5d):
-          15t, 75d, 0.2y, 2000-03-16.
-          
-          Must be in the form YYYY-MM-DD, e.g. 2003-01-01.
+          Maximum age of simulated humans in years
         </xs:documentation>
-        <xs:appinfo>name:Start of monitoring;</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="growthRate" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Growth rate of human population.
+            (we should be able to implement this with non-zero values)
+        </xs:documentation>
+        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="MonAgeGroup">
+  <!-- ageGroup -->
+  <xs:complexType name="DemogAgeGroup">
+    <xs:annotation>
+      <xs:documentation>
+        list of age groups included in demography or surveys
+      </xs:documentation>
+      <xs:appinfo>name:list of age groups;</xs:appinfo>
+    </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="om:MonGroupBounds"/>
+      <xs:element maxOccurs="unbounded" name="group" type="om:DemogGroupBounds"/>
     </xs:sequence>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
           Lower bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:Lower bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="MonGroupBounds">
+  <xs:complexType name="DemogGroupBounds">
+    <xs:attribute name="poppercent" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Percentage of human population in age group
+        </xs:documentation>
+        <xs:appinfo>units:Percentage;min:0;max:100;name:Percentage in age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="upperbound" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
           Upper bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:Upper bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="Cohorts">
-    <xs:sequence>
-      <xs:element name="subPop" maxOccurs="unbounded" type="om:CohortSubPop">
-        <xs:annotation>
-          <xs:documentation>
-            Consider a certain sup-population a cohort, and segregate outputs
-            according to membership. Where multiple sub-populations are listed,
-            segregate output according to all combinations of membership: e.g.
-            if sub-populations A and B are listed, there will be outputs for
-            &quot;member of A and B&quot;, &quot;member of A but not B&quot;, &quot;B but not A&quot; and
-            &quot;not a member of A or B&quot;. Listing n sub-populations implies 2^n
-            sets of outputs (each is further segregated by age groups, survey
-            times and enabled output measures, which could lead to excessive
-            program memory usage and output file size).
-            
-            To identify outputs, each sub-population has a power of two number
-            as identifier (see &quot;number&quot; attribute). Each of the 2^n output sets
-            is identified by a number: the output set is the output from humans
-            who are members in some set of sub-populations (S1, S2, ...) and
-            not members in some others (T1, T2, ...); the number identifying
-            the set is the sum of the numbers identifying the sets S1, S2, etc.
-            
-            In the output file, the output set is identified by multiplying
-            this number by 1000 then adding it to the age group column.
-          </xs:documentation>
-          <xs:appinfo>name:Sub-population;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="CohortSubPop">
-    <xs:attribute name="id" use="required" type="xs:string">
-      <xs:annotation>
-        <xs:documentation>
-          Textual identifier for the sub-population (i.e. for an intervention
-          component, since sub-populations are defined as the hosts an
-          intervention component is deployed to).
-        </xs:documentation>
-        <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="number" type="xs:integer" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Number identifying a sub-population; used to define identifiers of
-          output sets. This number must be a power of 2 (i.e. 1, 2, 4, 8, ...).
-          See documentation of subPop element.
-        </xs:documentation>
-        <xs:appinfo>name:Sub-population number;units:dimensionless;min:1;max:2097152;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="MonitoringOptions">
-    <xs:sequence>
-      <xs:element name="option" type="om:MonitoringOption" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
-    <xs:attribute name="onlyNewEpisode" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
-          If set, some statistics exclude humans who have been treated in the
-          recent past (precisely, when the time of last treatment was before
-          the current step and no more than health-system-memory days/steps
-          ago).
-          
-          This is a rough replacement for the REPORT_ONLY_AT_RISK option,
-          with one difference: the maximum age of treatment for
-          REPORT_ONLY_AT_RISK was fixed at 20 days.
-          
-          Affected measures include (as of version 35):
-          nHost (0),
-          nInfect(1),
-          nExpectd (2),
-          nPatent (3),
-          sumLogPyrogenThres (4),
-          sumlogDens (5),
-          totalInfs (6),
-          totalPatentInf (8),
-          sumPyrogenThresh (10),
-          nSubPopRemovalFirstEvent (62),
-          sumAge (68),
-          nInfectByGenotype (69),
-          nPatentByGenotype (70),
-          logDensByGenotype (71),
-          nHostDrugConcNonZero (72),
-          sumLogDrugConcNonZero (73).
-        </xs:documentation>
-        <xs:appinfo>name:Report only for new cases;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="MonitoringOption">
-    <xs:complexContent>
-      <xs:extension base="om:Option">
-        <xs:attribute name="outputNumber" type="xs:int" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              Number identifying this monitoring measure in the output
-              file (3rd column). Normally this is determined from the
-              measure, but it can be set manually, e.g. for when the same
-              measure is recorded twice (to accumulate across different
-              categories).
-            </xs:documentation>
-            <xs:appinfo>name:Number identifying measure in output;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="byAge" type="xs:boolean" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If true, the measure is reported for each age category. If
-              false, values are summed across all age categories and only
-              the sum reported. If not specified, separate categories
-              will be reported if the measure supports this.
-            </xs:documentation>
-            <xs:appinfo>name:Report by age category;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="byCohort" type="xs:boolean" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If true, the measure is reported for each cohort separately.
-              If false, values are summed across all cohorts and only
-              the sum reported. If not specified, separate categories
-              will be reported if the measure supports this.
-            </xs:documentation>
-            <xs:appinfo>name:Report by cohort;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="bySpecies" type="xs:boolean" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If true, the measure is reported for each mosquito species
-              separately. If false, values are summed across all species
-              and only the sum reported. If not specified, separate
-              categories will be reported if the measure supports this.
-            </xs:documentation>
-            <xs:appinfo>name:Report by mosquito species;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="byGenotype" type="xs:boolean" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If true, the measure is reported for each parasite genotype
-              separately. If false, values are summed across all genotypes
-              and only the sum reported. If not specified, separate
-              categories will be reported if the measure supports this.
-            </xs:documentation>
-            <xs:appinfo>name:Report by parasite genotype;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="byDrugType" type="xs:boolean" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If true, the measure is reported for each drug type
-              separately. If false, values are summed across all drug types
-              and only the sum reported. If not specified, separate
-              categories will be reported if the measure supports this.
-            </xs:documentation>
-            <xs:appinfo>name:Report by drug type;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
   </xs:complexType>
 
   
@@ -5948,525 +6536,6 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
         </xs:documentation>
     <xs:appinfo> units:Proportion; name:Probability of survival;</xs:appinfo>
    </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
-
- <!-- Component and TriggeredDeployments would be in interventions.xsd, except
-    that they are needed from healthSystem.xsd -->
- <xs:complexType name="Component">
-  <xs:annotation>
-   <xs:documentation>
-        The list of components deployed to eligible humans.
-      </xs:documentation>
-   <xs:appinfo>name:Component to be deployed;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="id" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The identifier (short name) of a component.
-        </xs:documentation>
-    <xs:appinfo>name:Identifier;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="TriggeredDeployments">
-  <xs:annotation>
-   <xs:documentation>
-        Lists intervention components which are deployed according to some
-        external trigger (for example, screening with a negative patency
-        outcome or health-system treatment).
-        
-        Components are referenced from one or more sub-lists. Each of these
-        lists is deployed independently if and only if its age constraints are
-        met by the human host and a random sample with the given probability of
-        a positive outcome is positive.
-      </xs:documentation>
-   <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
-     </xs:sequence>
-     <xs:attribute name="maxAge" type="xs:double" use="optional">
-      <xs:annotation>
-       <xs:documentation>
-                Maximum age of eligible humans (defaults to no limit).
-                
-                Input is rounded to the nearest time step.
-              </xs:documentation>
-       <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="minAge" type="xs:double" default="0">
-      <xs:annotation>
-       <xs:documentation>
-                Minimum age of eligible humans (defaults to 0).
-                
-                Input is rounded to the nearest time step.
-              </xs:documentation>
-       <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="p" type="xs:double" default="1">
-      <xs:annotation>
-       <xs:documentation>
-                Probability of this list of components being deployed, given
-                that other constraints are met.
-              </xs:documentation>
-       <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="OptionSet">
-  <xs:sequence>
-   <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="Option">
-  <xs:attribute name="name" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Name of an option (monitoring measure or model option).
-        </xs:documentation>
-    <xs:appinfo>name:Option name;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="value" type="xs:boolean" default="true">
-   <xs:annotation>
-    <xs:documentation>
-          Option on/off switch (true/false). Specifying value=&quot;true&quot; is
-          the same as not specifying a value; specifying value=&quot;false&quot;
-          explicitly turns the option off. If an option is not mentioned
-          at all, it is left at its default value (normally off, but
-          in a few cases, such as some bug-fix options, on).
-        </xs:documentation>
-    <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="DoubleList">
-  <xs:sequence>
-   <xs:element name="item" maxOccurs="unbounded" type="xs:double"/>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="DecayFunction">
-  <xs:annotation>
-   <xs:documentation>
-        Specification of decay or survival of a parameter.
-      </xs:documentation>
-   <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence minOccurs="0" maxOccurs="unbounded">
-   <xs:element name="decay" type="om:DecayFunction"/>
-  </xs:sequence>
-  <xs:attribute name="function" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Determines which decay function to use. Available decay functions,
-          for age t in years:
-          
-          constant: 1
-          
-          step: 1 for t less than L, otherwise 0
-          
-          linear: 1 - t/L for t less than L, otherwise 0
-          
-          exponential: exp( - t/L * log(2) )
-          
-          weibull: exp( -(t/L)^k * log(2) )
-          
-          hill: 1 / (1 + (t/L)^k)
-          
-          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
-        </xs:documentation>
-    <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="constant"/>
-     <xs:enumeration value="step"/>
-     <xs:enumeration value="linear"/>
-     <xs:enumeration value="exponential"/>
-     <xs:enumeration value="weibull"/>
-     <xs:enumeration value="hill"/>
-     <xs:enumeration value="smooth-compact"/>
-     <xs:enumeration value="plus"/>
-     <xs:enumeration value="minus"/>
-     <xs:enumeration value="divides"/>
-     <xs:enumeration value="multiplies"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
-  <xs:attribute name="L" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          (Time) scale parameter of distribution: this is either the age of
-          complete decay (smooth-compact, step and linear functions) or the age
-          at which the parameter has decayed to half its original value
-          (exponential, weibull and hill). Not used when function=&quot;constant&quot;
-          (i.e. no decay).
-          
-          This value can be specified in years, days or steps (e.g. 2y, 180d or
-          100t). When the unit is not specified years are assumed. The value is
-          used without rounding except when sampling an age of decay, when the
-          rounding happens as late as possible.
-        </xs:documentation>
-    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="k" type="xs:double" default="1.0">
-   <xs:annotation>
-    <xs:documentation>
-          Shape parameter of distribution. If not specified, default value of
-          1 is used. Meaning depends on function; not used in some cases.
-        </xs:documentation>
-    <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="CV" type="xs:double" default="0">
-   <xs:annotation>
-    <xs:documentation>
-        If CV is non-zero, heterogeneity of decay is introduced via a random
-        variable sampled from the log-normal distribution. This distribution is
-        parameterised with mean=1 and CV as given.
-        
-        The effective age of decay is the real age multiplied by this variable
-        (for decay functions with a half-life, this is equivalent to dividing
-        the half-life by the variable).
-        </xs:documentation>
-    <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="increasing" type="xs:boolean" default="false">
-   <xs:annotation>
-    <xs:documentation>
-          (Boolean) If True, this tells OpenMalaria to use the complement of the
-          DecayFunction defined as 1-f(x). This is useful to model increasing
-          functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
-          between 0 and 1.
-</xs:documentation>
-    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="initialEfficacy" type="xs:double" use="optional" default="1">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: Efficacy between 0 and 1.
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="rho" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: Proportion between 0 and 1, proportion of the response that is short-lived.</xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="halflife_short" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: halflife of short lived component (default to years).
-
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="halflife_long" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: halflife of long lived component (default to years).
-
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueN">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional heterogeneity.
-        
-        Optionally, a distribution (&quot;distr&quot;) and standard of deviation (&quot;SD&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value (normal);</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="mean" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The mean value.
-        </xs:documentation>
-    <xs:appinfo>name:mean;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="SD" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The standard deviation of variates.
-        </xs:documentation>
-    <xs:appinfo>name:standard deviation;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="optional" default="const">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          
-          Valid options are as follows.
-          
-          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
-          same effect as not specifying distr at all.
-          
-          &quot;normal&quot;: the parameter is sampled from a normal distribution.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="const"/>
-     <xs:enumeration value="normal"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="BetaMeanSample">
-  <xs:annotation>
-   <xs:documentation>
-        Parameters of a normal distribution, provided as mean and variance.
-        
-        Variates are sampled from Be(α,β) where α and β are determined from the
-        mean and variance as follows: let v be the variance and c=mean/(1-mean).
-        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
-      </xs:documentation>
-   <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="mean" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The mean of the beta distribution (must be in the open range (0,1)).
-        </xs:documentation>
-    <xs:appinfo>units:none;name:mean;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="variance" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The standard deviation of variates.
-        </xs:documentation>
-    <xs:appinfo>units:none;name:variance;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueCV">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional heterogeneity.
-        
-        The mean cannot be specified (unless this type is extended).
-        Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value (log normal);</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="CV" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The (linear) coefficient of variation.
-          
-          This value must be specified when a (non-constant) distribution is used. 
-          Note: since version 46, variance can be used instead.
-          
-          Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
-          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
-        </xs:documentation>
-    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="optional" default="const">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          
-          Valid options are as follows.
-          
-          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
-          same effect as not specifying distr at all.
-          
-          &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
-          Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
-          of the distribution and not log-space properties.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="const"/>
-     <xs:enumeration value="lognormal"/>
-     <xs:enumeration value="gamma"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
-  <xs:attribute name="variance" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The variance parameter of the distirbution.
-          
-          This value can be specified when a (non-constant) distribution is used.
-          
-          Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
-          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
-        </xs:documentation>
-    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueLN">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional log-normal heterogeneity.
-        
-        The mean value must be specified. Optionally, a distribution (&quot;distr&quot;)
-        and coefficient of variation (&quot;CV&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value;</xs:appinfo>
-  </xs:annotation>
-  <xs:complexContent>
-   <xs:extension base="om:SampledValueCV">
-    <xs:attribute name="mean" type="xs:double" use="required">
-     <xs:annotation>
-      <xs:documentation>
-              The (linear) mean value.
-            </xs:documentation>
-      <xs:appinfo>name:mean;</xs:appinfo>
-     </xs:annotation>
-    </xs:attribute>
-   </xs:extension>
-  </xs:complexContent>
- </xs:complexType>
- <xs:complexType name="WeibullSample">
-  <xs:annotation>
-   <xs:documentation>
-        Parameters of a Weibull distribution.
-      </xs:documentation>
-   <xs:appinfo>name:Weibull parameters;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="scale" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The Weibull scale parameter (λ).
-        </xs:documentation>
-    <xs:appinfo>name:Scale;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="shape" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The Weibull shape parameter (k).
-        </xs:documentation>
-    <xs:appinfo>name:shape;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          In this case, only &quot;weibull&quot; is allowed.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="weibull"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="DoubleValue">
-  <xs:attribute name="value" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>A double-precision floating-point value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="IntValue">
-  <xs:attribute name="value" type="xs:int" use="required">
-   <xs:annotation>
-    <xs:documentation>An integer value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="BooleanValue">
-  <xs:attribute name="value" type="xs:boolean" use="required">
-   <xs:annotation>
-    <xs:documentation>A boolean value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="AgeGroupValues">
-  <xs:sequence>
-   <xs:element maxOccurs="unbounded" name="group">
-    <xs:annotation>
-     <xs:documentation>
-            A series of values according to age groups, each specified with
-            a lower-bound and a value. The first lower-bound specified must be
-            zero; a final upper-bound of infinity is added to complete the last
-            age group. At least one age group is required. Normally these are
-            interpolated by a continuous function (see interpolation attribute).
-          </xs:documentation>
-     <xs:appinfo>name:age group;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:complexContent>
-      <xs:extension base="om:DoubleValue">
-       <xs:attribute name="lowerbound" type="xs:double" use="required">
-        <xs:annotation>
-         <xs:documentation>
-                    Lower bound of age group
-                  </xs:documentation>
-         <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
-        </xs:annotation>
-       </xs:attribute>
-      </xs:extension>
-     </xs:complexContent>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
-  <!-- NOTE: would specify default="linear" except for a possible bug in Code
-    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
-  <xs:attribute name="interpolation" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          Interpolation algorithm. Normally it is desirable for age-based
-          values to be continuous w.r.t. age. By default linear interpolation
-          is used.
-          
-          With all algorithms except &quot;none&quot;, the age groups are converted to a
-          set of points centred within each age range. Extra
-          points are added at each end (zero and infinity) to keep value
-          constant at both ends of the function. A zero-length age group may
-          be used as a kind of barrier to adjust the distribution; e.g. with
-          age group boundaries at 15, 20 and 25 years, a (linear) spline would
-          be drawn between ages 17.5 and 22.5, whereas with boundaries at
-          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
-          years (may be desired if individuals are assumed to reach adult size
-          at 20).
-          
-          Algorithms:
-          1. none: input values are used directly
-          2. linear: straight lines (on an age vs. value graph) are used to
-          interpolate data points.
-        </xs:documentation>
-    <xs:appinfo>name:interpolation;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="none"/>
-     <xs:enumeration value="linear"/>
-    </xs:restriction>
-   </xs:simpleType>
   </xs:attribute>
  </xs:complexType>
 </xs:schema>
