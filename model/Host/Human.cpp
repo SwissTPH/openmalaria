@@ -144,7 +144,7 @@ void Human::removeFirstEvent(interventions::SubPopRemove::RemoveAtCode code )
     for( auto it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         auto expIt = subPopExp.find( *it );
         if( expIt != subPopExp.end() ){
-            if( expIt->second > sim::nowOrTs0() ){
+            if( expIt->second >= sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should

@@ -164,7 +164,7 @@ inline SimTime Human::age( SimTime time ) const {
 inline bool Human::isInSubPop( interventions::ComponentId id ) const {
     auto it = subPopExp.find( id );
     if( it == subPopExp.end() ) return false;   // no history of membership
-    else return it->second > sim::nowOrTs0();   // added: has expired?
+    else return it->second >= sim::nowOrTs0();   // added: has expired?
 }
 
 inline uint32_t Human::getCohortSet() const { 
