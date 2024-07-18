@@ -367,7 +367,7 @@ protected:
         for( const size_t outId : outIds ){
             mon::reportEventMHI_CMDT( mon::MCD_CMDT_REPORT, hostData.human, 1, outId);
         }
-        return CMDTOut(true);
+        return CMDTOut(false);
     }
 private:
     vector<int> outIds;
@@ -530,7 +530,7 @@ protected:
         //NOTE: it's not intuitively obvious what value should be returned here
         // in the case of intervention deployment. This at least means that
         // repeat seekers get second-line treatment.
-        return CMDTOut(true);
+        return CMDTOut(false);
     }
 };
 
