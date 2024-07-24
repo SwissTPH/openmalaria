@@ -36,7 +36,7 @@ def scanInputFiles(files, _options):
     #
     for file in files:
         scanInputFile(file)
-    if len(suites) is 0 and not options.root:
+    if len(suites) == 0 and not options.root:
         abort( 'No tests defined' )
     return [options,suites]
 
@@ -73,7 +73,7 @@ def scanInputFile(fileName):
             prev = ""
     if contNo:
         scanInputLine( fileName, lineNo - contNo, prev + line )
-        
+
     closeSuite()
     file.close()
 
@@ -193,7 +193,7 @@ def addLineToBlock( suite, lineNo, line ):
     '''Append the line to the current CXXTEST_CODE() block'''
     line = fixBlockLine( suite, lineNo, line )
     line = re.sub( r'^.*\{\{', '', line )
-    
+
     e = re.search( r'\}\}', line )
     if e:
         line = line[:e.start()]
@@ -233,7 +233,7 @@ def closeSuite():
     '''Close current suite and add it to the list if valid'''
     global suite
     if suite is not None:
-        if len(suite['tests']) is not 0:
+        if len(suite['tests']) != 0:
             verifySuite(suite)
             rememberSuite(suite)
         suite = None
