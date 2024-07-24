@@ -48,7 +48,8 @@ public:
 
         UnittestUtil::EmpiricalWHM_setup();
 
-        human.reset( UnittestUtil::createHuman(sim::zero()).release() );
+        human.reset( UnittestUtil::createHuman(sim::nowOrTs0()).release() );
+
         ETS_ASSERT( human.get() != 0 );
         whm = dynamic_cast<WHMock*>(UnittestUtil::setHumanWH( *human,
                 unique_ptr<WithinHost::WHInterface>(new WHMock()) ));

@@ -183,7 +183,7 @@ protected:
 
         if ( ((hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED)) || (hostData.pgState & Episode::MALARIA) )
         {
-            if (latest.time + memory >= sim::now())
+            if (latest.time + memory >= sim::nowOrTs0())
                 return positive.exec( hostData );
             else
                 return negative.exec( hostData );
