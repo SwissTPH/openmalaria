@@ -112,7 +112,7 @@ Human::Human(SimTime dateOfBirth) :
 {
     // Initial humans are created at time 0 and may have dateOfBirth in past. Otherwise dateOfBirth must be now.
     assert( dateOfBirth == sim::nowOrTs1() || (sim::now() == sim::zero() && dateOfBirth < sim::now()) );
-    
+
     HumanHet het = hetSample(rng);
 
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( rng, het.comorbidityFactor );
