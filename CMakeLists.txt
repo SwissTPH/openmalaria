@@ -33,7 +33,7 @@ if (NOT MSVC)
 endif (NOT MSVC)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fp-model source")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fp-model strict")
 endif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
