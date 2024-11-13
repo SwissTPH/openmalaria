@@ -36,6 +36,7 @@ namespace OM { namespace util {
         virtual double sample(LocalRng& rng) const = 0;
         virtual void scaleMean( double scalar ) = 0;
         virtual double mean() const = 0;
+        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
     };
 
     /** A normal sample, which can be turned into various log-normal samples.
@@ -88,7 +89,7 @@ namespace OM { namespace util {
         
         /** Sample a value. */
         double sample(LocalRng& rng) const;
-        
+
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
             return sample.asNormal( mu, sigma );
@@ -143,9 +144,12 @@ namespace OM { namespace util {
         
         /** Get the mean. */
         double mean() const;
+
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        double cdf(double x) const;
+
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
             return sample.asLognormal( mu, sigma );
@@ -162,7 +166,7 @@ namespace OM { namespace util {
         double CV;
     };
 
-        /** Sampler for log-normal values */
+    /** Sampler for log-normal values */
     class GammaSampler : public Sampler {
     public:
         GammaSampler(const scnXml::SampledValueCV& elt) :
@@ -197,15 +201,7 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
-        // /** Create a log-normal sample from an existing normal sample. */
-        // inline double sample(NormalSample sample) const{
-        //     return sample.asLognormal( mu, sigma );
-        // }
-        
-        // /** Return true if and only if parameters have been set. */
-        // inline bool isSet() const{
-        //     return mu == mu;    // mu is NaN iff not set
-        // }
+        double cdf(double x) const;
         
     private:
         double mu, k, theta;
