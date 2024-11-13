@@ -157,9 +157,11 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);
 }
+
 double LognormalSampler::mean() const{
     return exp(mu + 0.5*sigma*sigma);
 }
+
 double LognormalSampler::sample(LocalRng& rng) const{
     if( sigma == 0.0 ){
         return exp( mu );
@@ -168,6 +170,13 @@ double LognormalSampler::sample(LocalRng& rng) const{
     }
 }
 
+double LognormalSampler::cdf(double x) const {
+    // Check if sigma is zero, and handle the degenerate log-normal case
+    if (sigma == 0.0)
+        throw std::runtime_error("LognormalSampler::cdf() does not support sigma = 0 (default const distirbution)");
+
+    return gsl_cdf_lognormal_P(x, mu, sigma);
+}
 
 // void GammaSampler::setParams( const scnXml::SampledValueLN& elt ){
 //     const double mean = elt.getMean();
@@ -251,6 +260,10 @@ double GammaSampler::sample(LocalRng& rng) const{
     return rng.gamma(k, theta);
 }
 
+double GammaSampler::cdf(double x) const {
+    return gsl_cdf_gamma_P(x, k, theta);
+}
+        
 void BetaSampler::setParamsMV( double mean, double variance ){
     if( variance > 0.0 ){
         // double c = mean / (1.0 - mean);
