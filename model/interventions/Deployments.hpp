@@ -181,6 +181,7 @@ protected:
     shared_ptr<const HumanIntervention> intervention;
 };
 
+
 /// Timed deployment of human-specific interventions
 class TimedHumanDeployment : public TimedDeployment, protected HumanDeploymentBase {
 public:
@@ -222,9 +223,48 @@ public:
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
+                double combined_gamma_sample = 0.0;
+
+                // Compute the weighted sum of gamma samples
+                for (size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i) {
+                    // double shape = Transmission::PerHostAnophParams::get(i).entoAvailability->shape();
+                    // double scale = Transmission::PerHostAnophParams::get(i).entoAvailability->scale();
+                    double avail = human.perHostTransmission.anophEntoAvailability[i];
+
+                    //getShapeScale(gamma_means[i], gamma_cvs[i], shape, scale);
+                    //double ux = gsl_cdf_gamma_P(avail, shape, scale); // Gamma to unit interval
+                    
+                    // Use avail that is already weighted?? or Need raw value?
+                    double ux = Transmission::PerHostAnophParams::get(i).entoAvailability->cdf(avail);
+
+                    double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
+
+                    combined_gamma_sample += xx; // sum in normal space
+
+                    cout << "(" << i << ") avail: " << avail << ", ux: " << ux << ", xx: " << xx << endl;
+                }
+
+                // Apply the Gaussian copula transformation for correlation
+                double correlation = 0.5;  // Example correlation
+                double yy = correlation * combined_gamma_sample + human.rng.gauss(0.0, 1.0) * sqrt(1 - correlation * correlation);
+
+                // Transform back to unit interval
+                double uy = gsl_cdf_ugaussian_P(yy);
+
+                // Beta distribution for intervention (Beta distributed)
+                double beta_mean = coverage;  // Assuming this value is given
+                double beta_var = 0.05;       // Given as well
+                double alpha = ((1 - beta_mean) / beta_var - 1 / beta_mean) * (beta_mean * beta_mean);
+                double beta = alpha * (1 / beta_mean - 1);
+
+                // Get the final probability from Beta distribution
+                double probability = gsl_cdf_beta_P(uy, alpha, beta);
+
+                cout << "Beta(" << alpha << "," << beta << ") correlation: " << correlation << ", yy: " << yy << ", uy: " << uy << " probability: " << probability << endl;
+
                 if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
                     if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                        if( human.rng.bernoulli( coverage ) ){
+                        if( human.rng.bernoulli( probability ) ){
                             deployToHuman( human, mon::Deploy::TIMED );
                         }
                     }
