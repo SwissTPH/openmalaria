@@ -37,12 +37,20 @@ vector<double> PerHostAnophParams::entoAvailabilityPercentiles;
 
 PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
     const string &distr = mosq.getAvailability().getDistr();
-    if(distr == "const" || distr == "lognormal")
+    if(distr == "const")
         entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
-    else if(distr == "gamma")
-        entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
     else
-        throw util::xml_scenario_error( "error ento availability: unknown distirbution "+distr);
+    {
+        if(util::ModelOptions::option(NEGATIVE_BINOMIAL_MASS_ACTION) || util::ModelOptions::option(LOGNORMAL_MASS_ACTION) || util::ModelOptions::option(COMORB_TRANS_HET))
+            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): ModelOptions NEGATIVE_BINOMIAL_MASS_ACTION, LOGNORMAL_MASS_ACTION, COMORB_TRANS_HET are not compatible with ento-availability heterogeneity distributions other than \"const\"");
+
+        if(distr == "lognormal")
+            entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
+        else if(distr == "gamma")
+            entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
+        else
+            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): unknown distribution "+distr);
+    }
 
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
