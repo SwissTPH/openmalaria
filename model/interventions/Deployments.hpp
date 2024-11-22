@@ -257,7 +257,7 @@ public:
                 if(copula)
                 {
                     if(Transmission::PerHostAnophParams::numSpecies() > 1)
-                        throw std::runtime_error("Gaussian copula transformation (deployment with availability correlation) only supports one mosquito species");
+                        throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
 
                     // Use avail that is already weighted?? or Need raw value?
                     double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(availability);
@@ -276,7 +276,7 @@ public:
                     double beta = alpha * (1.0 / beta_mean - 1.0);
 
                     if (alpha < 0 || beta < 0)
-                        cout << "Error " << alpha << " " << beta << endl;
+                        throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
 
                     // Get the final probability from Beta distribution
                     probability = gsl_cdf_beta_P(uy, alpha, beta);
