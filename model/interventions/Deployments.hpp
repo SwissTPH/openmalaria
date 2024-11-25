@@ -37,6 +37,7 @@
 
 
 #include <iomanip>
+#include <filesystem>
 
 namespace OM { namespace interventions {
 
@@ -238,8 +239,13 @@ public:
 
         if(copula)
         {
+            std::filesystem::path pathObj(util::CommandLine::getOutputName());
+
+            // Get the parent path (the directory)
+            std::filesystem::path directoryPath = pathObj.parent_path();
+
             std::ostringstream filename;
-            filename << sim::now() << "_copula_debug.txt";
+            filename << directoryPath.string() << "output_" << sim::now() << "_copula_debug.txt";
             file = std::ofstream(filename.str());
             file << "coverage GammaMean coverageCorr coverageVar" << endl;
             file << coverage << " " << Transmission::PerHostAnophParams::get(0).entoAvailability->mean() << " " << coverageCorr << " " << coverageVar << endl;
