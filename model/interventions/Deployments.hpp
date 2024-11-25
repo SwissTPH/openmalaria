@@ -35,10 +35,6 @@
 #include "util/SpeciesIndexChecker.h"
 #include "Host/Human.h"
 
-
-#include <iomanip>
-#include <filesystem>
-
 namespace OM { namespace interventions {
 
 struct ByDeployTime;    // forward decl for friend
@@ -171,14 +167,12 @@ protected:
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
             throw util::xml_scenario_error("intervention deployment coverage must be in range [0,1]");
         }
-        if( deploy.getCoverageCorr().present() )
+        if( coverage > 0 && deploy.getCoverageCorr().present() && deploy.getCoverageVar().present() && deploy.getCoverageVar().get() > 0)
         {
             coverageCorr = deploy.getCoverageCorr().get();
+            coverageVar = deploy.getCoverageVar().get();
             copula = true;
         }
-
-        if( deploy.getCoverageVar().present() )
-            coverageVar = deploy.getCoverageVar().get();
 
         vaccLimits.set( deploy );
     }
@@ -189,7 +183,7 @@ protected:
     
     bool copula = false;
     double coverage;    // proportion coverage within group meeting above restrictions
-    double coverageCorr, coverageVar;
+    double coverageCorr = 0.0, coverageVar = 0.0;
     VaccineLimits vaccLimits;
     ComponentId subPop;      // ComponentId::wholePop() if deployment is not restricted to a sub-population
     bool complement;
@@ -236,21 +230,17 @@ public:
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
         std::ofstream file;
-
+        std::ostringstream filename;
         if(copula)
         {
-            std::filesystem::path pathObj(util::CommandLine::getOutputName());
-
-            // Get the parent path (the directory)
-            std::filesystem::path directoryPath = pathObj.parent_path();
-
-            std::ostringstream filename;
-            filename << directoryPath.string() << "output_" << sim::now() << "_copula_debug.txt";
+            filename << util::CommandLine::getOutputName() << "_" << sim::now() << "_copula_debug.txt";
             file = std::ofstream(filename.str());
             file << "coverage GammaMean coverageCorr coverageVar" << endl;
             file << coverage << " " << Transmission::PerHostAnophParams::get(0).entoAvailability->mean() << " " << coverageCorr << " " << coverageVar << endl;
         }
 
+        // update output name
+        // if condition if variance or coverage is 0
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
