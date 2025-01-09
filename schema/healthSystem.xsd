@@ -672,6 +672,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="multiple" type="om:DTMultiple"/>
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType"/>
+   <xs:element name="infectionOrigin" type="om:DTInfectionOrigin"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic"/>
    <xs:element name="uncomplicated" type="om:DTUncomplicated"/>
    <xs:element name="severe" type="om:DTSevere"/>
@@ -712,6 +713,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:choice minOccurs="0" maxOccurs="unbounded">
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="infectionOrigin" type="om:DTInfectionOrigin" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="uncomplicated" type="om:DTUncomplicated" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="severe" type="om:DTSevere" minOccurs="0" maxOccurs="unbounded"/>
@@ -746,6 +748,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:all>
    <xs:element name="firstLine" type="om:DecisionTree"/>
    <xs:element name="secondLine" type="om:DecisionTree"/>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DTInfectionOrigin">
+  <xs:annotation>
+   <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the
+        patient has an imported, introduced or indigenous infection.
+        
+        If the patient is not infected, this will execute the indigenous branch by 
+        default. You must use a diagnostic test first to find out if the patient is infected.
+
+        If there are no imported cases, all infections will appear indigenous.
+      </xs:documentation>
+   <xs:appinfo>name:Switch (imported, introduced, indigenous);</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="imported" type="om:DecisionTree"/>
+   <xs:element name="introduced" type="om:DecisionTree"/>
+   <xs:element name="indigenous" type="om:DecisionTree"/>
   </xs:all>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
