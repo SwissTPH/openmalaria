@@ -50,14 +50,14 @@ jobs:
           - os: ubuntu-22.04
             compiler: g++
             target: Linux
+
+          - os: macos-15
+            compiler: clang
           
           - os: macos-14
             compiler: clang
 
           - os: macos-13
-            compiler: clang
-          
-          - os: macos-12
             compiler: clang
           
     steps:
