@@ -3,7 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
- *
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -66,8 +66,8 @@ public:
     VivaxBrood( istream& stream );
     
     struct UpdResult{
-        UpdResult() : newPrimaryBS(false), newRelapseBS(false), newBS(false) {}
-        bool newPrimaryBS, newRelapseBS, newBS, isFinished;
+        UpdResult() : newPrimaryBS(false), newRelapseBS(false), newRelapsebBS(false), newBS(false) {}
+        bool newPrimaryBS, newRelapseBS, newRelapsebBS, newBS, isFinished;
     };
     /**
      * Do per time step update: remove finished blood stage infections and act
@@ -113,22 +113,23 @@ private:
 
     // Whether the relapse blood stage infection has started
     bool relapseHasStarted;
+	
+	//Whether the later category of relapses has started
+	bool relapsebHasStarted;
 
     // Whether any clinical event has been triggered by this brood
     bool hadEvent;
 
     // Whether a relapse event has been triggered by this brood
     bool hadRelapse;
-
-    // Infection origin
-    int origin;
+	
+	// Infection origin
+	int origin;
 };
 
+
 /**
- * Implementation of a very basic vivax model.
- * 
- * This is for tropical Vivax (low transmission) and where there is little
- * immunity.
+ * Implementation of a basic vivax model
  */
 class WHVivax : public WHInterface {
 public:
@@ -155,8 +156,9 @@ public:
     virtual bool summarize(Host::Human& human) const;
     
     virtual void importInfection(LocalRng& rng, int origin);
-    
-    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
+	
+	
+	virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
         vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears);
     
     virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
@@ -164,10 +166,12 @@ public:
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     
     virtual void clearImmunity();
-
+	
     virtual InfectionOrigin getInfectionType() const {
         return InfectionOrigin::Indigenous;
     }
+
+	
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
@@ -190,7 +194,7 @@ private:
     
     list<VivaxBrood> infections;
     
-    /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
+    /* Is flagged as never getting PQ: this is a heterogeneity factor. Example:
      * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and
      * males aren't tested (i.e. all can get it) or (1+p)/2 where p is the
      * chance a male being tested and found to be G6PD deficient. */
@@ -205,10 +209,12 @@ private:
     // Either never or expiry time of treatment
     SimTime treatExpiryLiver, treatExpiryBlood;
 
-    // The probability of a clinical event from a first infection
+    // The probability of a clinical event from a primary infection
     double pEvent;
-    // The probability of a clinical event from a relapse
+    // The probability of a clinical event from an early relapse
     double pFirstRelapseEvent;
+	// The probability of a clinical event from a later relapse
+	double pSecondRelapseEvent;
     
     // Used for reporting; updated by update()
     double pSevere;

@@ -138,6 +138,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="pRelapseOne" type="om:ProbVivaxEvent"/>
       <xs:element name="pRelapseTwoPlus" type="om:ProbVivaxEvent"/>
       <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+      <xs:element name="vivaxClinOption" type="xs:string" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">

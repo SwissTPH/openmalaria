@@ -2223,6 +2223,1057 @@
   </xs:complexType>
 
  
+ <xs:complexType name="Pharmacology">
+  <xs:annotation>
+   <xs:documentation>
+        A library of drug related data for the PK/PD model.
+      </xs:documentation>
+   <xs:appinfo>name:Pharmacology library;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="treatments">
+    <xs:annotation>
+     <xs:documentation>
+            A library of drug deployment schedules and dosages.
+          </xs:documentation>
+     <xs:appinfo>name:Treatments library;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="dosages" type="om:PKPDDosages" minOccurs="1" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="drugs">
+    <xs:annotation>
+     <xs:documentation>
+            A library of drug PK/PD data.
+          </xs:documentation>
+     <xs:appinfo>name:Drug library;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="drug" type="om:PKPDDrug" minOccurs="1" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <!-- drug deployment params -->
+ <!--TODO: how to handle IV doses?
+   1) as now (caveats: qty is called mg but is actually mg/kg, a dosages table
+    must be given for treatment but is not actually relevant)
+   2) separate type of schedule
+   3) direct administration (no schedule)
+  -->
+ <xs:complexType name="PKPDSchedule">
+  <xs:annotation>
+   <xs:documentation>
+        A schedule for the administration of drugs in a course of treatment.
+        
+        Note that dose sizes are multiplied by some multiplier (see dosages)
+        and the times of all doses may be delayed.
+      </xs:documentation>
+   <xs:appinfo>name:Schedule of doses taken as a course of treatment;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="medicate" type="om:PKPDMedication" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name for referring to this deployment schedule
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="PKPDMedication">
+  <xs:attribute name="drug" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Abbreviated name of drug compound
+        </xs:documentation>
+    <xs:appinfo>name:drug;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="mg" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Quantity of drug compound in mg per *something*. A separate dosage
+          table must be used when medicating, which may specify multipliers of
+          this number based on patient age or weight.
+        </xs:documentation>
+    <xs:appinfo>units:mg per something;name:Drug dose (mg with multiplier);</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="hour" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+        Number of hours past start of timestep this drug dose is administered
+        at (first dose should be at hour 0).
+      </xs:documentation>
+    <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="PKPDDosages">
+  <xs:annotation>
+   <xs:documentation>
+        A table for selecting a dose size. There are several ways this can
+        work: using the patient's age or body mass in a look-up table to get a
+        multplier, or directly using body mass as the multiplier.
+        
+        The doses specified in &quot;mg&quot; in the treatment schedule are then
+        multiplied by this multiplier.
+      </xs:documentation>
+   <xs:appinfo>name:Dosage table;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:choice>
+    <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded">
+     <xs:annotation>
+      <xs:documentation>
+              Select dose multiplier from a look-up table using the patient's age.
+            </xs:documentation>
+      <xs:appinfo>name:Look-up table (age);</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded">
+     <xs:annotation>
+      <xs:documentation>
+              Select dose multiplier from a look-up table using the patient's body mass.
+            </xs:documentation>
+      <xs:appinfo>name:Look-up table (weight);</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="multiply" maxOccurs="1">
+     <xs:annotation>
+      <xs:documentation>
+              Multiply the dose by some quantity, such as patient weight.
+            </xs:documentation>
+      <xs:appinfo>name:Multiply dose;</xs:appinfo>
+     </xs:annotation>
+     <xs:complexType>
+      <xs:attribute name="by" use="required">
+       <xs:annotation>
+        <xs:documentation>
+                  Quantity to multiply the dose by. Only option is &quot;kg&quot;
+                  (patient weight in kg).
+                </xs:documentation>
+        <xs:appinfo>name:By what?;</xs:appinfo>
+       </xs:annotation>
+       <xs:simpleType>
+        <xs:restriction base="xs:string">
+         <xs:enumeration value="kg"/>
+        </xs:restriction>
+       </xs:simpleType>
+      </xs:attribute>
+     </xs:complexType>
+    </xs:element>
+   </xs:choice>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name for referring to this dosage table
+        </xs:documentation>
+    <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="PKPDDosageRange">
+  <xs:annotation>
+   <xs:documentation>
+        A look-up table which uses patient age (in years) or weight (in kg) to
+        find a multiplier.
+      </xs:documentation>
+   <xs:appinfo>name:Age/weight range;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="lowerbound" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:appinfo>name:Lower bound (inclusive);min:0;units:years or kg;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="dose_mult" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The dose size given in the schedule (in &quot;mg&quot;) is multiplied by
+          this value for patients falling into this range when this
+          dosage table is used.
+        </xs:documentation>
+    <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <!-- drug intrinsic (PK/PD) params -->
+ <xs:complexType name="PKPDDrug">
+  <xs:annotation>
+   <xs:documentation>
+        A drug description with PK/PD parameters.
+      </xs:documentation>
+   <xs:appinfo>name:Drug parameters;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="PD">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="phenotype" type="om:Phenotype" minOccurs="1" maxOccurs="unbounded">
+       <xs:annotation>
+        <xs:documentation>
+                  Pharmaco-Dynamic parameters for some resistance phenotype.
+                  
+                  To model resistance to this drug, describe multiple infection
+                  phenotypes (with respect to these PD parameters) and list one
+                  or more &quot;restrict&quot; elements for each phenotype.
+                  
+                  Loci are specified elsewhere. Multiple loci may influence the
+                  action of a single drug and each locus may influence multiple
+                  drugs.
+                </xs:documentation>
+        <xs:appinfo>name:PD parameters for some allele / resistance phenotype;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="locus" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
+                Optional; if present specifies the locus corresponding to this
+                drug's PD phenotypes: each phenotype must then match one of
+                that locus's alleles. Otherwise the drug should specify only
+                one phenotype.
+                
+                There is currently a one-to-many correspondance between loci
+                and drugs.
+              </xs:documentation>
+       <xs:appinfo>name:Locus;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="PK">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="negligible_concentration" type="xs:double">
+       <xs:annotation>
+        <xs:documentation>
+                    Concentration below which drug's effects are deemed negligible and can
+                    be removed from simulation.
+                  </xs:documentation>
+        <xs:appinfo>units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:choice>
+       <xs:element name="half_life" type="xs:double">
+        <xs:annotation>
+         <xs:documentation>
+                      Used to calculate elimination rate λ, calculated as
+                      λ = ln(2) / half_life. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      Alternatively, elimination rate can be specified via k
+                      and m_exponent.
+                    </xs:documentation>
+         <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+       <xs:sequence>
+        <xs:element name="k" type="om:SampledValueLN">
+         <xs:annotation>
+          <xs:documentation>
+                      Constant used to calculate the elimination rate λ, which
+                      is calculated as λ = k / (body_mass ^ m_exponent), where
+                      body_mass is the patient's weight in kg and m_exponent is
+                      the next parameter. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      If CV &gt; 0, k is sampled per-human from the log-normal
+                      distribution: ln N( ln(mean) - σ^2 / 2, σ^2).
+                      
+                      Alternatively, elimination rate can be specified via half_life.
+                      </xs:documentation>
+          <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (k);</xs:appinfo>
+         </xs:annotation>
+        </xs:element>
+        <xs:element name="m_exponent" type="xs:double">
+         <xs:annotation>
+          <xs:documentation>
+                      Constant used to calculate the elimination rate λ, which
+                      is calculated as λ = k / (body_mass ^ m_exponent), where
+                      body_mass is the patient's weight in kg and k is the
+                      previous parameter. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      Alternatively, elimination rate can be specified via half_life.
+                      
+                      Note that in the case of a conversion model, this applies
+                      to *both* the elimination and the conversion rates.
+                    </xs:documentation>
+          <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (m_exponent);</xs:appinfo>
+         </xs:annotation>
+        </xs:element>
+       </xs:sequence>
+      </xs:choice>
+      <xs:element name="k_a" type="om:SampledValueLN" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
+                  Absorption rate parameter. Not allowed for one compartment
+                  models, but required for two and three compartment models and
+                  one compartment with conversion model (for the parent drug
+                  only).
+                </xs:documentation>
+        <xs:appinfo>name:Absorption rate constant (k_a);min:0;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="conversion" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
+                  Configures the parent drug in a conversion model.
+                  
+                  To use a conversion model, the parent drug should have this
+                  section defined as well as half-life or k (direct
+                  elimination; this may be zero) and k_a (absorption rate;
+                  this may be large).
+                  
+                  The metabolite drug should define half-life or k (elimination
+                  of metabolite), but not k_a (absorption rate) or this section
+                  (conversion). It is not possible for the metabolite to itself
+                  undergo conversion with the current models.
+                </xs:documentation>
+        <xs:appinfo>name:Conversion parameters (parent drug);</xs:appinfo>
+       </xs:annotation>
+       <xs:complexType>
+        <xs:all>
+         <xs:element name="metabolite" type="xs:string">
+          <xs:annotation>
+           <xs:documentation>
+                        The abbreviation of the metabolite drug (e.g. &quot;DHA&quot; or
+                        &quot;DHA_AR&quot;).
+                      </xs:documentation>
+           <xs:appinfo>name:Metabolite drug (abbreviation);</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+         <xs:element name="rate" type="om:SampledValueLN">
+          <xs:annotation>
+           <xs:documentation>
+                        Rate of conversion of parent drug to metabolite.
+                      </xs:documentation>
+           <xs:appinfo>name:Rate of conversion;unit:Per day;</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+         <xs:element name="molRatio" type="xs:double">
+          <xs:annotation>
+           <xs:documentation>
+                        Ratio of molecular weights: molecular weight of the
+                        metabolite divided by molecular weight of the parent.
+                      </xs:documentation>
+           <xs:appinfo>name:Molecular weight ratio;unit:unitless;</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+         <xs:element name="IC50_log_correlation" type="xs:double">
+          <xs:annotation>
+           <xs:documentation>
+                        The IC50 values of parent and metabolite drugs may be
+                        sampled from the log-normal distribution (if CV is greater than 0).
+                        This parameter controls correlation between these samples,
+                        measured in log-space.
+                        
+                        If this value is 1, samples are fully correlated: a single z-score is
+                        used to calculate both samples. If this is 0, two independent
+                        samples are used.
+                        
+                        Values between 0 and 1 (partial correlation) are supported;
+                        in this case IC50 values are sampled such that
+                        cor(log(x), log(y)) matches this value (where x, y are parent and
+                        metabolite IC50 values).
+                      </xs:documentation>
+           <xs:appinfo>name:IC50 log correlation;min:0;max:1;</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+        </xs:all>
+       </xs:complexType>
+      </xs:element>
+      <xs:element name="vol_dist" type="om:SampledValueLN">
+       <xs:annotation>
+        <xs:documentation>
+                    Volume of Distribution.
+                    
+                    If CV &gt; 0 this is sampled from a log-normal distribution.
+                  </xs:documentation>
+        <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution (Vd);</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="compartment2" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
+                  Optional element specifying conversion parameters to- and
+                  from- a second compartment.
+                </xs:documentation>
+        <xs:appinfo>name:Second compartment parameters;</xs:appinfo>
+       </xs:annotation>
+       <xs:complexType>
+        <xs:all>
+         <xs:element name="k12" type="om:SampledValueLN">
+          <xs:annotation>
+           <xs:documentation>
+                          Absorption rate from the central compartment to the
+                          first periphery compartment (2).
+                          
+                          It is sampled per-patient when CV &gt; 0.
+                      </xs:documentation>
+           <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (k12);</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+         <xs:element name="k21" type="om:SampledValueLN">
+          <xs:annotation>
+           <xs:documentation>
+                          Absorption rate from the first periphery compartment
+                          (2) to the central compartment.
+                          
+                          It is sampled per-patient when CV &gt; 0.
+                      </xs:documentation>
+           <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (k21);</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+        </xs:all>
+       </xs:complexType>
+      </xs:element>
+      <xs:element name="compartment3" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
+                  Optional element specifying conversion parameters to- and
+                  from- a third compartment.
+                </xs:documentation>
+        <xs:appinfo>name:Third compartment parameters;</xs:appinfo>
+       </xs:annotation>
+       <xs:complexType>
+        <xs:all>
+         <xs:element name="k13" type="om:SampledValueLN">
+          <xs:annotation>
+           <xs:documentation>
+                          Absorption rate from the central compartment to the
+                          second periphery compartment (3).
+                          
+                          It is sampled per-patient when CV &gt; 0.
+                      </xs:documentation>
+           <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (k13);</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+         <xs:element name="k31" type="om:SampledValueLN">
+          <xs:annotation>
+           <xs:documentation>
+                          Absorption rate from the second periphery compartment
+                          (3) to the central compartment.
+                          
+                          It is sampled per-patient when CV &gt; 0.
+                      </xs:documentation>
+           <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (k31);</xs:appinfo>
+          </xs:annotation>
+         </xs:element>
+        </xs:all>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="abbrev" use="required" type="xs:string"/>
+ </xs:complexType>
+ <xs:complexType name="Phenotype">
+  <xs:sequence>
+   <xs:element name="restriction" minOccurs="0" maxOccurs="unbounded">
+    <xs:annotation>
+     <xs:documentation>
+            Specifies the mapping from genotype to phenotype. For each drug
+            type, if only one phenotype is present, restrictions need not be
+            specified, but otherwise restrictions must be specified.
+            
+            The set of loci affecting phenotypes of this drug's action must be
+            fixed for any drug type. Each phenotype must list, for each of
+            these loci, a restriction to one or more alleles under the locus.
+          </xs:documentation>
+     <xs:appinfo>name:Restrict phenotype applicability to certain alleles;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="onLocus" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
+                A locus under which only a restricted set of alleles map to
+                this phenotype.
+              </xs:documentation>
+       <xs:appinfo>name:Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="toAllele" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
+                One allele of a locus upon which phenotype choice depends.
+                If multiple alleles under this locus should map to the same
+                phenotype, repeat the whole &quot;restriction onLocus...&quot; element.
+              </xs:documentation>
+       <xs:appinfo>name:Alleles mapping to this phenotype;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="max_killing_rate" type="xs:double">
+    <xs:annotation>
+     <xs:documentation>
+              k1 — Maximal parasite killing rate.
+            </xs:documentation>
+     <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="IC50" type="om:SampledValueLN">
+    <xs:annotation>
+     <xs:documentation>
+            Half maximal effect concentration.
+            
+            If CV &gt; 0, the IC50 is sampled from a log-normal distribution.
+          </xs:documentation>
+     <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="slope" type="xs:double">
+    <xs:annotation>
+     <xs:documentation>
+              n — Slope of the concentration effect curve
+            </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Slope of effect curve;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" use="optional" type="xs:string">
+   <xs:annotation>
+    <xs:documentation>
+          Name of the phenotype; for documentation use only.
+        </xs:documentation>
+    <xs:appinfo>name:Name of phenotype;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+
+ <!-- Component and TriggeredDeployments would be in interventions.xsd, except
+    that they are needed from healthSystem.xsd -->
+ <xs:complexType name="Component">
+  <xs:annotation>
+   <xs:documentation>
+        The list of components deployed to eligible humans.
+      </xs:documentation>
+   <xs:appinfo>name:Component to be deployed;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="id" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The identifier (short name) of a component.
+        </xs:documentation>
+    <xs:appinfo>name:Identifier;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="TriggeredDeployments">
+  <xs:annotation>
+   <xs:documentation>
+        Lists intervention components which are deployed according to some
+        external trigger (for example, screening with a negative patency
+        outcome or health-system treatment).
+        
+        Components are referenced from one or more sub-lists. Each of these
+        lists is deployed independently if and only if its age constraints are
+        met by the human host and a random sample with the given probability of
+        a positive outcome is positive.
+      </xs:documentation>
+   <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
+     </xs:sequence>
+     <xs:attribute name="maxAge" type="xs:double" use="optional">
+      <xs:annotation>
+       <xs:documentation>
+                Maximum age of eligible humans (defaults to no limit).
+                
+                Input is rounded to the nearest time step.
+              </xs:documentation>
+       <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="minAge" type="xs:double" default="0">
+      <xs:annotation>
+       <xs:documentation>
+                Minimum age of eligible humans (defaults to 0).
+                
+                Input is rounded to the nearest time step.
+              </xs:documentation>
+       <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="p" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
+                Probability of this list of components being deployed, given
+                that other constraints are met.
+              </xs:documentation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="OptionSet">
+  <xs:sequence>
+   <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="Option">
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of an option (monitoring measure or model option).
+        </xs:documentation>
+    <xs:appinfo>name:Option name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="value" type="xs:boolean" default="true">
+   <xs:annotation>
+    <xs:documentation>
+          Option on/off switch (true/false). Specifying value=&quot;true&quot; is
+          the same as not specifying a value; specifying value=&quot;false&quot;
+          explicitly turns the option off. If an option is not mentioned
+          at all, it is left at its default value (normally off, but
+          in a few cases, such as some bug-fix options, on).
+        </xs:documentation>
+    <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DoubleList">
+  <xs:sequence>
+   <xs:element name="item" maxOccurs="unbounded" type="xs:double"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="DecayFunction">
+  <xs:annotation>
+   <xs:documentation>
+        Specification of decay or survival of a parameter.
+      </xs:documentation>
+   <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+   <xs:element name="decay" type="om:DecayFunction"/>
+  </xs:sequence>
+  <xs:attribute name="function" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Determines which decay function to use. Available decay functions,
+          for age t in years:
+          
+          constant: 1
+          
+          step: 1 for t less than L, otherwise 0
+          
+          linear: 1 - t/L for t less than L, otherwise 0
+          
+          exponential: exp( - t/L * log(2) )
+          
+          weibull: exp( -(t/L)^k * log(2) )
+          
+          hill: 1 / (1 + (t/L)^k)
+          
+          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+        </xs:documentation>
+    <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="constant"/>
+     <xs:enumeration value="step"/>
+     <xs:enumeration value="linear"/>
+     <xs:enumeration value="exponential"/>
+     <xs:enumeration value="weibull"/>
+     <xs:enumeration value="hill"/>
+     <xs:enumeration value="smooth-compact"/>
+     <xs:enumeration value="plus"/>
+     <xs:enumeration value="minus"/>
+     <xs:enumeration value="divides"/>
+     <xs:enumeration value="multiplies"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="L" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          (Time) scale parameter of distribution: this is either the age of
+          complete decay (smooth-compact, step and linear functions) or the age
+          at which the parameter has decayed to half its original value
+          (exponential, weibull and hill). Not used when function=&quot;constant&quot;
+          (i.e. no decay).
+          
+          This value can be specified in years, days or steps (e.g. 2y, 180d or
+          100t). When the unit is not specified years are assumed. The value is
+          used without rounding except when sampling an age of decay, when the
+          rounding happens as late as possible.
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="k" type="xs:double" default="1.0">
+   <xs:annotation>
+    <xs:documentation>
+          Shape parameter of distribution. If not specified, default value of
+          1 is used. Meaning depends on function; not used in some cases.
+        </xs:documentation>
+    <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="CV" type="xs:double" default="0">
+   <xs:annotation>
+    <xs:documentation>
+        If CV is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution. This distribution is
+        parameterised with mean=1 and CV as given.
+        
+        The effective age of decay is the real age multiplied by this variable
+        (for decay functions with a half-life, this is equivalent to dividing
+        the half-life by the variable).
+        </xs:documentation>
+    <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="increasing" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
+          (Boolean) If True, this tells OpenMalaria to use the complement of the
+          DecayFunction defined as 1-f(x). This is useful to model increasing
+          functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+          between 0 and 1.
+</xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="initialEfficacy" type="xs:double" use="optional" default="1">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Efficacy between 0 and 1.
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="rho" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: Proportion between 0 and 1, proportion of the response that is short-lived.</xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_short" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of short lived component (default to years).
+
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="halflife_long" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          biphasic: halflife of long lived component (default to years).
+
+        </xs:documentation>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueN">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional heterogeneity.
+        
+        Optionally, a distribution (&quot;distr&quot;) and standard of deviation (&quot;SD&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value (normal);</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="mean" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The mean value.
+        </xs:documentation>
+    <xs:appinfo>name:mean;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="SD" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+    <xs:appinfo>name:standard deviation;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="optional" default="const">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          
+          Valid options are as follows.
+          
+          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
+          same effect as not specifying distr at all.
+          
+          &quot;normal&quot;: the parameter is sampled from a normal distribution.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="const"/>
+     <xs:enumeration value="normal"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="BetaMeanSample">
+  <xs:annotation>
+   <xs:documentation>
+        Parameters of a normal distribution, provided as mean and variance.
+        
+        Variates are sampled from Be(α,β) where α and β are determined from the
+        mean and variance as follows: let v be the variance and c=mean/(1-mean).
+        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
+      </xs:documentation>
+   <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="mean" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The mean of the beta distribution (must be in the open range (0,1)).
+        </xs:documentation>
+    <xs:appinfo>units:none;name:mean;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="variance" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+    <xs:appinfo>units:none;name:variance;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueCV">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional heterogeneity.
+        
+        The mean cannot be specified (unless this type is extended).
+        Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value (log normal);</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="CV" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The (linear) coefficient of variation.
+          
+          This value must be specified when a (non-constant) distribution is used. 
+          Note: since version 46, variance can be used instead.
+          
+          Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
+        </xs:documentation>
+    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="optional" default="const">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          
+          Valid options are as follows.
+          
+          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
+          same effect as not specifying distr at all.
+          
+          &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
+          Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
+          of the distribution and not log-space properties.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="const"/>
+     <xs:enumeration value="lognormal"/>
+     <xs:enumeration value="gamma"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="variance" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          The variance parameter of the distirbution.
+          
+          This value can be specified when a (non-constant) distribution is used.
+          
+          Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
+          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
+        </xs:documentation>
+    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SampledValueLN">
+  <xs:annotation>
+   <xs:documentation>
+        A parameter with optional log-normal heterogeneity.
+        
+        The mean value must be specified. Optionally, a distribution (&quot;distr&quot;)
+        and coefficient of variation (&quot;CV&quot;) may be specified.
+      </xs:documentation>
+   <xs:appinfo>name:Sampled value;</xs:appinfo>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="om:SampledValueCV">
+    <xs:attribute name="mean" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:documentation>
+              The (linear) mean value.
+            </xs:documentation>
+      <xs:appinfo>name:mean;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="WeibullSample">
+  <xs:annotation>
+   <xs:documentation>
+        Parameters of a Weibull distribution.
+      </xs:documentation>
+   <xs:appinfo>name:Weibull parameters;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="scale" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The Weibull scale parameter (λ).
+        </xs:documentation>
+    <xs:appinfo>name:Scale;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="shape" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The Weibull shape parameter (k).
+        </xs:documentation>
+    <xs:appinfo>name:shape;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="distr" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          In this case, only &quot;weibull&quot; is allowed.
+        </xs:documentation>
+    <xs:appinfo>name:Distribution;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="weibull"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DoubleValue">
+  <xs:attribute name="value" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>A double-precision floating-point value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="IntValue">
+  <xs:attribute name="value" type="xs:int" use="required">
+   <xs:annotation>
+    <xs:documentation>An integer value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="BooleanValue">
+  <xs:attribute name="value" type="xs:boolean" use="required">
+   <xs:annotation>
+    <xs:documentation>A boolean value.</xs:documentation>
+    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="AgeGroupValues">
+  <xs:sequence>
+   <xs:element maxOccurs="unbounded" name="group">
+    <xs:annotation>
+     <xs:documentation>
+            A series of values according to age groups, each specified with
+            a lower-bound and a value. The first lower-bound specified must be
+            zero; a final upper-bound of infinity is added to complete the last
+            age group. At least one age group is required. Normally these are
+            interpolated by a continuous function (see interpolation attribute).
+          </xs:documentation>
+     <xs:appinfo>name:age group;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:complexContent>
+      <xs:extension base="om:DoubleValue">
+       <xs:attribute name="lowerbound" type="xs:double" use="required">
+        <xs:annotation>
+         <xs:documentation>
+                    Lower bound of age group
+                  </xs:documentation>
+         <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
+        </xs:annotation>
+       </xs:attribute>
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <!-- NOTE: would specify default="linear" except for a possible bug in Code
+    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
+  <xs:attribute name="interpolation" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          Interpolation algorithm. Normally it is desirable for age-based
+          values to be continuous w.r.t. age. By default linear interpolation
+          is used.
+          
+          With all algorithms except &quot;none&quot;, the age groups are converted to a
+          set of points centred within each age range. Extra
+          points are added at each end (zero and infinity) to keep value
+          constant at both ends of the function. A zero-length age group may
+          be used as a kind of barrier to adjust the distribution; e.g. with
+          age group boundaries at 15, 20 and 25 years, a (linear) spline would
+          be drawn between ages 17.5 and 22.5, whereas with boundaries at
+          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
+          years (may be desired if individuals are assumed to reach adult size
+          at 20).
+          
+          Algorithms:
+          1. none: input values are used directly
+          2. linear: straight lines (on an age vs. value graph) are used to
+          interpolate data points.
+        </xs:documentation>
+    <xs:appinfo>name:interpolation;</xs:appinfo>
+   </xs:annotation>
+   <xs:simpleType>
+    <xs:restriction base="xs:string">
+     <xs:enumeration value="none"/>
+     <xs:enumeration value="linear"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:attribute>
+ </xs:complexType>
+
+ 
  
  
  <xs:complexType name="Interventions">
@@ -4626,1057 +5677,6 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
   </xs:attribute>
  </xs:complexType>
 
- 
- <xs:complexType name="Pharmacology">
-  <xs:annotation>
-   <xs:documentation>
-        A library of drug related data for the PK/PD model.
-      </xs:documentation>
-   <xs:appinfo>name:Pharmacology library;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:element name="treatments">
-    <xs:annotation>
-     <xs:documentation>
-            A library of drug deployment schedules and dosages.
-          </xs:documentation>
-     <xs:appinfo>name:Treatments library;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="1" maxOccurs="unbounded"/>
-      <xs:element name="dosages" type="om:PKPDDosages" minOccurs="1" maxOccurs="unbounded"/>
-     </xs:sequence>
-    </xs:complexType>
-   </xs:element>
-   <xs:element name="drugs">
-    <xs:annotation>
-     <xs:documentation>
-            A library of drug PK/PD data.
-          </xs:documentation>
-     <xs:appinfo>name:Drug library;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="drug" type="om:PKPDDrug" minOccurs="1" maxOccurs="unbounded"/>
-     </xs:sequence>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
- </xs:complexType>
- <!-- drug deployment params -->
- <!--TODO: how to handle IV doses?
-   1) as now (caveats: qty is called mg but is actually mg/kg, a dosages table
-    must be given for treatment but is not actually relevant)
-   2) separate type of schedule
-   3) direct administration (no schedule)
-  -->
- <xs:complexType name="PKPDSchedule">
-  <xs:annotation>
-   <xs:documentation>
-        A schedule for the administration of drugs in a course of treatment.
-        
-        Note that dose sizes are multiplied by some multiplier (see dosages)
-        and the times of all doses may be delayed.
-      </xs:documentation>
-   <xs:appinfo>name:Schedule of doses taken as a course of treatment;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:element name="medicate" type="om:PKPDMedication" minOccurs="0" maxOccurs="unbounded"/>
-  </xs:sequence>
-  <xs:attribute name="name" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Name for referring to this deployment schedule
-        </xs:documentation>
-    <xs:appinfo>name:Name;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="PKPDMedication">
-  <xs:attribute name="drug" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Abbreviated name of drug compound
-        </xs:documentation>
-    <xs:appinfo>name:drug;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="mg" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Quantity of drug compound in mg per *something*. A separate dosage
-          table must be used when medicating, which may specify multipliers of
-          this number based on patient age or weight.
-        </xs:documentation>
-    <xs:appinfo>units:mg per something;name:Drug dose (mg with multiplier);</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="hour" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-        Number of hours past start of timestep this drug dose is administered
-        at (first dose should be at hour 0).
-      </xs:documentation>
-    <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="PKPDDosages">
-  <xs:annotation>
-   <xs:documentation>
-        A table for selecting a dose size. There are several ways this can
-        work: using the patient's age or body mass in a look-up table to get a
-        multplier, or directly using body mass as the multiplier.
-        
-        The doses specified in &quot;mg&quot; in the treatment schedule are then
-        multiplied by this multiplier.
-      </xs:documentation>
-   <xs:appinfo>name:Dosage table;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:choice>
-    <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded">
-     <xs:annotation>
-      <xs:documentation>
-              Select dose multiplier from a look-up table using the patient's age.
-            </xs:documentation>
-      <xs:appinfo>name:Look-up table (age);</xs:appinfo>
-     </xs:annotation>
-    </xs:element>
-    <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded">
-     <xs:annotation>
-      <xs:documentation>
-              Select dose multiplier from a look-up table using the patient's body mass.
-            </xs:documentation>
-      <xs:appinfo>name:Look-up table (weight);</xs:appinfo>
-     </xs:annotation>
-    </xs:element>
-    <xs:element name="multiply" maxOccurs="1">
-     <xs:annotation>
-      <xs:documentation>
-              Multiply the dose by some quantity, such as patient weight.
-            </xs:documentation>
-      <xs:appinfo>name:Multiply dose;</xs:appinfo>
-     </xs:annotation>
-     <xs:complexType>
-      <xs:attribute name="by" use="required">
-       <xs:annotation>
-        <xs:documentation>
-                  Quantity to multiply the dose by. Only option is &quot;kg&quot;
-                  (patient weight in kg).
-                </xs:documentation>
-        <xs:appinfo>name:By what?;</xs:appinfo>
-       </xs:annotation>
-       <xs:simpleType>
-        <xs:restriction base="xs:string">
-         <xs:enumeration value="kg"/>
-        </xs:restriction>
-       </xs:simpleType>
-      </xs:attribute>
-     </xs:complexType>
-    </xs:element>
-   </xs:choice>
-  </xs:sequence>
-  <xs:attribute name="name" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Name for referring to this dosage table
-        </xs:documentation>
-    <xs:appinfo>name:Name;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="PKPDDosageRange">
-  <xs:annotation>
-   <xs:documentation>
-        A look-up table which uses patient age (in years) or weight (in kg) to
-        find a multiplier.
-      </xs:documentation>
-   <xs:appinfo>name:Age/weight range;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="lowerbound" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:appinfo>name:Lower bound (inclusive);min:0;units:years or kg;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="dose_mult" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The dose size given in the schedule (in &quot;mg&quot;) is multiplied by
-          this value for patients falling into this range when this
-          dosage table is used.
-        </xs:documentation>
-    <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <!-- drug intrinsic (PK/PD) params -->
- <xs:complexType name="PKPDDrug">
-  <xs:annotation>
-   <xs:documentation>
-        A drug description with PK/PD parameters.
-      </xs:documentation>
-   <xs:appinfo>name:Drug parameters;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:element name="PD">
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="phenotype" type="om:Phenotype" minOccurs="1" maxOccurs="unbounded">
-       <xs:annotation>
-        <xs:documentation>
-                  Pharmaco-Dynamic parameters for some resistance phenotype.
-                  
-                  To model resistance to this drug, describe multiple infection
-                  phenotypes (with respect to these PD parameters) and list one
-                  or more &quot;restrict&quot; elements for each phenotype.
-                  
-                  Loci are specified elsewhere. Multiple loci may influence the
-                  action of a single drug and each locus may influence multiple
-                  drugs.
-                </xs:documentation>
-        <xs:appinfo>name:PD parameters for some allele / resistance phenotype;</xs:appinfo>
-       </xs:annotation>
-      </xs:element>
-     </xs:sequence>
-     <xs:attribute name="locus" type="xs:string" use="optional">
-      <xs:annotation>
-       <xs:documentation>
-                Optional; if present specifies the locus corresponding to this
-                drug's PD phenotypes: each phenotype must then match one of
-                that locus's alleles. Otherwise the drug should specify only
-                one phenotype.
-                
-                There is currently a one-to-many correspondance between loci
-                and drugs.
-              </xs:documentation>
-       <xs:appinfo>name:Locus;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-    </xs:complexType>
-   </xs:element>
-   <xs:element name="PK">
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="negligible_concentration" type="xs:double">
-       <xs:annotation>
-        <xs:documentation>
-                    Concentration below which drug's effects are deemed negligible and can
-                    be removed from simulation.
-                  </xs:documentation>
-        <xs:appinfo>units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
-       </xs:annotation>
-      </xs:element>
-      <xs:choice>
-       <xs:element name="half_life" type="xs:double">
-        <xs:annotation>
-         <xs:documentation>
-                      Used to calculate elimination rate λ, calculated as
-                      λ = ln(2) / half_life. The basic form of decay is
-                      C(t) = C0 * exp(-λ*t).
-                      
-                      Alternatively, elimination rate can be specified via k
-                      and m_exponent.
-                    </xs:documentation>
-         <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
-        </xs:annotation>
-       </xs:element>
-       <xs:sequence>
-        <xs:element name="k" type="om:SampledValueLN">
-         <xs:annotation>
-          <xs:documentation>
-                      Constant used to calculate the elimination rate λ, which
-                      is calculated as λ = k / (body_mass ^ m_exponent), where
-                      body_mass is the patient's weight in kg and m_exponent is
-                      the next parameter. The basic form of decay is
-                      C(t) = C0 * exp(-λ*t).
-                      
-                      If CV &gt; 0, k is sampled per-human from the log-normal
-                      distribution: ln N( ln(mean) - σ^2 / 2, σ^2).
-                      
-                      Alternatively, elimination rate can be specified via half_life.
-                      </xs:documentation>
-          <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (k);</xs:appinfo>
-         </xs:annotation>
-        </xs:element>
-        <xs:element name="m_exponent" type="xs:double">
-         <xs:annotation>
-          <xs:documentation>
-                      Constant used to calculate the elimination rate λ, which
-                      is calculated as λ = k / (body_mass ^ m_exponent), where
-                      body_mass is the patient's weight in kg and k is the
-                      previous parameter. The basic form of decay is
-                      C(t) = C0 * exp(-λ*t).
-                      
-                      Alternatively, elimination rate can be specified via half_life.
-                      
-                      Note that in the case of a conversion model, this applies
-                      to *both* the elimination and the conversion rates.
-                    </xs:documentation>
-          <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (m_exponent);</xs:appinfo>
-         </xs:annotation>
-        </xs:element>
-       </xs:sequence>
-      </xs:choice>
-      <xs:element name="k_a" type="om:SampledValueLN" minOccurs="0">
-       <xs:annotation>
-        <xs:documentation>
-                  Absorption rate parameter. Not allowed for one compartment
-                  models, but required for two and three compartment models and
-                  one compartment with conversion model (for the parent drug
-                  only).
-                </xs:documentation>
-        <xs:appinfo>name:Absorption rate constant (k_a);min:0;</xs:appinfo>
-       </xs:annotation>
-      </xs:element>
-      <xs:element name="conversion" minOccurs="0">
-       <xs:annotation>
-        <xs:documentation>
-                  Configures the parent drug in a conversion model.
-                  
-                  To use a conversion model, the parent drug should have this
-                  section defined as well as half-life or k (direct
-                  elimination; this may be zero) and k_a (absorption rate;
-                  this may be large).
-                  
-                  The metabolite drug should define half-life or k (elimination
-                  of metabolite), but not k_a (absorption rate) or this section
-                  (conversion). It is not possible for the metabolite to itself
-                  undergo conversion with the current models.
-                </xs:documentation>
-        <xs:appinfo>name:Conversion parameters (parent drug);</xs:appinfo>
-       </xs:annotation>
-       <xs:complexType>
-        <xs:all>
-         <xs:element name="metabolite" type="xs:string">
-          <xs:annotation>
-           <xs:documentation>
-                        The abbreviation of the metabolite drug (e.g. &quot;DHA&quot; or
-                        &quot;DHA_AR&quot;).
-                      </xs:documentation>
-           <xs:appinfo>name:Metabolite drug (abbreviation);</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-         <xs:element name="rate" type="om:SampledValueLN">
-          <xs:annotation>
-           <xs:documentation>
-                        Rate of conversion of parent drug to metabolite.
-                      </xs:documentation>
-           <xs:appinfo>name:Rate of conversion;unit:Per day;</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-         <xs:element name="molRatio" type="xs:double">
-          <xs:annotation>
-           <xs:documentation>
-                        Ratio of molecular weights: molecular weight of the
-                        metabolite divided by molecular weight of the parent.
-                      </xs:documentation>
-           <xs:appinfo>name:Molecular weight ratio;unit:unitless;</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-         <xs:element name="IC50_log_correlation" type="xs:double">
-          <xs:annotation>
-           <xs:documentation>
-                        The IC50 values of parent and metabolite drugs may be
-                        sampled from the log-normal distribution (if CV is greater than 0).
-                        This parameter controls correlation between these samples,
-                        measured in log-space.
-                        
-                        If this value is 1, samples are fully correlated: a single z-score is
-                        used to calculate both samples. If this is 0, two independent
-                        samples are used.
-                        
-                        Values between 0 and 1 (partial correlation) are supported;
-                        in this case IC50 values are sampled such that
-                        cor(log(x), log(y)) matches this value (where x, y are parent and
-                        metabolite IC50 values).
-                      </xs:documentation>
-           <xs:appinfo>name:IC50 log correlation;min:0;max:1;</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-        </xs:all>
-       </xs:complexType>
-      </xs:element>
-      <xs:element name="vol_dist" type="om:SampledValueLN">
-       <xs:annotation>
-        <xs:documentation>
-                    Volume of Distribution.
-                    
-                    If CV &gt; 0 this is sampled from a log-normal distribution.
-                  </xs:documentation>
-        <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution (Vd);</xs:appinfo>
-       </xs:annotation>
-      </xs:element>
-      <xs:element name="compartment2" minOccurs="0">
-       <xs:annotation>
-        <xs:documentation>
-                  Optional element specifying conversion parameters to- and
-                  from- a second compartment.
-                </xs:documentation>
-        <xs:appinfo>name:Second compartment parameters;</xs:appinfo>
-       </xs:annotation>
-       <xs:complexType>
-        <xs:all>
-         <xs:element name="k12" type="om:SampledValueLN">
-          <xs:annotation>
-           <xs:documentation>
-                          Absorption rate from the central compartment to the
-                          first periphery compartment (2).
-                          
-                          It is sampled per-patient when CV &gt; 0.
-                      </xs:documentation>
-           <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (k12);</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-         <xs:element name="k21" type="om:SampledValueLN">
-          <xs:annotation>
-           <xs:documentation>
-                          Absorption rate from the first periphery compartment
-                          (2) to the central compartment.
-                          
-                          It is sampled per-patient when CV &gt; 0.
-                      </xs:documentation>
-           <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (k21);</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-        </xs:all>
-       </xs:complexType>
-      </xs:element>
-      <xs:element name="compartment3" minOccurs="0">
-       <xs:annotation>
-        <xs:documentation>
-                  Optional element specifying conversion parameters to- and
-                  from- a third compartment.
-                </xs:documentation>
-        <xs:appinfo>name:Third compartment parameters;</xs:appinfo>
-       </xs:annotation>
-       <xs:complexType>
-        <xs:all>
-         <xs:element name="k13" type="om:SampledValueLN">
-          <xs:annotation>
-           <xs:documentation>
-                          Absorption rate from the central compartment to the
-                          second periphery compartment (3).
-                          
-                          It is sampled per-patient when CV &gt; 0.
-                      </xs:documentation>
-           <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (k13);</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-         <xs:element name="k31" type="om:SampledValueLN">
-          <xs:annotation>
-           <xs:documentation>
-                          Absorption rate from the second periphery compartment
-                          (3) to the central compartment.
-                          
-                          It is sampled per-patient when CV &gt; 0.
-                      </xs:documentation>
-           <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (k31);</xs:appinfo>
-          </xs:annotation>
-         </xs:element>
-        </xs:all>
-       </xs:complexType>
-      </xs:element>
-     </xs:sequence>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
-  <xs:attribute name="abbrev" use="required" type="xs:string"/>
- </xs:complexType>
- <xs:complexType name="Phenotype">
-  <xs:sequence>
-   <xs:element name="restriction" minOccurs="0" maxOccurs="unbounded">
-    <xs:annotation>
-     <xs:documentation>
-            Specifies the mapping from genotype to phenotype. For each drug
-            type, if only one phenotype is present, restrictions need not be
-            specified, but otherwise restrictions must be specified.
-            
-            The set of loci affecting phenotypes of this drug's action must be
-            fixed for any drug type. Each phenotype must list, for each of
-            these loci, a restriction to one or more alleles under the locus.
-          </xs:documentation>
-     <xs:appinfo>name:Restrict phenotype applicability to certain alleles;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:attribute name="onLocus" type="xs:string" use="required">
-      <xs:annotation>
-       <xs:documentation>
-                A locus under which only a restricted set of alleles map to
-                this phenotype.
-              </xs:documentation>
-       <xs:appinfo>name:Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="toAllele" type="xs:string" use="required">
-      <xs:annotation>
-       <xs:documentation>
-                One allele of a locus upon which phenotype choice depends.
-                If multiple alleles under this locus should map to the same
-                phenotype, repeat the whole &quot;restriction onLocus...&quot; element.
-              </xs:documentation>
-       <xs:appinfo>name:Alleles mapping to this phenotype;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-    </xs:complexType>
-   </xs:element>
-   <xs:element name="max_killing_rate" type="xs:double">
-    <xs:annotation>
-     <xs:documentation>
-              k1 — Maximal parasite killing rate.
-            </xs:documentation>
-     <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
-    </xs:annotation>
-   </xs:element>
-   <xs:element name="IC50" type="om:SampledValueLN">
-    <xs:annotation>
-     <xs:documentation>
-            Half maximal effect concentration.
-            
-            If CV &gt; 0, the IC50 is sampled from a log-normal distribution.
-          </xs:documentation>
-     <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
-    </xs:annotation>
-   </xs:element>
-   <xs:element name="slope" type="xs:double">
-    <xs:annotation>
-     <xs:documentation>
-              n — Slope of the concentration effect curve
-            </xs:documentation>
-     <xs:appinfo>units:dimensionless;name:Slope of effect curve;</xs:appinfo>
-    </xs:annotation>
-   </xs:element>
-  </xs:sequence>
-  <xs:attribute name="name" use="optional" type="xs:string">
-   <xs:annotation>
-    <xs:documentation>
-          Name of the phenotype; for documentation use only.
-        </xs:documentation>
-    <xs:appinfo>name:Name of phenotype;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
-
- <!-- Component and TriggeredDeployments would be in interventions.xsd, except
-    that they are needed from healthSystem.xsd -->
- <xs:complexType name="Component">
-  <xs:annotation>
-   <xs:documentation>
-        The list of components deployed to eligible humans.
-      </xs:documentation>
-   <xs:appinfo>name:Component to be deployed;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="id" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The identifier (short name) of a component.
-        </xs:documentation>
-    <xs:appinfo>name:Identifier;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="TriggeredDeployments">
-  <xs:annotation>
-   <xs:documentation>
-        Lists intervention components which are deployed according to some
-        external trigger (for example, screening with a negative patency
-        outcome or health-system treatment).
-        
-        Components are referenced from one or more sub-lists. Each of these
-        lists is deployed independently if and only if its age constraints are
-        met by the human host and a random sample with the given probability of
-        a positive outcome is positive.
-      </xs:documentation>
-   <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence>
-   <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
-    <xs:complexType>
-     <xs:sequence>
-      <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
-     </xs:sequence>
-     <xs:attribute name="maxAge" type="xs:double" use="optional">
-      <xs:annotation>
-       <xs:documentation>
-                Maximum age of eligible humans (defaults to no limit).
-                
-                Input is rounded to the nearest time step.
-              </xs:documentation>
-       <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="minAge" type="xs:double" default="0">
-      <xs:annotation>
-       <xs:documentation>
-                Minimum age of eligible humans (defaults to 0).
-                
-                Input is rounded to the nearest time step.
-              </xs:documentation>
-       <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="p" type="xs:double" default="1">
-      <xs:annotation>
-       <xs:documentation>
-                Probability of this list of components being deployed, given
-                that other constraints are met.
-              </xs:documentation>
-       <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="OptionSet">
-  <xs:sequence>
-   <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="Option">
-  <xs:attribute name="name" type="xs:string" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Name of an option (monitoring measure or model option).
-        </xs:documentation>
-    <xs:appinfo>name:Option name;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="value" type="xs:boolean" default="true">
-   <xs:annotation>
-    <xs:documentation>
-          Option on/off switch (true/false). Specifying value=&quot;true&quot; is
-          the same as not specifying a value; specifying value=&quot;false&quot;
-          explicitly turns the option off. If an option is not mentioned
-          at all, it is left at its default value (normally off, but
-          in a few cases, such as some bug-fix options, on).
-        </xs:documentation>
-    <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="DoubleList">
-  <xs:sequence>
-   <xs:element name="item" maxOccurs="unbounded" type="xs:double"/>
-  </xs:sequence>
- </xs:complexType>
- <xs:complexType name="DecayFunction">
-  <xs:annotation>
-   <xs:documentation>
-        Specification of decay or survival of a parameter.
-      </xs:documentation>
-   <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
-  </xs:annotation>
-  <xs:sequence minOccurs="0" maxOccurs="unbounded">
-   <xs:element name="decay" type="om:DecayFunction"/>
-  </xs:sequence>
-  <xs:attribute name="function" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          Determines which decay function to use. Available decay functions,
-          for age t in years:
-          
-          constant: 1
-          
-          step: 1 for t less than L, otherwise 0
-          
-          linear: 1 - t/L for t less than L, otherwise 0
-          
-          exponential: exp( - t/L * log(2) )
-          
-          weibull: exp( -(t/L)^k * log(2) )
-          
-          hill: 1 / (1 + (t/L)^k)
-          
-          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
-        </xs:documentation>
-    <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="constant"/>
-     <xs:enumeration value="step"/>
-     <xs:enumeration value="linear"/>
-     <xs:enumeration value="exponential"/>
-     <xs:enumeration value="weibull"/>
-     <xs:enumeration value="hill"/>
-     <xs:enumeration value="smooth-compact"/>
-     <xs:enumeration value="plus"/>
-     <xs:enumeration value="minus"/>
-     <xs:enumeration value="divides"/>
-     <xs:enumeration value="multiplies"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
-  <xs:attribute name="L" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          (Time) scale parameter of distribution: this is either the age of
-          complete decay (smooth-compact, step and linear functions) or the age
-          at which the parameter has decayed to half its original value
-          (exponential, weibull and hill). Not used when function=&quot;constant&quot;
-          (i.e. no decay).
-          
-          This value can be specified in years, days or steps (e.g. 2y, 180d or
-          100t). When the unit is not specified years are assumed. The value is
-          used without rounding except when sampling an age of decay, when the
-          rounding happens as late as possible.
-        </xs:documentation>
-    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="k" type="xs:double" default="1.0">
-   <xs:annotation>
-    <xs:documentation>
-          Shape parameter of distribution. If not specified, default value of
-          1 is used. Meaning depends on function; not used in some cases.
-        </xs:documentation>
-    <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="CV" type="xs:double" default="0">
-   <xs:annotation>
-    <xs:documentation>
-        If CV is non-zero, heterogeneity of decay is introduced via a random
-        variable sampled from the log-normal distribution. This distribution is
-        parameterised with mean=1 and CV as given.
-        
-        The effective age of decay is the real age multiplied by this variable
-        (for decay functions with a half-life, this is equivalent to dividing
-        the half-life by the variable).
-        </xs:documentation>
-    <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="increasing" type="xs:boolean" default="false">
-   <xs:annotation>
-    <xs:documentation>
-          (Boolean) If True, this tells OpenMalaria to use the complement of the
-          DecayFunction defined as 1-f(x). This is useful to model increasing
-          functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
-          between 0 and 1.
-</xs:documentation>
-    <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="initialEfficacy" type="xs:double" use="optional" default="1">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: Efficacy between 0 and 1.
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="rho" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: Proportion between 0 and 1, proportion of the response that is short-lived.</xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="halflife_short" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: halflife of short lived component (default to years).
-
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="halflife_long" type="xs:string" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          biphasic: halflife of long lived component (default to years).
-
-        </xs:documentation>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueN">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional heterogeneity.
-        
-        Optionally, a distribution (&quot;distr&quot;) and standard of deviation (&quot;SD&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value (normal);</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="mean" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The mean value.
-        </xs:documentation>
-    <xs:appinfo>name:mean;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="SD" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The standard deviation of variates.
-        </xs:documentation>
-    <xs:appinfo>name:standard deviation;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="optional" default="const">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          
-          Valid options are as follows.
-          
-          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
-          same effect as not specifying distr at all.
-          
-          &quot;normal&quot;: the parameter is sampled from a normal distribution.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="const"/>
-     <xs:enumeration value="normal"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="BetaMeanSample">
-  <xs:annotation>
-   <xs:documentation>
-        Parameters of a normal distribution, provided as mean and variance.
-        
-        Variates are sampled from Be(α,β) where α and β are determined from the
-        mean and variance as follows: let v be the variance and c=mean/(1-mean).
-        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
-      </xs:documentation>
-   <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="mean" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The mean of the beta distribution (must be in the open range (0,1)).
-        </xs:documentation>
-    <xs:appinfo>units:none;name:mean;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="variance" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The standard deviation of variates.
-        </xs:documentation>
-    <xs:appinfo>units:none;name:variance;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueCV">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional heterogeneity.
-        
-        The mean cannot be specified (unless this type is extended).
-        Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value (log normal);</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="CV" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The (linear) coefficient of variation.
-          
-          This value must be specified when a (non-constant) distribution is used. 
-          Note: since version 46, variance can be used instead.
-          
-          Note that specifying CV=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
-          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
-        </xs:documentation>
-    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="optional" default="const">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          
-          Valid options are as follows.
-          
-          &quot;const&quot;: no variation or sampling. Specifying distr=&quot;const&quot; has the
-          same effect as not specifying distr at all.
-          
-          &quot;lognormal&quot;: the parameter is sampled from a log-normal distribution.
-          Note that the &quot;mean&quot; and &quot;CV&quot; values are linear (arithmetic) properties
-          of the distribution and not log-space properties.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="const"/>
-     <xs:enumeration value="lognormal"/>
-     <xs:enumeration value="gamma"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
-  <xs:attribute name="variance" type="xs:double" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          The variance parameter of the distirbution.
-          
-          This value can be specified when a (non-constant) distribution is used.
-          
-          Note that specifying variance=&quot;0&quot; has the same effect as distr=&quot;const&quot; and
-          disables sampling of this parameter, even if distr is not &quot;const&quot;. 
-        </xs:documentation>
-    <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="SampledValueLN">
-  <xs:annotation>
-   <xs:documentation>
-        A parameter with optional log-normal heterogeneity.
-        
-        The mean value must be specified. Optionally, a distribution (&quot;distr&quot;)
-        and coefficient of variation (&quot;CV&quot;) may be specified.
-      </xs:documentation>
-   <xs:appinfo>name:Sampled value;</xs:appinfo>
-  </xs:annotation>
-  <xs:complexContent>
-   <xs:extension base="om:SampledValueCV">
-    <xs:attribute name="mean" type="xs:double" use="required">
-     <xs:annotation>
-      <xs:documentation>
-              The (linear) mean value.
-            </xs:documentation>
-      <xs:appinfo>name:mean;</xs:appinfo>
-     </xs:annotation>
-    </xs:attribute>
-   </xs:extension>
-  </xs:complexContent>
- </xs:complexType>
- <xs:complexType name="WeibullSample">
-  <xs:annotation>
-   <xs:documentation>
-        Parameters of a Weibull distribution.
-      </xs:documentation>
-   <xs:appinfo>name:Weibull parameters;</xs:appinfo>
-  </xs:annotation>
-  <xs:attribute name="scale" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The Weibull scale parameter (λ).
-        </xs:documentation>
-    <xs:appinfo>name:Scale;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="shape" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          The Weibull shape parameter (k).
-        </xs:documentation>
-    <xs:appinfo>name:shape;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="distr" use="required">
-   <xs:annotation>
-    <xs:documentation>
-          To allow heterogeneity, a distribution must be specified.
-          In this case, only &quot;weibull&quot; is allowed.
-        </xs:documentation>
-    <xs:appinfo>name:Distribution;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="weibull"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="DoubleValue">
-  <xs:attribute name="value" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>A double-precision floating-point value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="IntValue">
-  <xs:attribute name="value" type="xs:int" use="required">
-   <xs:annotation>
-    <xs:documentation>An integer value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="BooleanValue">
-  <xs:attribute name="value" type="xs:boolean" use="required">
-   <xs:annotation>
-    <xs:documentation>A boolean value.</xs:documentation>
-    <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
- </xs:complexType>
- <xs:complexType name="AgeGroupValues">
-  <xs:sequence>
-   <xs:element maxOccurs="unbounded" name="group">
-    <xs:annotation>
-     <xs:documentation>
-            A series of values according to age groups, each specified with
-            a lower-bound and a value. The first lower-bound specified must be
-            zero; a final upper-bound of infinity is added to complete the last
-            age group. At least one age group is required. Normally these are
-            interpolated by a continuous function (see interpolation attribute).
-          </xs:documentation>
-     <xs:appinfo>name:age group;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:complexContent>
-      <xs:extension base="om:DoubleValue">
-       <xs:attribute name="lowerbound" type="xs:double" use="required">
-        <xs:annotation>
-         <xs:documentation>
-                    Lower bound of age group
-                  </xs:documentation>
-         <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
-        </xs:annotation>
-       </xs:attribute>
-      </xs:extension>
-     </xs:complexContent>
-    </xs:complexType>
-   </xs:element>
-  </xs:sequence>
-  <!-- NOTE: would specify default="linear" except for a possible bug in Code
-    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
-  <xs:attribute name="interpolation" use="optional">
-   <xs:annotation>
-    <xs:documentation>
-          Interpolation algorithm. Normally it is desirable for age-based
-          values to be continuous w.r.t. age. By default linear interpolation
-          is used.
-          
-          With all algorithms except &quot;none&quot;, the age groups are converted to a
-          set of points centred within each age range. Extra
-          points are added at each end (zero and infinity) to keep value
-          constant at both ends of the function. A zero-length age group may
-          be used as a kind of barrier to adjust the distribution; e.g. with
-          age group boundaries at 15, 20 and 25 years, a (linear) spline would
-          be drawn between ages 17.5 and 22.5, whereas with boundaries at
-          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
-          years (may be desired if individuals are assumed to reach adult size
-          at 20).
-          
-          Algorithms:
-          1. none: input values are used directly
-          2. linear: straight lines (on an age vs. value graph) are used to
-          interpolate data points.
-        </xs:documentation>
-    <xs:appinfo>name:interpolation;</xs:appinfo>
-   </xs:annotation>
-   <xs:simpleType>
-    <xs:restriction base="xs:string">
-     <xs:enumeration value="none"/>
-     <xs:enumeration value="linear"/>
-    </xs:restriction>
-   </xs:simpleType>
-  </xs:attribute>
- </xs:complexType>
-
   <!---HumanPopulationStructure-->
   <xs:complexType name="Demography">
     <xs:sequence>
@@ -5892,6 +5892,7 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
       <xs:element name="pRelapseOne" type="om:ProbVivaxEvent"/>
       <xs:element name="pRelapseTwoPlus" type="om:ProbVivaxEvent"/>
       <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+      <xs:element name="vivaxClinOption" type="xs:string" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">

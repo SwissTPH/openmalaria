@@ -1,698 +1,562 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_current.xsd">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
-    <ageGroup lowerbound="0.0">
-      <group poppercent="3.474714994" upperbound="1"/>
-      <group poppercent="12.76004028" upperbound="5"/>
-      <group poppercent="14.52151394" upperbound="10"/>
-      <group poppercent="12.75565434" upperbound="15"/>
-      <group poppercent="10.83632374" upperbound="20"/>
-      <group poppercent="8.393312454" upperbound="25"/>
-      <group poppercent="7.001421452" upperbound="30"/>
-      <group poppercent="5.800587654" upperbound="35"/>
-      <group poppercent="5.102136612" upperbound="40"/>
-      <group poppercent="4.182561874" upperbound="45"/>
-      <group poppercent="3.339409351" upperbound="50"/>
-      <group poppercent="2.986112356" upperbound="55"/>
-      <group poppercent="2.555766582" upperbound="60"/>
-      <group poppercent="2.332763433" upperbound="65"/>
-      <group poppercent="1.77400255" upperbound="70"/>
-      <group poppercent="1.008525491" upperbound="75"/>
-      <group poppercent="0.74167341" upperbound="80"/>
-      <group poppercent="0.271863401" upperbound="85"/>
-      <group poppercent="0.161614642" upperbound="90"/>
-    </ageGroup>
-  </demography>
-  <monitoring name="Quarterly Surveys" startDate="1351-1-1">
-    <SurveyOptions>
-      <option name="nHost" value="true"/>
-      <option name="nInfect" value="true"/>
-      <option name="nExpectd" value="true"/>
-      <option name="nPatent" value="true"/>
-      <option name="totalInfs" value="true"/>
-      <option name="nTransmit" value="true"/>
-      <option name="totalPatentInf" value="true"/>
-      <option name="nTreatments1" value="true"/>
-      <option name="nTreatments2" value="true"/>
-      <option name="nTreatments3" value="true"/>
-      <option name="nUncomp" value="true"/>
-      <option name="nSevere" value="true"/>
-      <option name="nIndDeaths" value="true"/>
-      <option name="nDirDeaths" value="true"/>
-      <option name="annAvgK" value="true"/>
-      <option name="nLiverStageTreatments" value="true"/>
-      <option name="nTreatDiagnostics"/>
-    </SurveyOptions>
-    <surveys diagnostic="standard">
-      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-1-6</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-4-6</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-7-5</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-10-3</surveyTime>
-    </surveys>
-    <ageGroup lowerbound="0.0">
-      <group upperbound="1"/>
-      <group upperbound="5"/>
-      <group upperbound="10"/>
-      <group upperbound="20"/>
-      <group upperbound="40"/>
-      <group upperbound="99"/>
-    </ageGroup>
-  </monitoring>
-  <interventions name="enable selective PQ">
-    <changeHS>
-      <timedDeployment time="1361-1-1">
-        <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
-          <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
-          <initialACR>
-            <ACT value="0.85"/>
-            <!-- what is cure rate of blood-stage drugs? -->
-            <QN value="0"/>
-            <!-- no treatment for severe (can change so long as CFR=1) -->
-            <selfTreatment value="0"/>
-          </initialACR>
-          <compliance>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </compliance>
-          <nonCompliersEffective>
-            <ACT value="0"/>
-            <QN value="0"/>
-            <selfTreatment value="0"/>
-          </nonCompliersEffective>
-          <treatmentActions>
-            <ACT name="clear blood-stage infections">
-              <clearInfections stage="blood" timesteps="-1t"/>
-            </ACT>
-            <QN name="clear blood-stage infections">
-              <clearInfections stage="blood" timesteps="-1t"/>
-            </QN>
-          </treatmentActions>
-          <!--set as desired... -->
-          <pSeekOfficialCareUncomplicated1 value="0.04"/>
-          <pSelfTreatUncomplicated value="0"/>
-          <pSeekOfficialCareUncomplicated2 value="0.04"/>
-          <pSeekOfficialCareSevere value="1"/>
-          <liverStageDrug>
-            <pHumanCannotReceive value="0.3"/>
-            <ignoreCannotReceive value="false"/>
-            <pUseUncomplicated value="0.95"/>
-            <effectivenessOnUse value="0.775"/>
-            <!-- 1 - 0.18 / 0.8 -->
-          </liverStageDrug>
-        </ImmediateOutcomes>
-        <CFR>
-          <!-- CFR=1 so that all severe cases result in death -->
-          <group lowerbound="0" value="1"/>
-        </CFR>
-        <pSequelaeInpatient>
-          <!-- no sequelae -->
-          <group lowerbound="0.0" value="0"/>
-        </pSequelaeInpatient>
-      </timedDeployment>
-    </changeHS>
-  </interventions>
-  <healthSystem>
-    <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
-      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
-      <initialACR>
-        <ACT value="0.85"/>
-        <!-- what is cure rate of blood-stage drugs? -->
-        <QN value="0"/>
-        <!-- no treatment for severe (can change so long as CFR=1) -->
-        <selfTreatment value="0"/>
-      </initialACR>
-      <compliance>
-        <ACT value="1"/>
-        <QN value="1"/>
-        <selfTreatment value="1"/>
-      </compliance>
-      <nonCompliersEffective>
-        <ACT value="0"/>
-        <QN value="0"/>
-        <selfTreatment value="0"/>
-      </nonCompliersEffective>
-      <treatmentActions>
-        <ACT name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="-1t"/>
-        </ACT>
-        <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="-1t"/>
-        </QN>
-      </treatmentActions>
-      <!--set as desired... -->
-      <pSeekOfficialCareUncomplicated1 value="0.04"/>
-      <pSelfTreatUncomplicated value="0"/>
-      <pSeekOfficialCareUncomplicated2 value="0.04"/>
-      <pSeekOfficialCareSevere value="1"/>
-      <liverStageDrug>
-        <pHumanCannotReceive value="0.3"/>
-        <ignoreCannotReceive value="true"/>
-        <pUseUncomplicated value="0.95"/>
-        <effectivenessOnUse value="0.775"/>
-        <!-- 1 - 0.18 / 0.8 -->
-      </liverStageDrug>
-    </ImmediateOutcomes>
-    <CFR>
-      <!-- CFR=1 so that all severe cases result in death -->
-      <group lowerbound="0" value="1"/>
-    </CFR>
-    <pSequelaeInpatient>
-      <!-- no sequelae -->
-      <group lowerbound="0.0" value="0"/>
-    </pSequelaeInpatient>
-  </healthSystem>
-  <entomology mode="dynamic" name="Namawala1_16*1.0">
-    <nonVector eipDuration="10">
-      <EIRDaily origin="Namawala Pre">0.011646449</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.010093589</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012399958</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00417152</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.032564215</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.022553714</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.109582625</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03679304</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.019256035</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.021840315</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.12177057</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.062335003</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.08145638</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02654187</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.18463561</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.12458692</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.15459837</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.091613</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.29196343</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.17139332</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.17837547</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.17242761</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.09780438</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.15611112</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.24088523</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.13097599</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.24442644</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.20882814</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.32493162</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.16841653</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.19186127</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.21454392</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.18540058</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.26535854</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.19882336</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3791184</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3377986</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3828573</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.37944216</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.36320302</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3490869</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.56899995</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.25438538</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3142507</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.44112965</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.32541868</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.69834</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.4899244</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.35683113</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3121363</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.26744142</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3126749</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.21521434</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.3667958</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.4191633</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.18140669</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.2747903</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.2058499</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.1433344</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.1390053</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.094167195</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07993647</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.038923204</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.051262997</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.040923014</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.037337396</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.036820255</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02212682</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024907356</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029843846</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.025112208</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018432332</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023211243</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024670988</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029928366</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03922547</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04500285</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04982474</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.042215154</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.041410074</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.036191374</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03292521</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03233501</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.026036188</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.016353734</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04388118</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02623674</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.027153559</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018122906</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.031979743</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.045998458</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.031938203</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.047396604</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04554005</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.049647108</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.030711958</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.037540816</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.044699155</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07712299</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.041427262</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.032465372</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.046409596</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.036858935</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.08993408</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.06211869</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.058447123</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.042765245</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.054427452</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07138284</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.08039774</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0594327</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.05522537</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.032177433</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03763966</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07012222</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.06978414</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.10657288</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.067280084</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0648362</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.05537435</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.047952425</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.049419336</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.045265004</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.040958825</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.057014596</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03499808</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04717886</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.05518669</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04024543</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.025335683</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029351056</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.026296908</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.022079546</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.041281145</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.11026307</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.062466796</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.05943127</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.056480262</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04188424</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.076269194</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.062529825</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.04762151</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07641102</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07051903</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.067500696</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.046847947</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.063968085</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.08584851</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.06953345</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0721206</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.051470716</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.039705366</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.034995213</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.026332721</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020061115</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023596594</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.022207042</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0146031855</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.021980703</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.021591054</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018779004</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.028917</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023653895</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029028738</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.026398618</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024789888</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02412806</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024848623</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02335163</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02008117</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018121473</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.026362805</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.01748543</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020320402</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.019141432</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029756462</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029429846</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018151557</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015742045</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.021999326</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023473395</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.019013938</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.017526975</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.027064743</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02552191</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018582746</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018049847</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.017498324</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015657526</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015595927</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012024636</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012142103</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0064076954</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.013071814</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0149111785</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009530606</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.007446278</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.019781772</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009378757</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00834304</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0073058903</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0073717865</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0056369957</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0046743373</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005675674</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.01578502</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0063460968</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005303217</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0079978015</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0035727236</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0047832094</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008874508</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.011265396</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.013190714</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0066440627</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.004841943</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008280009</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005114123</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008956162</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009964662</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009698211</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.010978891</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00782733</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009812813</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0069047827</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0039967517</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0052946215</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0065924916</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.007890361</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009185366</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.010483236</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.011781107</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0096007995</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024100844</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009689616</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.018307703</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008214112</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0063375016</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005778816</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005887688</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00599656</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0061054323</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005922069</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.016250592</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009122335</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.011007542</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012892747</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012689329</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0071540424</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00676153</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009755513</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023063693</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015663255</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0074634682</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009534903</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0065495158</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015757803</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.007878901</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.010526212</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.01070098</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008446182</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.001194728</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005664214</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.006919108</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008174002</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015299394</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008417532</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.013927032</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0109617</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0084003415</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0012806796</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012918533</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008552189</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0052688364</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009325754</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.009758377</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008274279</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0067987754</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.008196922</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.002186037</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.001773469</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0013580361</EIRDaily>
-      <EIRDaily origin="Namawala Pre">6.073917E-4</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0018680159</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0023779958</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0036128343</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0035154226</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0035641284</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0030140379</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily>
-      <EIRDaily origin="Namawala Pre">4.8992445E-4</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0023694006</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0017448185</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.002392321</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0030426884</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0036901908</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.004337693</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0049851956</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0056355633</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.006283066</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.016909555</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005798871</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0045468425</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.002137331</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0026387158</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0013666312</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0012720844</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0010686655</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.00417152</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005394899</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0049221646</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0011059112</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0024267016</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.002650176</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0117324</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005329002</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.016726192</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.014170562</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.040039144</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020029599</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020791704</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020510929</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.023834392</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.020009544</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02158246</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03534905</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0016932475</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.041070566</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.08855312</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.067108184</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.10968863</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.049932178</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.06417723</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.052754257</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.07044311</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.036423445</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02869066</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.019367771</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.045640327</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.02805462</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.038941827</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.025974588</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.017794857</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.06690763</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.029624669</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03307706</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.01947378</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.03999044</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.024923114</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.013712154</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.005033902</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.012981565</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.015700502</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0040827035</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0046156035</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0013637661</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0032489724</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.006391938</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0053461925</EIRDaily>
-      <EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily>
-    </nonVector>
-  </entomology>
-  <diagnostics>
-    <diagnostic name="standard" units="Other">
-      <deterministic minDensity="40"/>
-    </diagnostic>
-    <diagnostic name="neonatal" units="Other">
-      <deterministic minDensity="40"/>
-    </diagnostic>
-  </diagnostics>
-  <model>
-    <ModelOptions>
-      <option name="VIVAX_SIMPLE_MODEL" value="true"/>
-      <option name="NON_MALARIA_FEVERS" value="true"/>
-    </ModelOptions>
-    <clinical healthSystemMemory="6">
-      <NeonatalMortality diagnostic="neonatal"/>
-      <NonMalariaFevers>
-        <incidence>
-          <group lowerbound="0" value="0.322769924518357"/>
-          <group lowerbound="0" value="0.308520194304172"/>
-          <group lowerbound="1" value="0.279441774808493"/>
-          <group lowerbound="2" value="0.250431781111273"/>
-          <group lowerbound="3" value="0.223285859756841"/>
-          <group lowerbound="4" value="0.199298352451799"/>
-          <group lowerbound="5" value="0.179376872365614"/>
-          <group lowerbound="6" value="0.163623659390782"/>
-          <group lowerbound="7" value="0.152227726923469"/>
-          <group lowerbound="8" value="0.145022785567758"/>
-          <group lowerbound="9" value="0.141493087461765"/>
-          <group lowerbound="10" value="0.140473293219353"/>
-          <group lowerbound="11" value="0.141109775159515"/>
-          <group lowerbound="12" value="0.142644475217328"/>
-          <group lowerbound="13" value="0.144335079395766"/>
-          <group lowerbound="14" value="0.145964032924869"/>
-          <group lowerbound="15" value="0.147708915135714"/>
-          <group lowerbound="16" value="0.149731543445568"/>
-          <group lowerbound="17" value="0.151887428568276"/>
-          <group lowerbound="18" value="0.154060663485195"/>
-          <group lowerbound="19" value="0.156179169710494"/>
-          <group lowerbound="20" value="0.158135015380583"/>
-          <group lowerbound="21" value="0.159704766482219"/>
-          <group lowerbound="22" value="0.160807788387655"/>
-          <group lowerbound="23" value="0.161427976448279"/>
-          <group lowerbound="24" value="0.161620429119137"/>
-          <group lowerbound="25" value="0.16144021875986"/>
-          <group lowerbound="26" value="0.160943264630612"/>
-          <group lowerbound="27" value="0.160217573697398"/>
-          <group lowerbound="28" value="0.159422614374451"/>
-          <group lowerbound="29" value="0.158542519631641"/>
-          <group lowerbound="30" value="0.157501217628248"/>
-          <group lowerbound="31" value="0.156175160594841"/>
-          <group lowerbound="32" value="0.154402302191411"/>
-          <group lowerbound="33" value="0.152102040636481"/>
-          <group lowerbound="34" value="0.14921450014676"/>
-          <group lowerbound="35" value="0.145714433541659"/>
-          <group lowerbound="36" value="0.141800502067518"/>
-          <group lowerbound="37" value="0.137916853907569"/>
-          <group lowerbound="38" value="0.134503529382102"/>
-          <group lowerbound="39" value="0.131746276580642"/>
-          <group lowerbound="40" value="0.12969902537497"/>
-          <group lowerbound="41" value="0.128398077347679"/>
-          <group lowerbound="42" value="0.127864136551891"/>
-          <group lowerbound="43" value="0.12804497197004"/>
-          <group lowerbound="44" value="0.128894055047661"/>
-          <group lowerbound="45" value="0.130350838992718"/>
-          <group lowerbound="46" value="0.132286605622701"/>
-          <group lowerbound="47" value="0.134599921072495"/>
-          <group lowerbound="48" value="0.137212726976988"/>
-          <group lowerbound="49" value="0.140035253913284"/>
-          <group lowerbound="50" value="0.142934573453621"/>
-          <group lowerbound="51" value="0.145830221511879"/>
-          <group lowerbound="52" value="0.148674810561069"/>
-          <group lowerbound="53" value="0.151497963594518"/>
-          <group lowerbound="54" value="0.15438856687865"/>
-          <group lowerbound="55" value="0.157403790093505"/>
-          <group lowerbound="56" value="0.16059513222516"/>
-          <group lowerbound="57" value="0.16402433342886"/>
-          <group lowerbound="58" value="0.16770481415944"/>
-          <group lowerbound="59" value="0.171626873047865"/>
-          <group lowerbound="60" value="0.175748327054247"/>
-          <group lowerbound="61" value="0.180030857856799"/>
-          <group lowerbound="62" value="0.184411365583771"/>
-          <group lowerbound="63" value="0.188816421789366"/>
-          <group lowerbound="64" value="0.19316997803338"/>
-          <group lowerbound="65" value="0.197435603275487"/>
-          <group lowerbound="66" value="0.201578808813379"/>
-          <group lowerbound="67" value="0.205556806881398"/>
-          <group lowerbound="68" value="0.209307183457343"/>
-          <group lowerbound="69" value="0.212783260344084"/>
-          <group lowerbound="70" value="0.215944154621391"/>
-          <group lowerbound="71" value="0.218749275266548"/>
-          <group lowerbound="72" value="0.221187990639016"/>
-          <group lowerbound="73" value="0.223361260399378"/>
-          <group lowerbound="74" value="0.225363436789592"/>
-          <group lowerbound="75" value="0.227254280093211"/>
-          <group lowerbound="76" value="0.229084576349576"/>
-          <group lowerbound="77" value="0.230891971097789"/>
-          <group lowerbound="78" value="0.232690225166173"/>
-          <group lowerbound="79" value="0.234484973338876"/>
-          <group lowerbound="80" value="0.236276361586796"/>
-          <group lowerbound="81" value="0.238064394629696"/>
-          <group lowerbound="82" value="0.239849077182917"/>
-          <group lowerbound="83" value="0.241630413957381"/>
-          <group lowerbound="84" value="0.243408409659591"/>
-          <group lowerbound="85" value="0.245183068991633"/>
-          <group lowerbound="86" value="0.246954396651183"/>
-          <group lowerbound="87" value="0.248722397331501"/>
-          <group lowerbound="88" value="0.250487075721441"/>
-          <group lowerbound="89" value="0.252248436505447"/>
-          <group lowerbound="90" value="0.253127874257909"/>
-        </incidence>
-      </NonMalariaFevers>
-    </clinical>
-    <human>
-      <availabilityToMosquitoes>
-        <group lowerbound="0.0" value="0.225940909648"/>
-        <group lowerbound="1.0" value="0.286173633441"/>
-        <group lowerbound="2.0" value="0.336898395722"/>
-        <group lowerbound="3.0" value="0.370989854675"/>
-        <group lowerbound="4.0" value="0.403114915112"/>
-        <group lowerbound="5.0" value="0.442585112522"/>
-        <group lowerbound="6.0" value="0.473839351511"/>
-        <group lowerbound="7.0" value="0.512630464378"/>
-        <group lowerbound="8.0" value="0.54487872702"/>
-        <group lowerbound="9.0" value="0.581527755812"/>
-        <group lowerbound="10.0" value="0.630257580698"/>
-        <group lowerbound="11.0" value="0.663063362714"/>
-        <group lowerbound="12.0" value="0.702417432755"/>
-        <group lowerbound="13.0" value="0.734605377277"/>
-        <group lowerbound="14.0" value="0.788908765653"/>
-        <group lowerbound="15.0" value="0.839587932303"/>
-        <group lowerbound="20.0" value="1.0"/>
-        <group lowerbound="20.0" value="1.0"/>
-      </availabilityToMosquitoes>
-    </human>
-    <vivax>
-      <probBloodStageInfectiousToMosq value="0.25"/>
-      <hypnozoiteRelease>
-        <numberHypnozoites max="11" base="0.8"/>
-        <!-- this is mean=2.92 in timesteps-->
-        <firstReleaseDays mean="14.6" CV="1.22" distr="lognormal" latentRelapse="10"/>
-      </hypnozoiteRelease>
-      <bloodStageProtectionLatency value="10"/>
-      <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
-      <bloodStageLengthDays scale="115.0582" shape="2.331" distr="weibull"/>
-      <clinicalEvents>
-        <pPrimaryInfection a="0.9687" b="9.803"/>
-        <pRelapseOne a="0.2098" b="1.812"/>
-        <pRelapseTwoPlus a="0.2098" b="1.812"/>
-        <!-- probability of a clinical event being severe -->
-        <pEventIsSevere value="0.1"/>
-      </clinicalEvents>
-    </vivax>
-    <parameters interval="5" iseed="0" latentp="15d">
-      <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
-      <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
-      <parameter include="false" name="        Simm    " number="3" value="0.1447"/>
-      <parameter include="false" name="        Xstar_p " number="4" value="2801.485664"/>
-      <parameter include="false" name="        gamma_p " number="5" value="2.061137"/>
-      <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
-      <!-- log odds 0 implies community CFR equals hospital CFR -->
-      <parameter include="false" name="        log oddsr CF community  " number="17" value="0"/>
-      <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="50.648162"/>
-    </parameters>
-  </model>
+ 
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax clinical illness" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_47.xsd"> 
+  <demography maximumAgeYrs="90" name="PNG" popSize="200"> 
+  <!-- make popSize larger for the actual runs, smaller for testing --> 
+  <!-- age-group for demography currently based on old Ethiopia data, but doesn't matter in any case since using fixed EIR rather than dynamic transmission --> 
+    <ageGroup lowerbound="0.0"> 
+      <group poppercent="3.474714994" upperbound="1"/> 
+      <group poppercent="12.76004028" upperbound="5"/> 
+      <group poppercent="14.52151394" upperbound="10"/> 
+      <group poppercent="12.75565434" upperbound="15"/> 
+      <group poppercent="10.83632374" upperbound="20"/> 
+      <group poppercent="8.393312454" upperbound="25"/> 
+      <group poppercent="7.001421452" upperbound="30"/> 
+      <group poppercent="5.800587654" upperbound="35"/> 
+      <group poppercent="5.102136612" upperbound="40"/> 
+      <group poppercent="4.182561874" upperbound="45"/> 
+      <group poppercent="3.339409351" upperbound="50"/> 
+      <group poppercent="2.986112356" upperbound="55"/> 
+      <group poppercent="2.555766582" upperbound="60"/> 
+      <group poppercent="2.332763433" upperbound="65"/> 
+      <group poppercent="1.77400255" upperbound="70"/> 
+      <group poppercent="1.008525491" upperbound="75"/> 
+      <group poppercent="0.74167341" upperbound="80"/> 
+      <group poppercent="0.271863401" upperbound="85"/> 
+      <group poppercent="0.161614642" upperbound="90"/> 
+    </ageGroup> 
+  </demography> 
+  <!-- monitoring outcomes: uncomplicated and severe episodes and number per age-group   --> 
+  <monitoring name="Quarterly Surveys" startDate="1351-1-1"> 
+    <SurveyOptions> 
+      <option name="nHost" value="true"/> 
+      <option name="nInfect" value="false"/> 
+      <option name="nExpectd" value="false"/> 
+      <option name="nPatent" value="false"/> 
+      <option name="totalInfs" value="false"/> 
+     <!-- for vivax, totalInfs is the number of broods --> 
+      <option name="nTransmit" value="false"/> 
+      <option name="totalPatentInf" value="false"/> 
+      <!-- for vivax, totalPatentInf is the number of broods with an active blood stage --> 
+      <option name="nTreatments1" value="true"/> 
+      <option name="nTreatments2" value="true"/> 
+      <option name="nTreatments3" value="true"/> 
+      <option name="nUncomp" value="true"/> 
+      <option name="nSevere" value="false"/> 
+      <option name="nIndDeaths" value="false"/> 
+      <option name="nDirDeaths" value="false"/> 
+      <option name="annAvgK" value="false"/> 
+      <option name="nLiverStageTreatments" value="false"/> 
+      <option name="nTreatDiagnostics"/> 
+    </SurveyOptions> 
+    <surveys diagnostic="standard"> 
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-1-6</surveyTime> 
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-4-6</surveyTime> 
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-7-5</surveyTime> 
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-10-3</surveyTime> 
+    </surveys> 
+    <ageGroup lowerbound="0.0"> 
+      <group upperbound="0.25"/> 
+      <group upperbound="0.5"/> 
+      <group upperbound="0.75"/> 
+      <group upperbound="1"/> 
+      <group upperbound="1.5"/> 
+      <group upperbound="2"/> 
+      <group upperbound="3"/> 
+      <group upperbound="4"/> 
+      <group upperbound="5"/> 
+      <group upperbound="6"/> 
+      <group upperbound="7"/> 
+      <group upperbound="8"/> 
+      <group upperbound="9"/> 
+      <group upperbound="10"/> 
+      <group upperbound="12"/> 
+      <group upperbound="14"/> 
+      <group upperbound="16"/> 
+      <group upperbound="18"/> 
+      <group upperbound="20"/> 
+      <group upperbound="25"/> 
+      <group upperbound="30"/> 
+      <group upperbound="35"/> 
+      <group upperbound="40"/> 
+      <group upperbound="45"/> 
+      <group upperbound="50"/> 
+      <group upperbound="55"/> 
+      <group upperbound="60"/> 
+      <group upperbound="65"/> 
+      <group upperbound="70"/> 
+      <group upperbound="99"/> 
+    </ageGroup> 
+  </monitoring> 
+  <interventions name="no interventions">   
+  </interventions> 
+  <healthSystem> 
+<DecisionTree5Day name="vivax test">
+  <pSeekOfficialCareUncomplicated1 value="0.3"/>
+  <pSelfTreatUncomplicated value="0.0"/>
+  <pSeekOfficialCareUncomplicated2 value="0.3"/>
+  <pSeekOfficialCareSevere value="1.0"/>
+  <treeUCOfficial>
+    <treatSimple durationLiver="0" durationBlood="-1t"/>
+  </treeUCOfficial>
+  <treeUCSelfTreat>
+    <noTreatment/>
+  </treeUCSelfTreat>
+  <cureRateSevere value="1.0"/>
+  <treatmentSevere>
+    <clearInfections stage="blood" timesteps="-1t"/>
+  </treatmentSevere>
+</DecisionTree5Day> 
+    <CFR> 
+      <!-- if CFR=1 then all severe cases result in death (no severe model) --> 
+      <group lowerbound="0" value="1"/> 
+    </CFR> 
+    <pSequelaeInpatient> 
+      <!-- no sequelae --> 
+      <group lowerbound="0.0" value="0"/> 
+    </pSequelaeInpatient> 
+  </healthSystem> 
+ <entomology mode="forced" name="R03Ilaita"> 
+  <nonVector eipDuration="10"> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0568633  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0391189  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0264658  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0211302  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0190838  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+<EIRDaily origin="R03estimate">  0.0346269  </EIRDaily> 
+    </nonVector> 
+  </entomology> 
+  <diagnostics> 
+    <!-- diagnostic currently irrelevant for vivax in any case --> 
+    <diagnostic name="standard" units="Other"> 
+      <deterministic minDensity="40"/> 
+    </diagnostic> 
+    <diagnostic name="neonatal" units="Other"> 
+      <deterministic minDensity="40"/> 
+    </diagnostic> 
+  </diagnostics> 
+  <model> 
+    <ModelOptions> 
+      <option name="VIVAX_SIMPLE_MODEL" value="true"/> 
+      <option name="NON_MALARIA_FEVERS" value="false"/> 
+      <option name="LOGNORMAL_MASS_ACTION" value="false" /> 
+    </ModelOptions> 
+    <clinical healthSystemMemory="6t"> 
+      <NeonatalMortality diagnostic="neonatal"/> 
+     </clinical> 
+    <human> 
+      <availabilityToMosquitoes> 
+        <group lowerbound="0.0" value="0.225940909648"/> 
+        <group lowerbound="1.0" value="0.286173633441"/> 
+        <group lowerbound="2.0" value="0.336898395722"/> 
+        <group lowerbound="3.0" value="0.370989854675"/> 
+        <group lowerbound="4.0" value="0.403114915112"/> 
+        <group lowerbound="5.0" value="0.442585112522"/> 
+        <group lowerbound="6.0" value="0.473839351511"/> 
+        <group lowerbound="7.0" value="0.512630464378"/> 
+        <group lowerbound="8.0" value="0.54487872702"/> 
+        <group lowerbound="9.0" value="0.581527755812"/> 
+        <group lowerbound="10.0" value="0.630257580698"/> 
+        <group lowerbound="11.0" value="0.663063362714"/> 
+        <group lowerbound="12.0" value="0.702417432755"/> 
+        <group lowerbound="13.0" value="0.734605377277"/> 
+        <group lowerbound="14.0" value="0.788908765653"/> 
+        <group lowerbound="15.0" value="0.839587932303"/> 
+        <group lowerbound="20.0" value="1.0"/> 
+        <group lowerbound="20.0" value="1.0"/> 
+      </availabilityToMosquitoes> 
+    </human> 
+    <vivax> 
+      <!-- parameter values  --> 
+      <probBloodStageInfectiousToMosq value="0.25"/> 
+      <hypnozoiteRelease> 
+        <numberHypnozoites max="15" base="0.846"/> 
+        <!-- relapse pattern --> 
+        <firstReleaseDays mean="208.85" CV="1.36" distr="lognormal" latentRelapse="15"/> 
+      </hypnozoiteRelease> 
+      <bloodStageProtectionLatency value="20"/> 
+      <!-- blood-stage duration Weibull distribution --> 
+      <bloodStageLengthDays scale="86.5" shape="3.184" distr="weibull"/> 
+      <clinicalEvents> 
+        <!-- parameter values for probability of clinical illness --> 
+        <pPrimaryInfection a="0.405" b="0.088" /> 
+        <pRelapseOne a="0.135" b="0.088"/> 
+        <pRelapseTwoPlus a="0.048" b="0.088"/> 
+        <!-- probability of a clinical event being severe --> 
+        <pEventIsSevere value="0.001"/> 
+        <vivaxClinOption>A2j</vivaxClinOption> 
+      </clinicalEvents> 
+    </vivax> 
+     <parameters interval="5" iseed="0" latentp="10d"> 
+      <!-- base --> 
+      <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/> 
+      <parameter include="false" name="        Estar   " number="2" value="0.03247"/> 
+      <parameter include="false" name="        Simm    " number="3" value="0.138161050830301"/> 
+      <parameter include="false" name="        Xstar_p " number="4" value="1514.385853233699891"/> 
+      <parameter include="false" name="        gamma_p " number="5" value="2.03692533424484"/> 
+      <parameter include="false" name="        sigma2i " number="16" value="0.3"/> 
+      <!-- log odds 0 implies community CFR equals hospital CFR --> 
+      <parameter include="false" name="        log oddsr CF community  " number="17" value="0"/> 
+      <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="49.539046599999999"/> 
+    </parameters> 
+  </model> 
 </om:scenario>
