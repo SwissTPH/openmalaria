@@ -241,13 +241,19 @@ void GammaSampler::setMeanVariance( double mean, double variance ){
 }
 
 void GammaSampler::scaleMean(double scalar){
+    if (scalar <= 0.0) {
+        // Invalid scalar, return without changing anything
+        return;
+    }
+
+    // Scale the mean
     mu *= scalar;
-    // if(!isnan(this->variance))
-    // {
-    //     k = (mu*mu)/this->variance;
-    // }
-    if(!isnan(k))
-        theta = mu / k;
+
+    if (!std::isnan(this->variance) && this->variance > 0.0) {
+        // Adjust k and theta to preserve the variance
+        k /= (scalar * scalar); // Scale k inversely with the square of the scalar
+        theta = mu / k; // Recompute theta to maintain the new mean
+    }
 }
 
 double GammaSampler::mean() const {
