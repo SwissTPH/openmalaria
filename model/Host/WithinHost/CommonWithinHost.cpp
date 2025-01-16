@@ -260,29 +260,13 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i
         m_y_lag_l[y_lag_i * Genotypes::N() + g] = 0.0;
     }
 
-    int nImported = 0, nIntroduced = 0, nIndigenous = 0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf )
     {
         if((*inf)->origin() == InfectionOrigin::Imported)
             m_y_lag_i[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
         else
             m_y_lag_l[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
-
-        if((*inf)->origin() == InfectionOrigin::Indigenous) nIndigenous++;
-        else if((*inf)->origin() == InfectionOrigin::Introduced) nIntroduced++;
-        else nImported++;
     }
-
-    /* The rules are:
-    - Imported only if all infections are imported
-    - Introduced if at least one Introduced
-    - Indigenous otherwise (Imported + Indigenous or just Indigenous infections) */
-    if(nIntroduced > 0)
-        infectionType = InfectionOrigin::Introduced;
-    else if(nIndigenous > 0)
-        infectionType = InfectionOrigin::Indigenous;
-    else
-        infectionType = InfectionOrigin::Imported;
 
     // This is a bug, we keep it this way to be consistent with old simulations
     if(nNewInfsIgnored > 0)
@@ -294,6 +278,10 @@ void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceBy
     throw util::unimplemented_exception( "prophylactic effects on 1-day time step" );
 }
 
+InfectionOrigin CommonWithinHost::getInfectionOrigin()const
+{
+    return get_infection_origin(infections);
+}
 
 // -----  Summarize  -----
 
@@ -308,6 +296,8 @@ struct InfGenotypeSorter {
 bool CommonWithinHost::summarize( Host::Human& human )const{
     pathogenesisModel->summarize( human );
     pkpdModel.summarize( human );
+    
+    InfectionOrigin infectionType = get_infection_origin(infections);
     
     // If the number of infections is 0 and parasite density is positive we default to Indigenous
     if( infections.size() > 0 ){

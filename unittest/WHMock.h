@@ -59,7 +59,7 @@ public:
     virtual void clearImmunity();
     virtual double getCumulative_h() const;
     virtual double getCumulative_Y() const;
-    virtual InfectionOrigin getInfectionType() const;
+    virtual InfectionOrigin getInfectionOrigin() const;
 
     // This mock class does not have actual infections. Just set this as you please.
     double totalDensity;

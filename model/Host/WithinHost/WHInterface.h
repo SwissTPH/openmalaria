@@ -194,7 +194,7 @@ public:
     virtual double getCumulative_h() const =0;
     virtual double getCumulative_Y() const =0;
 
-    virtual InfectionOrigin getInfectionType() const =0;
+    virtual InfectionOrigin getInfectionOrigin() const =0;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of

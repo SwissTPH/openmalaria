@@ -167,7 +167,7 @@ public:
     
     virtual void clearImmunity();
 	
-    virtual InfectionOrigin getInfectionType() const {
+    virtual InfectionOrigin getInfectionOrigin() const {
         return InfectionOrigin::Indigenous;
     }
 

@@ -94,7 +94,7 @@ double WHMock::getCumulative_Y() const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-InfectionOrigin WHMock::getInfectionType() const{
+InfectionOrigin WHMock::getInfectionOrigin() const{
     return InfectionOrigin::Indigenous;
 }
 

@@ -139,7 +139,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        WithinHost::InfectionOrigin InfectionOrigin = hostData.withinHost().getInfectionType();
+        WithinHost::InfectionOrigin InfectionOrigin = hostData.withinHost().getInfectionOrigin();
         if(InfectionOrigin == WithinHost::InfectionOrigin::Imported)
             return imported.exec( hostData );
         else if (InfectionOrigin == WithinHost::InfectionOrigin::Introduced)
