@@ -52,7 +52,9 @@ public:
     virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 
         vector<double>& genotype_weights_i, vector<double>& genotype_weights_l, double ageInYears);
     
-    virtual bool summarize( Host::Human& human )const;
+    virtual InfectionOrigin getInfectionOrigin() const;
+
+    virtual bool summarize( Host::Human& human ) const;
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );
@@ -67,7 +69,7 @@ protected:
      * 
      * Since infection models and within host models are very much intertwined,
      * the idea is that each WithinHostModel has its own list of infections. */
-     std::list<DescriptiveInfection> infections;
+     std::list<DescriptiveInfection*> infections;
 
      bool opt_vaccine_genotype = false;
 };

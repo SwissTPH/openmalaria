@@ -66,6 +66,8 @@ public:
     static CommonInfection* (* createInfection) (LocalRng& rng, uint32_t protID, int origin);
     static CommonInfection* (* checkpointedInfection) (istream& stream);
     //@}
+
+    virtual InfectionOrigin getInfectionOrigin() const;
     
     virtual bool summarize( Host::Human& human )const;
     

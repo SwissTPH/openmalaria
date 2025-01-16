@@ -154,5 +154,31 @@ protected:
     friend class ::UnittestUtil;
 };
 
+template <typename T>
+InfectionOrigin get_infection_origin(const std::list<T*> &infections)
+{
+    if(infections.empty())
+        return InfectionOrigin::Indigenous;
+
+    int nImported = 0, nIntroduced = 0, nIndigenous = 0;
+    for( auto inf = infections.begin(); inf != infections.end(); ++inf )
+    {
+        if((*inf)->origin() == InfectionOrigin::Indigenous) nIndigenous++;
+        else if((*inf)->origin() == InfectionOrigin::Introduced) nIntroduced++;
+        else nImported++;
+    }
+
+    /* The rules are:
+    - Imported only if all infections are imported
+    - Introduced if at least one Introduced
+    - Indigenous otherwise (Imported + Indigenous or just Indigenous infections) */
+    if(nIntroduced > 0)
+        return InfectionOrigin::Introduced;
+    else if(nIndigenous > 0)
+        return InfectionOrigin::Indigenous;
+    else
+        return InfectionOrigin::Imported;
+}
+
 } }
 #endif

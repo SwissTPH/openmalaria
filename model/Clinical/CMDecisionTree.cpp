@@ -121,6 +121,44 @@ private:
 };
 
 /**
+ * Should the patient recieve a different treatment based on its infection type?
+ */
+class CMDTInfectionOrigin : public CMDecisionTree {
+public:
+    static const CMDecisionTree& create( const ::scnXml::DTInfectionOrigin& node, bool isUC );
+    
+protected:
+    virtual bool operator==( const CMDecisionTree& that ) const{
+        if( this == &that ) return true; // short cut: same object thus equivalent
+        const CMDTInfectionOrigin* p = dynamic_cast<const CMDTInfectionOrigin*>( &that );
+        if( p == 0 ) return false;      // different type of node
+        if( imported != p->imported ) return false;
+        if( introduced != p->introduced ) return false;
+        if( indigenous != p->indigenous ) return false;
+        return true;    // no tests failed; must be the same
+    }
+    
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        WithinHost::InfectionOrigin InfectionOrigin = hostData.withinHost().getInfectionOrigin();
+        if(InfectionOrigin == WithinHost::InfectionOrigin::Imported)
+            return imported.exec( hostData );
+        else if (InfectionOrigin == WithinHost::InfectionOrigin::Introduced)
+            return introduced.exec( hostData );
+        else
+            return indigenous.exec( hostData );
+    }
+    
+private:
+    CMDTInfectionOrigin( const CMDecisionTree& imported,
+                  const CMDecisionTree& introduced,
+                  const CMDecisionTree& indigenous ) :
+                  imported(imported), introduced(introduced), indigenous(indigenous)
+                  {}
+    
+    const CMDecisionTree& imported, &introduced, &indigenous;
+};
+
+/**
  * Use a diagnostic, and call another decision tree based on the outcome.
  */
 class CMDTDiagnostic : public CMDecisionTree {
@@ -603,6 +641,7 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
     if( node.getMultiple().present() ) return CMDTMultiple::create( node.getMultiple().get(), isUC);
     // branching nodes
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC);
+    if( node.getInfectionOrigin().present() ) return CMDTInfectionOrigin::create( node.getInfectionOrigin().get(), isUC);
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC);
     if( node.getUncomplicated().present() ) return CMDTUncomplicated::create( node.getUncomplicated().get(), isUC);
     if( node.getSevere().present() ) return CMDTSevere::create( node.getSevere().get(), true);
@@ -627,6 +666,9 @@ const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool
     CMDTMultiple* self = new CMDTMultiple();
     for( const scnXml::DTCaseType& sn : node.getCaseType() ){
         self->children.push_back( &CMDTCaseType::create(sn, isUC) );
+    }
+    for( const scnXml::DTInfectionOrigin& sn : node.getInfectionOrigin() ){
+        self->children.push_back( &CMDTInfectionOrigin::create(sn, isUC) );
     }
     for( const scnXml::DTDiagnostic& sn : node.getDiagnostic() ){
         self->children.push_back( &CMDTDiagnostic::create(sn, isUC) );
@@ -668,6 +710,17 @@ const CMDecisionTree& CMDTCaseType::create( const scnXml::DTCaseType& node, bool
     return save_decision( new CMDTCaseType(
         CMDecisionTree::create( node.getFirstLine(), isUC ),
         CMDecisionTree::create( node.getSecondLine(), isUC )
+    ) );
+}
+
+const CMDecisionTree& CMDTInfectionOrigin::create( const scnXml::DTInfectionOrigin& node, bool isUC ){
+    if( !isUC ){
+        throw util::xml_scenario_error( "decision tree: caseType can only be used for uncomplicated cases" );
+    }
+    return save_decision( new CMDTInfectionOrigin(
+        CMDecisionTree::create( node.getImported(), isUC ),
+        CMDecisionTree::create( node.getIntroduced(), isUC ),
+        CMDecisionTree::create( node.getIndigenous(), isUC )
     ) );
 }
 
