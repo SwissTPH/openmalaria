@@ -32,6 +32,7 @@ namespace OM { namespace util {
     class Sampler
     {
     public:
+        virtual ~Sampler() = default;
         virtual double sample(LocalRng& rng) const = 0;
         virtual void scaleMean( double scalar ) = 0;
         virtual double mean() const = 0;
