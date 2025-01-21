@@ -45,11 +45,16 @@ class HumanVectorInterventionComponent;
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostAnophParams {
 public:
-    static inline void initReserve (size_t numSpecies) {
-        params.reserve (numSpecies);
-    }
+    PerHostAnophParams (const scnXml::Mosq& mosq);
+
+    PerHostAnophParams(PerHostAnophParams&&) noexcept = default;
+    PerHostAnophParams& operator=(PerHostAnophParams&&) noexcept = default;
+
+    PerHostAnophParams(const PerHostAnophParams&) = delete;
+    PerHostAnophParams& operator=(const PerHostAnophParams&) = delete;
+
     static inline void init (const scnXml::Mosq& mosq) {
-        params.push_back(PerHostAnophParams{ mosq });
+        params.emplace_back(mosq);
     }
     
     /// Get the number of vector species
@@ -133,8 +138,6 @@ public:
     //@}
     
 private:
-    PerHostAnophParams (const scnXml::Mosq& mosq);
-
     static vector<PerHostAnophParams> params;
     static vector<double> entoAvailabilityPercentiles;
 

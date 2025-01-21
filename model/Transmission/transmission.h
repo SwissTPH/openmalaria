@@ -334,8 +334,6 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
     // Sort Anopheles by Decreasing EIR
     sort(anophelesList.begin(), anophelesList.end(), anophelesCompare);
 
-    PerHostAnophParams::initReserve(numSpecies);
-
     for (size_t i = 0; i < numSpecies; ++i)
     {
         auto anoph = anophelesList[i];
