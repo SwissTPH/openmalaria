@@ -75,7 +75,8 @@ public:
      * It should be called exactly once.
       */
     inline static void scaleEntoAvailability(size_t species, double entoAvailability){
-        params[species].entoAvailability->scaleMean( entoAvailability );
+        //params[species].entoAvailability->scaleMean( entoAvailability );
+        params[species].entoAvailabilityFactor = entoAvailability;
     }
 
     inline static void calcAvailabilityPercentiles(){
@@ -123,6 +124,12 @@ public:
      * P_C_i and P_D_i across the human population. */
     //@{
     /** Availability rate (α_i) */
+    double entoAvailabilityFactor = 1.0;
+
+    /** @brief Availability heterogeneity factor
+     * This multiplies the entoAvailabilityFactor. */
+    //@{
+    /** heterogeneity */
     unique_ptr<util::Sampler> entoAvailability;
 
     /** Probability of mosquito successfully biting host (P_B_i) */

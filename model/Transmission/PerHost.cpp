@@ -24,7 +24,8 @@
 #include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"
-
+#include <cerrno>
+#include <cfenv>
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
@@ -74,14 +75,21 @@ void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
     anophEntoAvailability.resize(PerHostAnophParams::numSpecies());
     anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
     anophProbMosqResting.resize(PerHostAnophParams::numSpecies());
+
+    std::ofstream outputFile;
+    if(sim::now() == 0) outputFile = std::ofstream("samples.txt", std::ios::app);
+
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
-        anophEntoAvailability[i] = base.entoAvailability->sample(rng) * availabilityFactor;
+        anophEntoAvailability[i] = base.entoAvailabilityFactor * base.entoAvailability->sample(rng) * availabilityFactor;
+        if(sim::now() == 0)outputFile << anophEntoAvailability[i]  << std::endl;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);
         auto pRest2 = base.probMosqSurvivalResting.sample(rng);
         anophProbMosqResting[i] = pRest1 * pRest2;
     }
+    // DEBUG Close file
+    if(sim::now() ==  0)outputFile.close();
 }
 
 void PerHost::update(Host::Human& human){
