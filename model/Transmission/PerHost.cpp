@@ -76,20 +76,20 @@ void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
     anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
     anophProbMosqResting.resize(PerHostAnophParams::numSpecies());
 
-    std::ofstream outputFile;
-    if(sim::now() == 0) outputFile = std::ofstream("samples.txt", std::ios::app);
+    // std::ofstream outputFile;
+    // if(sim::now() == 0) outputFile = std::ofstream("samples.txt", std::ios::app);
 
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
         anophEntoAvailability[i] = base.entoAvailabilityFactor * base.entoAvailability->sample(rng) * availabilityFactor;
-        if(sim::now() == 0)outputFile << anophEntoAvailability[i]  << std::endl;
+        // if(sim::now() == 0)outputFile << anophEntoAvailability[i]  << std::endl;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);
         auto pRest2 = base.probMosqSurvivalResting.sample(rng);
         anophProbMosqResting[i] = pRest1 * pRest2;
     }
-    // DEBUG Close file
-    if(sim::now() ==  0)outputFile.close();
+    // // DEBUG Close file
+    // if(sim::now() ==  0)outputFile.close();
 }
 
 void PerHost::update(Host::Human& human){
