@@ -211,7 +211,8 @@ void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
 
 void GammaSampler::setMeanCV( double mean, double CV ){
     mu = mean;
-    
+    this->CV = CV;
+
     if( CV == 0.0 )
         return;
 
@@ -248,6 +249,10 @@ void GammaSampler::scaleMean(double scalar) {
 
     // Scale the mean
     mu *= scalar;
+
+    if (!std::isnan(this->CV) && this->CV > 0.0) {
+        this->variance = mu * this->CV;
+    }
 
     if (!std::isnan(this->variance) && this->variance > 0.0) {
         // Recalculate k and theta based on the scaled mean and fixed variance
