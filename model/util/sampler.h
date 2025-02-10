@@ -172,7 +172,8 @@ namespace OM { namespace util {
             mu( 1.0 ),
             k( numeric_limits<double>::signaling_NaN() ),
             theta( numeric_limits<double>::signaling_NaN() ),
-            variance( numeric_limits<double>::signaling_NaN() )
+            variance( numeric_limits<double>::signaling_NaN() ),
+            CV( numeric_limits<double>::signaling_NaN() )
         {
             setParams(mu, elt);
         }
@@ -205,6 +206,7 @@ namespace OM { namespace util {
     private:
         double mu, k, theta;
         double variance;
+        double CV;
     };
     
     /** Sampler for the Beta distribution.
