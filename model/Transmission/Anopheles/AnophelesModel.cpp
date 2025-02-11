@@ -241,15 +241,6 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     PerHostAnophParams::scaleEntoAvailability(species, (P_A1 / populationSize) * availFactor);
 
-    // DEBUG Open file for writing
-    std::ofstream outputFile("availFactor.txt");
-
-    cout << (P_A1 / populationSize) * availFactor << endl;
-    outputFile << (P_A1 / populationSize) * availFactor  << std::endl;
-    
-    // DEBUG Close file
-    outputFile.close();
-
     initAvail = (P_A1 / populationSize) * availFactor;
 
     nhh_avail = 0.0;
