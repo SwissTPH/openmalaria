@@ -251,7 +251,7 @@ void GammaSampler::scaleMean(double scalar) {
     mu *= scalar;
 
     if (!std::isnan(this->CV) && this->CV > 0.0) {
-        this->variance = mu * this->CV;
+        this->variance = (mu * this->CV) * (mu * this->CV);
     }
 
     if (!std::isnan(this->variance) && this->variance > 0.0) {
