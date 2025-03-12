@@ -78,7 +78,7 @@ void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
 
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
-        anophEntoAvailability[i] = base.entoAvailabilityFactor * base.entoAvailability->sample(rng) * availabilityFactor;
+        anophEntoAvailability[i] = base.entoAvailabilityFactor * std::min(base.entoAvailability->sample(rng), 25.0) * availabilityFactor;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);
         auto pRest2 = base.probMosqSurvivalResting.sample(rng);
