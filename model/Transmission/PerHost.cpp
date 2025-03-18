@@ -24,7 +24,8 @@
 #include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"
-
+#include <cerrno>
+#include <cfenv>
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
@@ -37,12 +38,20 @@ vector<double> PerHostAnophParams::entoAvailabilityPercentiles;
 
 PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
     const string &distr = mosq.getAvailability().getDistr();
-    if(distr == "const" || distr == "lognormal")
+    if(distr == "const")
         entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
-    else if(distr == "gamma")
-        entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
     else
-        throw util::xml_scenario_error( "error ento availability: unknown distirbution "+distr);
+    {
+        if(util::ModelOptions::option(NEGATIVE_BINOMIAL_MASS_ACTION) || util::ModelOptions::option(LOGNORMAL_MASS_ACTION) || util::ModelOptions::option(COMORB_TRANS_HET))
+            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): ModelOptions NEGATIVE_BINOMIAL_MASS_ACTION, LOGNORMAL_MASS_ACTION, COMORB_TRANS_HET are not compatible with ento-availability heterogeneity distributions other than \"const\"");
+
+        if(distr == "lognormal")
+            entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
+        else if(distr == "gamma")
+            entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
+        else
+            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): unknown distribution "+distr);
+    }
 
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
@@ -66,9 +75,10 @@ void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
     anophEntoAvailability.resize(PerHostAnophParams::numSpecies());
     anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
     anophProbMosqResting.resize(PerHostAnophParams::numSpecies());
+
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
-        anophEntoAvailability[i] = base.entoAvailability->sample(rng) * availabilityFactor;
+        anophEntoAvailability[i] = base.entoAvailabilityFactor * std::min(base.entoAvailability->sample(rng), 25.0) * availabilityFactor;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);
         auto pRest2 = base.probMosqSurvivalResting.sample(rng);

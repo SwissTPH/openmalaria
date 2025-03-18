@@ -167,6 +167,13 @@ protected:
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
             throw util::xml_scenario_error("intervention deployment coverage must be in range [0,1]");
         }
+        if( coverage > 0 && deploy.getCoverageCorr().present() && deploy.getCoverageVar().present() && deploy.getCoverageVar().get() > 0)
+        {
+            coverageCorr = deploy.getCoverageCorr().get();
+            coverageVar = deploy.getCoverageVar().get();
+            copula = true;
+        }
+
         vaccLimits.set( deploy );
     }
     
@@ -174,12 +181,15 @@ protected:
         intervention->deploy( human, method, vaccLimits );
     }
     
+    bool copula = false;
     double coverage;    // proportion coverage within group meeting above restrictions
+    double coverageCorr = 0.0, coverageVar = 0.0;
     VaccineLimits vaccLimits;
     ComponentId subPop;      // ComponentId::wholePop() if deployment is not restricted to a sub-population
     bool complement;
     shared_ptr<const HumanIntervention> intervention;
 };
+
 
 /// Timed deployment of human-specific interventions
 class TimedHumanDeployment : public TimedDeployment, protected HumanDeploymentBase {
@@ -219,18 +229,68 @@ public:
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
+        std::ofstream file;
+        std::ostringstream filename;
+        if(copula)
+        {
+            filename << util::CommandLine::getOutputName() << "_" << sim::now() << "_copula_debug.txt";
+            file = std::ofstream(filename.str());
+            file << "coverage GammaMean coverageCorr coverageVar" << endl;
+            file << coverage << " " << Transmission::PerHostAnophParams::get(0).entoAvailability->mean() << " " << coverageCorr << " " << coverageVar << endl;
+        }
+
+        // update output name
+        // if condition if variance or coverage is 0
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                double availability = 0.0;
+                for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
+                    availability += human.perHostTransmission.anophEntoAvailability[i];
+
+                double probability = coverage;
+
+                if(copula)
+                {
+                    if(Transmission::PerHostAnophParams::numSpecies() > 1)
+                        throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
+
+                    // Use avail that is already weighted?? or Need raw value?
+                    double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(availability);
+                    double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
+                
+                    // Apply the Gaussian copula transformation for correlation
+                    double yy = coverageCorr * xx + human.rng.gauss(0.0, 1.0) * sqrt(1 - coverageCorr * coverageCorr);
+
+                    // Transform back to unit interval
+                    double uy = gsl_cdf_ugaussian_P(yy);
+
+                    // Beta distribution for intervention (Beta distributed)
+                    double beta_mean = coverage;  // Assuming this value is given
+                    double beta_var = coverageVar;       // Given as well
+                    double alpha = ((1.0 - beta_mean) / beta_var - 1.0 / beta_mean) * (beta_mean * beta_mean);
+                    double beta = alpha * (1.0 / beta_mean - 1.0);
+
+                    if (alpha < 0 || beta < 0)
+                        throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
+
+                    // Get the final probability from Beta distribution
+                    probability = gsl_cdf_beta_P(uy, alpha, beta);
+
+                    file << availability << " " << probability << endl;
+                }
+
+                if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
                     if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
-                        if( human.rng.bernoulli( coverage ) ){
+                        if( human.rng.bernoulli( probability ) ){
                             deployToHuman( human, mon::Deploy::TIMED );
                         }
                     }
                 }
             }
         }
+        if(copula)
+            file.close();
     }
     
     virtual void print_details( std::ostream& out )const{
@@ -276,7 +336,10 @@ public:
         for(Host::Human &human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
+                double availability = 0.0;
+                for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
+                    availability += human.perHostTransmission.anophEntoAvailability[i];
+                if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
                     if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
                         total+=1;
                         if( !human.isInSubPop(cumCovInd) )
@@ -571,7 +634,11 @@ public:
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
-            if( human.getAvailability() >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && human.getAvailability() <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
+            double availability = 0.0;
+            for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
+                availability += human.perHostTransmission.anophEntoAvailability[i];
+
+            if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
             {
                 auto now = sim::intervDate();
                 if( begin <= now && now < end &&
