@@ -714,9 +714,6 @@ const CMDecisionTree& CMDTCaseType::create( const scnXml::DTCaseType& node, bool
 }
 
 const CMDecisionTree& CMDTInfectionOrigin::create( const scnXml::DTInfectionOrigin& node, bool isUC ){
-    if( !isUC ){
-        throw util::xml_scenario_error( "decision tree: caseType can only be used for uncomplicated cases" );
-    }
     return save_decision( new CMDTInfectionOrigin(
         CMDecisionTree::create( node.getImported(), isUC ),
         CMDecisionTree::create( node.getIntroduced(), isUC ),
