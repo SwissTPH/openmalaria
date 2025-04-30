@@ -28,6 +28,7 @@
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/VectorModel.h"
+#include "Transmission/PerHost.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include <schema/interventions.h>
@@ -549,7 +550,7 @@ public:
                 Transmission::Anopheles::Nhh nhh;
 
                 double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability->mean();
-                double avail_i = popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
+                double avail_i = Transmission::PerHostAnophParams::get(i).entoAvailabilityFactor * popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
 
                 nhh.avail_i = avail_i;
                 nhh.P_B_I = p.mosqProbBiting;
