@@ -127,6 +127,7 @@ const size_t GSL_INTG_MAX_ITER = 1000;     // 10 seems enough, but no harm in us
 gsl_integration_workspace *gsl_intgr_wksp = gsl_integration_workspace_alloc (GSL_INTG_MAX_ITER);
 //NOTE: we "should" free, but mem-leaks at end of program aren't really important
 // gsl_integration_workspace_free (gsl_intgr_wksp);
+
 double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) const{
     gsl_function F;
     F.function = &func_fC;
