@@ -236,7 +236,7 @@ public:
         {
             filename << util::CommandLine::getOutputName() << "_" << sim::now() << "_copula_debug.txt";
             file = std::ofstream(filename.str());
-            file << "coverage GammaMean coverageCorr coverageVar" << endl;
+            file << "coverage GammaMean coverageCorr coverageVar gaussianSample" << endl;
             file << coverage << " " << Transmission::PerHostAnophParams::get(0).entoAvailability->mean() << " " << coverageCorr << " " << coverageVar << endl;
         }
 
@@ -261,7 +261,22 @@ public:
                     double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
                 
                     // Apply the Gaussian copula transformation for correlation
-                    double yy = coverageCorr * xx + human.rng.gauss(0.0, 1.0) * sqrt(1 - coverageCorr * coverageCorr);
+                    ComponentId cid = subPop;
+
+                    /** human.rng.gauss(0.0, 1.0) is calculated once per component and per human. Re-deployment of
+                     * the same component on the same human must use the same gaussian sample. Therefore we store
+                     * this value in the human the first time it is calculated. */
+                    double g = 0.0;
+                    auto it = human.perHostTransmission.copulaGaussianSamples.find(cid);
+                    if (it != human.perHostTransmission.copulaGaussianSamples.end())
+                        g = it->second;
+                    else
+                    {
+                        g = human.rng.gauss(0.0, 1.0);
+                        human.perHostTransmission.copulaGaussianSamples[cid] = g;
+                    }
+
+                    double yy = coverageCorr * xx + g * sqrt(1 - coverageCorr * coverageCorr);
 
                     // Transform back to unit interval
                     double uy = gsl_cdf_ugaussian_P(yy);
@@ -278,7 +293,7 @@ public:
                     // Get the final probability from Beta distribution
                     probability = gsl_cdf_beta_P(uy, alpha, beta);
 
-                    file << availability << " " << probability << endl;
+                    file << availability << " " << probability << " " << g << endl;
                 }
 
                 if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
