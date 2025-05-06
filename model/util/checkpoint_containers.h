@@ -109,6 +109,7 @@ namespace checkpoint {
         }
         cerr<<"operator&(map<S,T> x, ostream&) where S="<<typeid(S).name()<<", T="<<typeid(T).name()<<", x.size()="<<x.size()<<endl;
     }
+
     template<class S, class T>
     void operator& (map<S,T> x, istream& stream) {
         size_t l;
@@ -125,6 +126,34 @@ namespace checkpoint {
         }
     }
     */
+
+    // serialize
+    template<class K, class V>
+    void operator& (std::map<K,V> const& m, std::ostream& stream) {
+        // write number of entries
+        size_t n = m.size();
+        n & stream;
+        // then each key/value
+        for (auto const& kv : m) {
+            kv.first  & stream;  // ComponentId::operator&(ostream&)
+            kv.second & stream;  // double & stream (if you have primitive overloads)
+        }
+    }
+
+    // deserialize
+    template<class K, class V>
+    void operator& (std::map<K,V>& m, std::istream& stream) {
+        size_t n;
+        n & stream;              // read count
+        validateListSize(n);
+        m.clear();
+        for (size_t i = 0; i < n; ++i) {
+            K key{stream};       // calls ComponentId(istream&)
+            V val;
+            val & stream;        // V::operator&(istream&) or primitive
+            m.emplace(std::move(key), val);
+        }
+    }
     
     void operator& (const set<interventions::ComponentId>&x, ostream& stream);
     void operator& (set<interventions::ComponentId>& x, istream& stream);
