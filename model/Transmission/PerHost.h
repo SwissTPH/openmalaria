@@ -126,10 +126,8 @@ public:
     /** Availability rate (α_i) */
     double entoAvailabilityFactor = 1.0;
 
-    /** @brief Availability heterogeneity factor
+    /** Availability heterogeneity factor
      * This multiplies the entoAvailabilityFactor. */
-    //@{
-    /** heterogeneity */
     unique_ptr<util::Sampler> entoAvailability;
 
     /** Probability of mosquito successfully biting host (P_B_i) */
@@ -344,6 +342,7 @@ public:
         anophProbMosqResting & stream;
         relativeAvailabilityHet & stream;
         outsideTransmission & stream;
+        copulaGaussianSamples & stream;
         checkpointIntervs( stream );
     }
     //@}
@@ -367,6 +366,12 @@ public:
      * resting without dying, after biting the human (P_C_i * P_D_i) in the
      * absense of interventions. */
     vector<double> anophProbMosqResting;
+
+    /** @brief gaussian sample used in the deployment of intervention 
+     * components using the gaussian copula transformation. The factors are 
+     * component specific and are sampled once per human during the first 
+     * deployment attempt. */
+    std::map<interventions::ComponentId, double> copulaGaussianSamples; 
 
 private:
     void checkpointIntervs( ostream& stream );
