@@ -257,7 +257,8 @@ public:
                         throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
 
                     // Use avail that is already weighted?? or Need raw value?
-                    double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(availability);
+                    double scaling_factor = (Transmission::PerHostAnophParams::get(0).entoAvailabilityFactor * human.perHostTransmission.relativeAvailabilityHet);
+                    double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(availability / scaling_factor);
                     double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
                 
                     // Apply the Gaussian copula transformation for correlation
@@ -280,7 +281,7 @@ public:
 
                     // Transform back to unit interval
                     double uy = gsl_cdf_ugaussian_P(yy);
-
+        
                     // Beta distribution for intervention (Beta distributed)
                     double beta_mean = coverage;  // Assuming this value is given
                     double beta_var = coverageVar;       // Given as well
@@ -290,10 +291,14 @@ public:
                     if (alpha < 0 || beta < 0)
                         throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
 
-                    // Get the final probability from Beta distribution
-                    probability = gsl_cdf_beta_P(uy, alpha, beta);
+                    
 
-                    file << availability << " " << probability << " " << g << endl;
+                    // Get the final probability from Beta distribution
+                    probability = gsl_cdf_beta_Pinv(uy, alpha, beta);
+
+                    //cout << availability << " " << ux << " " << xx << " " << yy << " " << uy << " " << coverageCorr << " " << g << endl;;
+
+                    file << availability << " " << probability << endl;
                 }
 
                 if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
