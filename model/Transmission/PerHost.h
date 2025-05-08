@@ -337,6 +337,7 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
+        anophEntoAvailabilityRaw & stream;
         anophEntoAvailability & stream;
         anophProbMosqBiting & stream;
         anophProbMosqResting & stream;
@@ -354,7 +355,10 @@ public:
     // entoAvailability param stored in HostMosquitoInteraction.
     double relativeAvailabilityHet;
 
-    /** Species availability rate of human to mosquitoes, including hetergeneity factor
+    /** Species availability rate of human to mosquitoes */
+    vector<double> anophEntoAvailabilityRaw;
+
+    /** Species availability rate of human to mosquitoes, including heterogeneity factor
      * and base rate, but excluding age and intervention factors. */
     vector<double> anophEntoAvailability;
     

@@ -253,50 +253,50 @@ public:
 
                 if(copula)
                 {
-                    if(Transmission::PerHostAnophParams::numSpecies() > 1)
-                        throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
-
-                    // Use avail that is already weighted?? or Need raw value?
-                    double scaling_factor = (Transmission::PerHostAnophParams::get(0).entoAvailabilityFactor * human.perHostTransmission.relativeAvailabilityHet);
-                    double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(availability / scaling_factor);
-                    double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
-                
-                    // Apply the Gaussian copula transformation for correlation
-                    ComponentId cid = subPop;
-
-                    /** human.rng.gauss(0.0, 1.0) is calculated once per component and per human. Re-deployment of
-                     * the same component on the same human must use the same gaussian sample. Therefore we store
-                     * this value in the human the first time it is calculated. */
-                    double g = 0.0;
-                    auto it = human.perHostTransmission.copulaGaussianSamples.find(cid);
-                    if (it != human.perHostTransmission.copulaGaussianSamples.end())
-                        g = it->second;
-                    else
-                    {
-                        g = human.rng.gauss(0.0, 1.0);
-                        human.perHostTransmission.copulaGaussianSamples[cid] = g;
-                    }
-
-                    double yy = coverageCorr * xx + g * sqrt(1 - coverageCorr * coverageCorr);
-
-                    // Transform back to unit interval
-                    double uy = gsl_cdf_ugaussian_P(yy);
-        
                     // Beta distribution for intervention (Beta distributed)
                     double beta_mean = coverage;  // Assuming this value is given
                     double beta_var = coverageVar;       // Given as well
                     double alpha = ((1.0 - beta_mean) / beta_var - 1.0 / beta_mean) * (beta_mean * beta_mean);
                     double beta = alpha * (1.0 / beta_mean - 1.0);
 
-                    if (alpha < 0 || beta < 0)
-                        throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
+                    if(Transmission::PerHostAnophParams::numSpecies() > 1)
+                        throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
 
-                    
+                    double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(human.perHostTransmission.anophEntoAvailabilityRaw[0]);
+                    if(ux < 1)
+                    {
+                        double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
 
-                    // Get the final probability from Beta distribution
-                    probability = gsl_cdf_beta_Pinv(uy, alpha, beta);
+                        // Apply the Gaussian copula transformation for correlation
+                        ComponentId cid = subPop;
 
-                    //cout << availability << " " << ux << " " << xx << " " << yy << " " << uy << " " << coverageCorr << " " << g << endl;;
+                        /** human.rng.gauss(0.0, 1.0) is calculated once per component and per human. Re-deployment of
+                         * the same component on the same human must use the same gaussian sample. Therefore we store
+                         * this value in the human the first time it is calculated. */
+                        double g = 0.0;
+                        auto it = human.perHostTransmission.copulaGaussianSamples.find(cid);
+                        if (it != human.perHostTransmission.copulaGaussianSamples.end())
+                            g = it->second;
+                        else
+                        {
+                            g = human.rng.gauss(0.0, 1.0);
+                            human.perHostTransmission.copulaGaussianSamples[cid] = g;
+                        }
+                        double yy = coverageCorr * xx + g * sqrt(1 - coverageCorr * coverageCorr);
+
+                        // Transform back to unit interval
+                        double uy = gsl_cdf_ugaussian_P(yy);
+
+                        if (alpha < 0 || beta < 0)
+                            throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
+
+                        // Get the final probability from Beta distribution
+                        probability = gsl_cdf_beta_Pinv(uy, alpha, beta);
+                    }
+                    else // Gamma with CV=0
+                        probability = human.rng.beta(alpha, beta);
+
+                    // cout << availability << " " << probability << " " << alpha << " " << beta << endl;
 
                     file << availability << " " << probability << endl;
                 }
