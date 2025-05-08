@@ -171,10 +171,11 @@ double LognormalSampler::sample(LocalRng& rng) const{
 }
 
 double LognormalSampler::cdf(double x) const {
-    // Check if sigma is zero, and handle the degenerate log-normal case
     if (sigma == 0.0)
-        throw std::runtime_error("LognormalSampler::cdf() does not support sigma = 0 (default const distirbution)");
-
+    {
+        if(x >= mu) return 1.0;
+        else return 0.0;
+    }
     return gsl_cdf_lognormal_P(x, mu, sigma);
 }
 
@@ -266,12 +267,17 @@ double GammaSampler::mean() const {
 }
 
 double GammaSampler::sample(LocalRng& rng) const{
-    if(isnan(theta))
+    if(isnan(theta)) // CV=0
         return mu;
     return rng.gamma(k, theta);
 }
 
 double GammaSampler::cdf(double x) const {
+    if(isnan(theta)) // CV=0
+    {
+        if(x >= mu) return 1.0;
+        else return 0.0;
+    }
     return gsl_cdf_gamma_P(x, k, theta);
 }
         
