@@ -548,15 +548,15 @@
     </vivax> 
      <parameters interval="5" iseed="0" latentp="10d"> 
       <!-- base --> 
-      <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/> 
-      <parameter include="false" name="        Estar   " number="2" value="0.03247"/> 
-      <parameter include="false" name="        Simm    " number="3" value="0.138161050830301"/> 
-      <parameter include="false" name="        Xstar_p " number="4" value="1514.385853233699891"/> 
-      <parameter include="false" name="        gamma_p " number="5" value="2.03692533424484"/> 
-      <parameter include="false" name="        sigma2i " number="16" value="0.3"/> 
+      <parameter name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/> 
+      <parameter name="        Estar   " number="2" value="0.03247"/> 
+      <parameter name="        Simm    " number="3" value="0.138161050830301"/> 
+      <parameter name="        Xstar_p " number="4" value="1514.385853233699891"/> 
+      <parameter name="        gamma_p " number="5" value="2.03692533424484"/> 
+      <parameter name="        sigma2i " number="16" value="0.3"/> 
       <!-- log odds 0 implies community CFR equals hospital CFR --> 
-      <parameter include="false" name="        log oddsr CF community  " number="17" value="0"/> 
-      <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="49.539046599999999"/> 
+      <parameter name="        log oddsr CF community  " number="17" value="0"/> 
+      <parameter name="        Non-malaria infant mortality    " number="19" value="49.539046599999999"/> 
     </parameters> 
   </model> 
 </om:scenario>
