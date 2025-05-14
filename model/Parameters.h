@@ -141,6 +141,12 @@ public:
 
     Parameters( const scnXml::Parameters& parameters )
     {
+        for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
+        {
+            const ParameterName name = pair.second;
+            nameToValueMap[name] = std::nullopt;
+        }
+
         initializeParamsFromXML(parameters);
     }
 
@@ -152,7 +158,7 @@ public:
         const bool paramHasAValueSet = nameToValueMap.at(name) != std::nullopt;
         if (!paramHasAValueSet)
         {
-            for (std::pair<int, ParameterName> pair : idCodeToNameMap)
+            for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
             {
                 if (pair.second == name)
                 {
@@ -178,6 +184,7 @@ private:
     void initializeParamsFromXML(const scnXml::Parameters& parameters)
     {
         const scnXml::Parameters::ParameterSequence& paramSeq = parameters.getParameter();
+
         for(auto iter = paramSeq.begin(); iter != paramSeq.end(); ++iter)
         {
             const int paramId = iter->getNumber();
@@ -269,49 +276,8 @@ private:
     * The keys of this map may not form a contiguous sequence, e.g. in the case where a
     * parameter gets deleted altogether from the simulation code.  This is okay, and is
     * in fact already the case at the time of writing.
-    *
-    * TODO : probably just intialize this in a loop or something...
     */
-    std::unordered_map<ParameterName, std::optional<double>> nameToValueMap
-    {
-        { ParameterName::NEG_LOG_ONE_MINUS_SINF,       std::nullopt },
-        { ParameterName::E_STAR,                       std::nullopt },
-        { ParameterName::SIMM,                         std::nullopt },
-        { ParameterName::X_STAR_P,                     std::nullopt },
-        { ParameterName::GAMMA_P,                      std::nullopt },
-        { ParameterName::SIGMA_I_SQ,                   std::nullopt },
-        { ParameterName::CUMULATIVE_Y_STAR,            std::nullopt },
-        { ParameterName::CUMULATIVE_H_STAR,            std::nullopt },
-        { ParameterName::NEG_LOG_ONE_MINUS_ALPHA_M,    std::nullopt },
-        { ParameterName::DECAY_M,                      std::nullopt },
-        { ParameterName::SIGMA0_SQ,                    std::nullopt },
-        { ParameterName::X_NU_STAR,                    std::nullopt },
-        { ParameterName::Y_STAR_SQ,                    std::nullopt },
-        { ParameterName::ALPHA,                        std::nullopt },
-        { ParameterName::DENSITY_BIAS_NON_GARKI,       std::nullopt },
-        { ParameterName::BASELINE_AVAILABILITY_SHAPE,  std::nullopt },
-        { ParameterName::LOG_ODDS_RATIO_CF_COMMUNITY,  std::nullopt },
-        { ParameterName::INDIRECT_RISK_COFACTOR,       std::nullopt },
-        { ParameterName::NON_MALARIA_INFANT_MORTALITY, std::nullopt },
-        { ParameterName::DENSITY_BIAS_GARKI,           std::nullopt },
-        { ParameterName::SEVERE_MALARIA_THRESHHOLD,    std::nullopt },
-        { ParameterName::IMMUNITY_PENALTY,             std::nullopt },
-        { ParameterName::IMMUNE_EFFECTOR_DECAY,        std::nullopt },
-        { ParameterName::COMORBIDITY_INTERCEPT,        std::nullopt },
-        { ParameterName::Y_STAR_HALF_LIFE,             std::nullopt },
-        { ParameterName::Y_STAR_1,                     std::nullopt },
-        { ParameterName::ASEXUAL_IMMUNITY_DECAY,       std::nullopt },
-        { ParameterName::Y_STAR_0,                     std::nullopt },
-        { ParameterName::CRITICAL_AGE_FOR_COMORBIDITY, std::nullopt },
-        { ParameterName::MUELLER_RATE_MULTIPLIER,      std::nullopt },
-        { ParameterName::MUELLER_DENSITY_EXPONENT,     std::nullopt },
-        { ParameterName::CFR_SCALE_FACTOR,             std::nullopt },
-        { ParameterName::MEAN_LOCAL_MAX_DENSITY,       std::nullopt },
-        { ParameterName::SD_LOCAL_MAX_DENSITY,         std::nullopt },
-        { ParameterName::MEAN_DIFF_POS_DAYS,           std::nullopt },
-        { ParameterName::SD_DIFF_POS_DAYS,             std::nullopt },
-        { ParameterName::CFR_NEG_LOG_ALPHA,            std::nullopt },
-    };
+    std::unordered_map<ParameterName, std::optional<double>> nameToValueMap;
 };
 
 }
