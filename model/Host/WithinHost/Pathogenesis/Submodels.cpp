@@ -37,9 +37,9 @@ double rateMultiplier_31;
 double densityExponent_32;
 
 void MuellerPathogenesis::init( const Parameters& parameters ){
-    rateMultiplier_31 = parameters[Parameters::ParameterName::MUELLER_RATE_MULTIPLIER]
+    rateMultiplier_31 = parameters[ParameterName::MUELLER_RATE_MULTIPLIER]
         * sim::yearsPerStep();
-    densityExponent_32 = parameters[Parameters::ParameterName::MUELLER_DENSITY_EXPONENT];
+    densityExponent_32 = parameters[ParameterName::MUELLER_DENSITY_EXPONENT];
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
@@ -64,21 +64,21 @@ double a = numeric_limits<double>::signaling_NaN(),
     b = numeric_limits<double>::signaling_NaN();
 
 void PyrogenPathogenesis::init( const Parameters& parameters ){
-    initPyroThres = parameters[Parameters::ParameterName::Y_STAR_0];
+    initPyroThres = parameters[ParameterName::Y_STAR_0];
     
     double delt = 1.0 / n;
     double smuY = -log(0.5) /
-        (sim::stepsPerYear() * parameters[Parameters::ParameterName::Y_STAR_HALF_LIFE]);
+        (sim::stepsPerYear() * parameters[ParameterName::Y_STAR_HALF_LIFE]);
     b = -smuY * delt;
     
-    Ystar2_13 = parameters[Parameters::ParameterName::Y_STAR_SQ];
+    Ystar2_13 = parameters[ParameterName::Y_STAR_SQ];
     
     //alpha: factor determining increase in pyrogenic threshold
-    double alpha14 = parameters[Parameters::ParameterName::ALPHA];
+    double alpha14 = parameters[ParameterName::ALPHA];
     a = alpha14 * sim::oneTS() * delt;  
     
     //Ystar1: critical value of parasite density in determing increase in pyrog t
-    Ystar1_26 = parameters[Parameters::ParameterName::Y_STAR_1];
+    Ystar1_26 = parameters[ParameterName::Y_STAR_1];
 }
 
 PyrogenPathogenesis::PyrogenPathogenesis(double cF) :

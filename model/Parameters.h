@@ -33,6 +33,79 @@ namespace scnXml { class Parameters; }
 namespace OM {
 
 /*
+* Defines the names that clients of the Parameters class use in order to
+* reference the values of parameters.
+*
+* NOTE: any time that a new parameter is added here, a corresponding entry
+* *must* be added to the map in the Parameters class which relates parameter
+* codes to parameter names, or else the new parameter will not be usable
+* in the simulation.
+*/
+enum class ParameterName {
+    /// @b Infection incidence model parameters
+    //@{
+    NEG_LOG_ONE_MINUS_SINF,
+    E_STAR,
+    SIMM,
+    X_STAR_P,
+    GAMMA_P,
+    //@}
+    /// @b Immunity parameters, mostly on infections
+    //@{
+    SIGMA_I_SQ,                 ///< Host (not infection) parameter
+    CUMULATIVE_Y_STAR,
+    CUMULATIVE_H_STAR,
+    NEG_LOG_ONE_MINUS_ALPHA_M,
+    DECAY_M,
+    //@}
+    /// @b DescriptiveInfection specific
+    //@{
+    SIGMA0_SQ,
+    X_NU_STAR,
+    //@}
+    /// @b Used in PathogenesisModel
+    //@{
+    Y_STAR_SQ,
+    ALPHA,
+    //@}
+    DENSITY_BIAS_NON_GARKI,        ///< Used in Diagnostic
+    BASELINE_AVAILABILITY_SHAPE,   ///< Used in InfectionIncidenceModel
+    LOG_ODDS_RATIO_CF_COMMUNITY,   ///< Used in CaseManagementModel
+    INDIRECT_RISK_COFACTOR,        ///< Used in PathogenesisModel
+    NON_MALARIA_INFANT_MORTALITY,  ///< Used in Summary
+    DENSITY_BIAS_GARKI,            ///< Used in Diagnostic
+    SEVERE_MALARIA_THRESHHOLD,     ///< Used in PathogenesisModel
+    IMMUNITY_PENALTY,              ///< Used in WHFalciparum
+    IMMUNE_EFFECTOR_DECAY,         ///< Used in WHFalciparum
+    /// @b Used in PathogenesisModel
+    //@{
+    COMORBIDITY_INTERCEPT,
+    Y_STAR_HALF_LIFE,
+    Y_STAR_1,
+    //@}
+    ASEXUAL_IMMUNITY_DECAY,        ///< Used in WHFalciparum
+    /// @b Used in PathogenesisModel
+    //@{
+    Y_STAR_0,
+
+    CRITICAL_AGE_FOR_COMORBIDITY,
+    MUELLER_RATE_MULTIPLIER,
+    MUELLER_DENSITY_EXPONENT,
+    //@}
+    /// EventScheduler: v in "Case Fatality Rate proposal"
+    CFR_SCALE_FACTOR,
+
+    /// @b Molineaux: sampling parameters (not pairwise mode only)
+    MEAN_LOCAL_MAX_DENSITY,
+    SD_LOCAL_MAX_DENSITY,
+    MEAN_DIFF_POS_DAYS,
+    SD_DIFF_POS_DAYS,
+
+    /// EventScheduler: exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day
+    CFR_NEG_LOG_ALPHA,
+};
+
+/*
 * Each "parameter" can be thought of as a 3-tuple.
 *
 * A parameter has a "code" or an "index", which is the positive integer that identifies the
@@ -60,84 +133,13 @@ namespace OM {
 * | notes  | The sequence of para-  | Used by clients of  | Has a value iff input |
 * |        | meter codes may be     | this class to       | XML sets one or input |
 * |        | non-contiguous.        | identify the param. | XML selects a model   |
-* |        | non-contiguous.        | identify the param. | which sets a value    |
+* |        |                        |                     | which sets a value    |
 * |        |                        |                     | for this param.       |
 * `--------`------------------------`---------------------`-----------------------`
 *
 */
 class Parameters {
 public:
-
-    /*
-    * Defines the names that clients of this class use in order to reference
-    * the values of parameters.
-    *
-    * NOTE: any time that a new parameter is added here, corresponding entries
-    * *must* be added to idCodeToNameMap and nameToValueMap.
-    */
-    enum class ParameterName {
-        /// @b Infection incidence model parameters
-        //@{
-        NEG_LOG_ONE_MINUS_SINF,
-        E_STAR,
-        SIMM,
-        X_STAR_P,
-        GAMMA_P,
-        //@}
-        /// @b Immunity parameters, mostly on infections
-        //@{
-        SIGMA_I_SQ,                 ///< Host (not infection) parameter
-        CUMULATIVE_Y_STAR,
-        CUMULATIVE_H_STAR,
-        NEG_LOG_ONE_MINUS_ALPHA_M,
-        DECAY_M,
-        //@}
-        /// @b DescriptiveInfection specific
-        //@{
-        SIGMA0_SQ,
-        X_NU_STAR,
-        //@}
-        /// @b Used in PathogenesisModel
-        //@{
-        Y_STAR_SQ,
-        ALPHA,
-        //@}
-        DENSITY_BIAS_NON_GARKI,        ///< Used in Diagnostic
-        BASELINE_AVAILABILITY_SHAPE,   ///< Used in InfectionIncidenceModel
-        LOG_ODDS_RATIO_CF_COMMUNITY,   ///< Used in CaseManagementModel
-        INDIRECT_RISK_COFACTOR,        ///< Used in PathogenesisModel
-        NON_MALARIA_INFANT_MORTALITY,  ///< Used in Summary
-        DENSITY_BIAS_GARKI,            ///< Used in Diagnostic
-        SEVERE_MALARIA_THRESHHOLD,     ///< Used in PathogenesisModel
-        IMMUNITY_PENALTY,              ///< Used in WHFalciparum
-        IMMUNE_EFFECTOR_DECAY,         ///< Used in WHFalciparum
-        /// @b Used in PathogenesisModel
-        //@{
-        COMORBIDITY_INTERCEPT,
-        Y_STAR_HALF_LIFE,
-        Y_STAR_1,
-        //@}
-        ASEXUAL_IMMUNITY_DECAY,        ///< Used in WHFalciparum
-        /// @b Used in PathogenesisModel
-        //@{
-        Y_STAR_0,
-
-        CRITICAL_AGE_FOR_COMORBIDITY,
-        MUELLER_RATE_MULTIPLIER,
-        MUELLER_DENSITY_EXPONENT,
-        //@}
-        /// EventScheduler: v in "Case Fatality Rate proposal"
-        CFR_SCALE_FACTOR,
-
-        /// @b Molineaux: sampling parameters (not pairwise mode only)
-        MEAN_LOCAL_MAX_DENSITY,
-        SD_LOCAL_MAX_DENSITY,
-        MEAN_DIFF_POS_DAYS,
-        SD_DIFF_POS_DAYS,
-
-        /// EventScheduler: exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day
-        CFR_NEG_LOG_ALPHA,
-    };
 
     Parameters( const scnXml::Parameters& parameters )
     {

@@ -79,11 +79,11 @@ Diagnostic::Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& 
             throw util::xml_scenario_error( "diagnostics/diagnostic(*)/units: must specify this attribute when GARKI_DENSITY_BIAS is set" );
         }
         // otherwise we assume "Other"
-        dens_lim *= parameters[Parameters::ParameterName::DENSITY_BIAS_NON_GARKI];
+        dens_lim *= parameters[ParameterName::DENSITY_BIAS_NON_GARKI];
     }else if( elt.getUnits().get() == "Other" ){
-        dens_lim *= parameters[Parameters::ParameterName::DENSITY_BIAS_NON_GARKI];
+        dens_lim *= parameters[ParameterName::DENSITY_BIAS_NON_GARKI];
     }else if( elt.getUnits().get() == "Garki" ){
-        dens_lim *= parameters[Parameters::ParameterName::DENSITY_BIAS_GARKI];
+        dens_lim *= parameters[ParameterName::DENSITY_BIAS_GARKI];
     }else{
         assert( elt.getUnits().get() == "Malariatherapy" );
         // in this case we don't need to use a bias factor
@@ -161,7 +161,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
         // the Garki or other methods.
         double densitybias = numeric_limits<double>::quiet_NaN();
         if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
-            densitybias = parameters[Parameters::ParameterName::DENSITY_BIAS_GARKI];
+            densitybias = parameters[ParameterName::DENSITY_BIAS_GARKI];
         } else {
             if( scenario.getAnalysisNo().present() ){
                 int analysisNo = scenario.getAnalysisNo().get();
@@ -171,7 +171,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
                         "specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
                 }
             }
-            densitybias = parameters[Parameters::ParameterName::DENSITY_BIAS_NON_GARKI];
+            densitybias = parameters[ParameterName::DENSITY_BIAS_NON_GARKI];
         }
         double detectionLimit = surveys.getDetectionLimit().get() * densitybias;
         diagnostics::monitoring_diagnostic = &diagnostics::make_deterministic( detectionLimit );
