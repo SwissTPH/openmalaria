@@ -34,12 +34,12 @@ namespace OM {
 
 /*
 * Defines the names that clients of the Parameters class use in order to
-* reference the values of parameters.
+* read the values of parameters.
 *
 * NOTE: any time that a new parameter is added here, a corresponding entry
-* *must* be added to the map in the Parameters class which relates parameter
-* codes to parameter names, or else the new parameter will not be usable
-* in the simulation.
+* *must* be added to the map in the Parameters class.  Such an entry relates
+* a parameter codes (positive ingeger) to the new parameter names.  If no
+* such entry is added, the new parameter will not be usable in the simulation.
 */
 enum class ParameterName {
     /// @b Infection incidence model parameters
@@ -106,37 +106,31 @@ enum class ParameterName {
 };
 
 /*
-* Each "parameter" can be thought of as a 3-tuple.
+* From a user perspective, each parameter has these 3 parts:
 *
-* A parameter has a "code" or an "index", which is the positive integer that identifies the
-* given parameter in the input XML.
+* 1. The name of the parameter as written in XML.
+*       OpenMalaria completely disregards this.
 *
-* Each parameter has a "name", which is used by clients of this class to refer to the parameter.
-* Parameter names strings in an input XML file are simply for user convenience.  The values of the
-* "name" attributes in XML are *completely* ignored by OpenMalaria itself.
+* 2. The numerical ID, "index" which identfies the parameter in XML.
+*       OpenMalaria relies on this.
 *
-* Finally, each parameter can hold an assigned value, of type double.  An *optional* double is used
-* to represent each parameter's value because many scenarios will specify values for less than the
-* full set of parameters.
+* 3. The value assigned to the parameter in XML.
+*       OpenMalaria associates this with the numerical ID.
 *
-* Note that, when a client of this class attempts to access the value of some parameter which did
-* not actually get a value assigned to it, it is considered a run time error.  This class is
-* responsible for handling such errors.
+* From a developer perspective, each "parameter" can be thought of as having these 3 parts:
 *
-*          .----------------------------------------------------------------------.
-*          | Part of 3-tuple                                                      |
-*          .------------------------.---------------------.-----------------------.
-*          | Parameter Code         | Parameter Name      | Parameter Value       |
-* .--------.------------------------.---------------------.-----------------------.
-* | type   | (int)                  | enum class          | std::optional<double> |
-* .--------.------------------------.---------------------.-----------------------.
-* | notes  | The sequence of para-  | Used by clients of  | Has a value iff input |
-* |        | meter codes may be     | this class to       | XML sets one or input |
-* |        | non-contiguous.        | identify the param. | XML selects a model   |
-* |        |                        |                     | which sets a value    |
-* |        |                        |                     | for this param.       |
-* `--------`------------------------`---------------------`-----------------------`
+* 1. A ParameterName.
+*       Clients of this class use a ParameterName to refer to the parameter.
 *
+* 2. A numerical ID to identify the parameter.
+*       This is used to map parameters in XML to parameters in OpenMalaria,
+*       and for error reporting.
+*
+* 2. A (possible) floating point number representing the actual value assigned to the parameter. 
+*       If the user does not explicitly or implicitly set a value, an empty
+*       value is assigned.  If a client of this class attempts to read the
+*       parameter's value, but the value is empty, this is considered an
+*       error - and this class is responsible for handling such errors.
 */
 class Parameters {
 public:
@@ -224,9 +218,11 @@ private:
     /*
     * Defines the map from parameter ID numbers (AKA parameter codes) to parameter names.
     *
-    * The keys of this map may not form a contiguous sequence, e.g. in the case where a
-    * parameter gets deleted altogether from the simulation code.  This is okay, and is
-    * in fact already the case at the time of writing.
+    * Each parameter "code"/"index"/"ID number" is a positive integer that identifies the
+    * given parameter in the input XML.
+    *
+    * The keys of this map need not form a contiguous sequence.
+    * E.g. in the case where a parameter is deleted altogether from the simulation code.
     */
     const std::unordered_map<int, ParameterName> idCodeToNameMap
     {
@@ -275,9 +271,13 @@ private:
     /*
     * Defines the map from parameter names to parameter (optional) values.
     *
-    * The keys of this map may not form a contiguous sequence, e.g. in the case where a
-    * parameter gets deleted altogether from the simulation code.  This is okay, and is
-    * in fact already the case at the time of writing.
+    * The map values are made optional because many scenarios will specify
+    * values for less than the full set of parameters.
+    *
+    * Any given ParameterName has a value (other than std::nullopt) iff
+    * either the XML explicitly states a value for the parameter or the
+    * XML explicitly states to use some model which itself contains the
+    * given parameter among its preset values.
     */
     std::unordered_map<ParameterName, std::optional<double>> nameToValueMap;
 };
