@@ -69,14 +69,14 @@ int InfectionIncidenceModel::ctsNewInfections = 0;
 // -----  static initialisation  -----
 
 void InfectionIncidenceModel::init ( const Parameters& parameters ) {
-    baseline_avail_shape_param = parameters[Parameters::BASELINE_AVAILABILITY_SHAPE];
+    baseline_avail_shape_param = parameters[Parameters::ParameterName::BASELINE_AVAILABILITY_SHAPE];
     baseline_avail_offset = 0.5 * pow(baseline_avail_shape_param, 2);
     
-    gamma_p=parameters[Parameters::GAMMA_P];
-    Sinf=1-exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_SINF]);
-    Simm=parameters[Parameters::SIMM];
-    EstarInv = 1.0/parameters[Parameters::E_STAR];
-    Xstar_pInv = 1.0/parameters[Parameters::X_STAR_P];
+    gamma_p=parameters[Parameters::ParameterName::GAMMA_P];
+    Sinf=1-exp(-parameters[Parameters::ParameterName::NEG_LOG_ONE_MINUS_SINF]);
+    Simm=parameters[Parameters::ParameterName::SIMM];
+    EstarInv = 1.0/parameters[Parameters::ParameterName::E_STAR];
+    Xstar_pInv = 1.0/parameters[Parameters::ParameterName::X_STAR_P];
     
     //! constant defining the constraint for the Gamma shape parameters
     /// Used for the case where availability is assumed gamma distributed

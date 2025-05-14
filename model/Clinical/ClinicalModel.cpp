@@ -54,7 +54,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
         indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
         //NOTE: if changing XSD, this should not have a default unit:
         healthSystemMemory = UnitParse::readShortDuration(clinical.getHealthSystemMemory(), UnitParse::STEPS);
-        oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
+        oddsRatioThreshold = exp( parameters[Parameters::ParameterName::LOG_ODDS_RATIO_CF_COMMUNITY] );
         InfantMortality::init( parameters );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/clinical/healthSystemMemory: ").append(e.message()) );
@@ -201,7 +201,7 @@ double nonMalariaMortality;
 void InfantMortality::init( const OM::Parameters& parameters ){
     infantDeaths.resize(sim::stepsPerYear());
     infantIntervalsAtRisk.resize(sim::stepsPerYear());
-    nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+    nonMalariaMortality=parameters[Parameters::ParameterName::NON_MALARIA_INFANT_MORTALITY];
 }
 
 void InfantMortality::preMainSimInit() {

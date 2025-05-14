@@ -166,11 +166,11 @@ void MolineauxInfection::init( const Parameters& parameters ){
     
     pairwise_P_star_sample = util::ModelOptions::option( util::MOLINEAUX_PAIRWISE_SAMPLE );
     if( !pairwise_P_star_sample ){
-        mean_shape_first_local_max = parameters[Parameters::MEAN_LOCAL_MAX_DENSITY];
-        sd_scale_first_local_max = parameters[Parameters::SD_LOCAL_MAX_DENSITY];
+        mean_shape_first_local_max = parameters[Parameters::ParameterName::MEAN_LOCAL_MAX_DENSITY];
+        sd_scale_first_local_max = parameters[Parameters::ParameterName::SD_LOCAL_MAX_DENSITY];
         
-        mean_shape_diff_pos_days = parameters[Parameters::MEAN_DIFF_POS_DAYS];
-        sd_scale_diff_pos_days = parameters[Parameters::SD_DIFF_POS_DAYS];
+        mean_shape_diff_pos_days = parameters[Parameters::ParameterName::MEAN_DIFF_POS_DAYS];
+        sd_scale_diff_pos_days = parameters[Parameters::ParameterName::SD_DIFF_POS_DAYS];
         
         
         // with gamma distribution shape and scale parameters has to be recalculated 

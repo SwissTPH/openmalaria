@@ -63,12 +63,12 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::C
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
     
-    alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
+    alpha = exp( -parameters[Parameters::ParameterName::CFR_NEG_LOG_ALPHA] );
     if( !(0.0<=alpha && alpha<=1.0) ){
         throw util::xml_scenario_error(
             "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
     }
-    neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
+    neg_v = -parameters[Parameters::ParameterName::CFR_SCALE_FACTOR];
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
         if( !clinical.getNonMalariaFevers().present() ){

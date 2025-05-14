@@ -85,16 +85,16 @@ int WHFalciparum::y_lag_len = 0;
 // -----  static functions  -----
 
 void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& model ) {
-    sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
-    immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
-    immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
-    asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
+    sigma_i=sqrt(parameters[Parameters::ParameterName::SIGMA_I_SQ]);
+    immPenalty_22=1-exp(parameters[Parameters::ParameterName::IMMUNITY_PENALTY]);
+    immEffectorRemain=exp(-parameters[Parameters::ParameterName::IMMUNE_EFFECTOR_DECAY]);
+    asexImmRemain=exp(-parameters[Parameters::ParameterName::ASEXUAL_IMMUNITY_DECAY]);
     
     // calculate inverses here, so we can use multiplication later (faster):
-    invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
-    invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
-    alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
-    decayM = parameters[Parameters::DECAY_M];
+    invCumulativeYstar = 1.0 / parameters[Parameters::ParameterName::CUMULATIVE_Y_STAR];
+    invCumulativeHstar = 1.0 / parameters[Parameters::ParameterName::CUMULATIVE_H_STAR];
+    alpha_m = 1.0 - exp(-parameters[Parameters::ParameterName::NEG_LOG_ONE_MINUS_ALPHA_M]);
+    decayM = parameters[Parameters::ParameterName::DECAY_M];
     
     y_lag_len = sim::inSteps(sim::fromDays(20)) + 1;
     
