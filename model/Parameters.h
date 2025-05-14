@@ -26,6 +26,7 @@
 #include <optional>
 #include <unordered_map>
 #include <schema/scenario.h>
+#include "util/CommandLine.h"
 #include "util/errors.h"
 
 namespace scnXml { class Parameters; }
@@ -186,9 +187,16 @@ private:
             const bool paramIdIsValid = idCodeToNameMap.count(paramId);
             if (!paramIdIsValid)
             {
-                throw util::xml_scenario_error("The specified <parameter> index "
-                        + to_string(paramId) +
-                        " does not correspond to any actual parameter that exists in the simulation.");
+                if( util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS) ){
+                    cerr << "Deprecation warning: <parameter> index" << to_string(paramId) <<
+                        " is no longer used" << endl;
+                }
+
+                // If we throw here, old scenarios containing the deprecated parameter
+                // will need manual work to migrate to new OpenMalaria versions.  This
+                // isn't unacceptable, but it's simpler here to just skip over the
+                // deprecated parameter.
+                continue;
             }
             const ParameterName nameOfParamToSet = idCodeToNameMap.at(paramId);
 
@@ -241,6 +249,9 @@ private:
         { 26, ParameterName::Y_STAR_1 },
         { 27, ParameterName::ASEXUAL_IMMUNITY_DECAY },
         { 28, ParameterName::Y_STAR_0 },
+        // 29 corresponds to a now-deprecated parameter.  If adding a new parameter,
+        // don't use 29.  Since some old scenarios likely define a parameter value
+        // with index 29 already.
         { 30, ParameterName::CRITICAL_AGE_FOR_COMORBIDITY },
         { 31, ParameterName::MUELLER_RATE_MULTIPLIER },
         { 32, ParameterName::MUELLER_DENSITY_EXPONENT },
