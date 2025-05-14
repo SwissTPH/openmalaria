@@ -186,9 +186,9 @@ private:
             const bool paramIdIsValid = idCodeToNameMap.count(paramId);
             if (!paramIdIsValid)
             {
-                throw util::xml_scenario_error("The specified parameter code/index "
+                throw util::xml_scenario_error("The specified <parameter> index "
                         + to_string(paramId) +
-                        " does not correspond to any actual parameter.");
+                        " does not correspond to any actual parameter that exists in the simulation.");
             }
             const ParameterName nameOfParamToSet = idCodeToNameMap.at(paramId);
 
