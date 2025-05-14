@@ -333,9 +333,8 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    for(auto inf = infections.begin(); inf != infections.end(); ++inf){
+    for(DescriptiveInfection* inf : infections)
         *inf & stream;
-    }
 }
 
 char const*const not_impl = "feature not available with the \"descriptive\" within-host model";

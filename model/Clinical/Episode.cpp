@@ -126,6 +126,7 @@ void Episode::report () {
 void Episode::operator& (istream& stream) {
     time & stream;
     if (time > sim::zero()) {
+        // int temp; temp & stream; infectionType = static_cast<WithinHost::InfectionOrigin>(temp);
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;
@@ -137,6 +138,7 @@ void Episode::operator& (istream& stream) {
 void Episode::operator& (ostream& stream) {
     time & stream;
     if (time >= sim::zero()) {
+        // static_cast<int>(infectionType) & stream;
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;
