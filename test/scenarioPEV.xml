@@ -316,33 +316,33 @@
             </weight>
         </human>
         <parameters interval="5" iseed="1" latentp="3">
-            <parameter include="0" name="'-ln(1-Sinf)'    " number="1" value="0.050736"/>
-            <parameter include="0" name="Estar    " number="2" value="0.03247"/>
-            <parameter include="1" name="Simm     " number="3" value="0.153741"/>
-            <parameter include="1" name="Xstar_p  " number="4" value="1609.836243"/>
-            <parameter include="1" name="gamma_p  " number="5" value="1.650241"/>
-            <parameter include="1" name="sigma2i  " number="6" value="1.082696"/>
-            <parameter include="1" name="CumulativeYstar  " number="7" value="1865464.660703"/>
-            <parameter include="1" name="CumulativeHstar  " number="8" value="1765.283962"/>
-            <parameter include="1" name="'-ln(1-alpha_m)'" number="9" value="2.702352"/>
-            <parameter include="1" name="decay_m  " number="10" value="1.526271"/>
-            <parameter include="1" name="Ystar2   " number="13" value="4259.530005"/>
-            <parameter include="1" name="alpha    " number="14" value="553373.45094"/>
-            <parameter include="1" name="Density bias (non Garki)" number="15" value="0.510558"/>
-            <parameter include="0" name="No Use 1" number="16" value="0.05"/>
-            <parameter include="1" name="log oddsr CF community   " number="17" value="0.548263"/>
-            <parameter include="1" name="Indirect risk cofactor   " number="18" value="0.007721"/>
-            <parameter include="1" name="Non-malaria infant mortality     " number="19" value="47.967295"/>
-            <parameter include="1" name="Density bias (Garki)     " number="20" value="2.601878"/>
-            <parameter include="1" name="Severe Malaria Threshhold        " number="21" value="3411970.636451"/>
-            <parameter include="0" name="Immunity Penalty" number="22" value="1"/>
-            <parameter include="0" name=" Immune effector decay " number="23" value="0"/>
-            <parameter include="1" name="comorbidity intercept    " number="24" value="0.011939"/>
-            <parameter include="1" name="Ystar half life  " number="25" value="0.401293"/>
-            <parameter include="1" name="Ystar1   " number="26" value="0.796334"/>
-            <parameter include="0" name=" Asex immune decay " number="27" value="0"/>
-            <parameter include="1" name="Ystar0   " number="28" value="28.120561"/>
-            <parameter include="1" name="critical age for comorbidity     " number="30" value="0.151984"/>
+            <parameter name="'-ln(1-Sinf)'    " number="1" value="0.050736"/>
+            <parameter name="Estar    " number="2" value="0.03247"/>
+            <parameter name="Simm     " number="3" value="0.153741"/>
+            <parameter name="Xstar_p  " number="4" value="1609.836243"/>
+            <parameter name="gamma_p  " number="5" value="1.650241"/>
+            <parameter name="sigma2i  " number="6" value="1.082696"/>
+            <parameter name="CumulativeYstar  " number="7" value="1865464.660703"/>
+            <parameter name="CumulativeHstar  " number="8" value="1765.283962"/>
+            <parameter name="'-ln(1-alpha_m)'" number="9" value="2.702352"/>
+            <parameter name="decay_m  " number="10" value="1.526271"/>
+            <parameter name="Ystar2   " number="13" value="4259.530005"/>
+            <parameter name="alpha    " number="14" value="553373.45094"/>
+            <parameter name="Density bias (non Garki)" number="15" value="0.510558"/>
+            <parameter name="No Use 1" number="16" value="0.05"/>
+            <parameter name="log oddsr CF community   " number="17" value="0.548263"/>
+            <parameter name="Indirect risk cofactor   " number="18" value="0.007721"/>
+            <parameter name="Non-malaria infant mortality     " number="19" value="47.967295"/>
+            <parameter name="Density bias (Garki)     " number="20" value="2.601878"/>
+            <parameter name="Severe Malaria Threshhold        " number="21" value="3411970.636451"/>
+            <parameter name="Immunity Penalty" number="22" value="1"/>
+            <parameter name=" Immune effector decay " number="23" value="0"/>
+            <parameter name="comorbidity intercept    " number="24" value="0.011939"/>
+            <parameter name="Ystar half life  " number="25" value="0.401293"/>
+            <parameter name="Ystar1   " number="26" value="0.796334"/>
+            <parameter name=" Asex immune decay " number="27" value="0"/>
+            <parameter name="Ystar0   " number="28" value="28.120561"/>
+            <parameter name="critical age for comorbidity     " number="30" value="0.151984"/>
         </parameters>
     </model>
 </om:scenario>
