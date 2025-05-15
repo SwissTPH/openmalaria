@@ -144,10 +144,9 @@ int main(int argc, char* argv[])
         scenarioFile = util::CommandLine::parse (argc, argv);
         unique_ptr<scnXml::Scenario> scenario = util::loadScenario(scenarioFile);
 
-        sim::init(*scenario);
+        sim::init(*scenario); // also reads survey dates
     
         // 1) elements with no dependencies on other elements initialised here:
-        // sim::init( *scenario );  // also reads survey dates
         Parameters parameters( scenario->getModel().getParameters() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         
