@@ -168,7 +168,7 @@
                     <mosqLaidEggsSameDayProportion value="0.313"/>
                     <mosqSeekingDuration value="0.33"/>
                     <mosqSurvivalFeedingCycleProbability value="0.623"/>
-                    <availability distr="gamma" variance="0.000001"/>
+                    <availability />
                     <mosqProbBiting mean="0.95" variance="0"/>
                     <mosqProbFindRestSite mean="0.95" variance="0"/>
                     <mosqProbResting mean="0.99" variance="0"/>
@@ -197,6 +197,7 @@
     <!-- Here you can specify additional model parameters, or model variants. -->
     <model>
         <ModelOptions>
+            <option name="MAX_DENS_CORRECTION" value="false"/> <!-- MANDATORY WITH THE BASE MODEL DO NOT REMOVE -->
             <option name="INNATE_MAX_DENS" value="false"/> <!-- MANDATORY WITH THE BASE MODEL DO NOT REMOVE -->
             <option name="INDIRECT_MORTALITY_FIX" value="false"/> <!-- MANDATORY WITH THE BASE MODEL DO NOT REMOVE -->
             <option name="HEALTH_SYSTEM_MEMORY_FIX" value="false"/> <!-- MANDATORY WITH THE BASE MODEL DO NOT REMOVE -->
