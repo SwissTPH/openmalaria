@@ -41,7 +41,12 @@ bool reportPatentInfected = false;
 // -----  Initialization  -----
 
 void DescriptiveWithinHostModel::initDescriptive(){
-    reportPatentInfected = mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
+    reportPatentInfected = (
+                                mon::isUsedM(mon::MHR_PATENT_INFECTIONS) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_IMPORTED) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_INTRODUCED) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_INDIGENOUS) 
+                            );
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor ) :
