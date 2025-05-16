@@ -29,7 +29,6 @@
 #include "util/checkpoint_containers.h"
 
 #include "util/random.h"
-#include <fstream>
 
 namespace OM {
 namespace Transmission {
