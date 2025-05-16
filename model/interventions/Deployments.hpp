@@ -230,16 +230,6 @@ public:
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
-        std::ofstream file;
-        std::ostringstream filename;
-        if(copula)
-        {
-            filename << util::CommandLine::getOutputName() << "_" << sim::now() << "_copula_debug.txt";
-            file = std::ofstream(filename.str());
-            file << "coverage GammaMean coverageCorr coverageVar gaussianSample" << endl;
-            file << coverage << " " << Transmission::PerHostAnophParams::get(0).entoAvailability->mean() << " " << coverageCorr << " " << coverageVar << endl;
-        }
-
         // update output name
         // if condition if variance or coverage is 0
         for(Human& human : population) {
@@ -295,10 +285,6 @@ public:
                     }
                     else // Gamma with CV=0
                         probability = human.rng.beta(alpha, beta);
-
-                    // cout << availability << " " << probability << " " << alpha << " " << beta << endl;
-
-                    file << availability << " " << probability << endl;
                 }
 
                 if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {
@@ -310,8 +296,6 @@ public:
                 }
             }
         }
-        if(copula)
-            file.close();
     }
     
     virtual void print_details( std::ostream& out )const{
