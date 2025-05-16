@@ -24,8 +24,7 @@
 #include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"
-#include <cerrno>
-#include <cfenv>
+
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
