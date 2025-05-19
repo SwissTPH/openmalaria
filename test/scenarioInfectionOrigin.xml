@@ -60,7 +60,11 @@
             <option name="inputEIR"/>                 <!-- id 35 -->
             <option name="simulatedEIR"/>             <!-- id 36 -->
             <option name="simulatedEIR_Introduced"/>  <!-- id 2036 -->
-            <option name="simulatedEIR_Indigenous"/>  <!-- id 2036 -->
+            <option name="simulatedEIR_Indigenous"/>  <!-- id 3036 -->
+            <option name="nNewInfections"/>             <!-- id 43 -->
+            <option name="nNewInfections_Imported"/>    <!-- id 1043 -->
+            <option name="nNewInfections_Introduced"/>  <!-- id 2043 -->
+            <option name="nNewInfections_Indigenous"/>  <!-- id 3043 -->
         </SurveyOptions>
 
         <!-- OpenMalaria will only provide outputs at the specified survey times.
@@ -92,7 +96,8 @@
     <interventions name="GVI example">
         <importedInfections name = "constant importation">
             <timed>
-                <rate value="1000" time="2000-01-01"/>
+                <rate value="0" time="2000-01-01"/>
+                <rate value="1000" time="2002-01-01"/>
             </timed>
         </importedInfections>
     </interventions>

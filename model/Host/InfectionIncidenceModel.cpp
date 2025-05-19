@@ -258,10 +258,12 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double expectedNumI
   return 0;
 }
 
-void InfectionIncidenceModel::reportNumNewInfections(Human& human, int newNumInfections)
+void InfectionIncidenceModel::reportNumNewInfections(Human& human, int newNumInfections_i, int newNumInfections_l)
 {
-    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, newNumInfections);
-    ctsNewInfections += newNumInfections;
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, newNumInfections_i+newNumInfections_l);
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS_INTRODUCED, human, newNumInfections_i);
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS_INDIGENOUS, human, newNumInfections_l);
+    ctsNewInfections += newNumInfections_i+newNumInfections_l;
 }
 
 } }

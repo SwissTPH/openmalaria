@@ -289,8 +289,11 @@ void defineOutMeasures(){
     namedOutMeasures["Clinical_HospitalFirstDayDeaths"] =
         OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
     /** The number of actual infections since the last survey. */
-    namedOutMeasures["nNewInfections"] =
-        OutMeasure::humanAC( 43, MHR_NEW_INFECTIONS, false );
+    namedOutMeasures["nNewInfections"] = OutMeasure::humanAC( 43, MHR_NEW_INFECTIONS, false );
+        namedOutMeasures["nNewInfections_Imported"] = OutMeasure::humanAC( 1043, MHR_NEW_INFECTIONS_IMPORTED, false );
+        namedOutMeasures["nNewInfections_Introduced"] = OutMeasure::humanAC( 2043, MHR_NEW_INFECTIONS_INTRODUCED, false );
+        namedOutMeasures["nNewInfections_Indigenous"] = OutMeasure::humanAC( 3043, MHR_NEW_INFECTIONS_INDIGENOUS, false );
+        
     /** The number of ITNs delivered by mass distribution since last survey.
      *
      * These are "modelled ITNs": cover only a single person, cannot be passed
