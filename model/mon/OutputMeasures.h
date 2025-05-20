@@ -127,10 +127,10 @@ void findNamedMeasuresUsing( Measure m, ostream& msg ){
 // outputs), type of output (integer or floating point), aggregation, and the
 // corresponding internal measure code.
 void defineOutMeasures(){
-    //NOTE: measures are ordered by their output codes.
-    // Add new outputs with next available code at end of list.
-    // Don't reuse old codes.
-    
+    /* Don't ever make an existing numerical identifier point to a new/different 
+    output measure because this would violate users' expectations */
+    // Don't reuse old numerical identifiers
+
     /// Total number of humans
     namedOutMeasures["nHost"] = OutMeasure::humanAC( 0, MHR_HOSTS, false );
     /** The number of human hosts with an infection (patent or not) at the time
