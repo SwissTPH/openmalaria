@@ -114,16 +114,10 @@ Human::Human(SimTime dateOfBirth) :
     assert( dateOfBirth == sim::nowOrTs1() || (sim::now() == sim::zero() && dateOfBirth < sim::now()) );
 
     HumanHet het = hetSample(rng);
-
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( rng, het.comorbidityFactor );
     double iiFactor = infIncidence->getAvailabilityFactor(rng, 1.0);
     perHostTransmission.initialise (rng, het.availabilityFactor * iiFactor);
     clinicalModel = Clinical::ClinicalModel::createClinicalModel(het.treatmentSeekingFactor);
-
-    // Compute base availability
-    avail = 0.0;
-    for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
-        avail += perHostTransmission.anophEntoAvailability[i];
 }
 
 void Human::addToCohort(ComponentId id, SimTime duration )
@@ -178,11 +172,6 @@ void Human::updateCohortSet()
     }
 }
 
-double Human::getAvailability() const
-{
-    return avail;
-}
-
 void Human::checkpoint(istream &stream)
 {
     perHostTransmission & stream;
@@ -196,7 +185,6 @@ void Human::checkpoint(istream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
-    avail & stream;
 }
 
 void Human::checkpoint(ostream &stream)
@@ -212,7 +200,6 @@ void Human::checkpoint(ostream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
-    avail & stream;
 }
 
 // -----  Non-static functions: per-time-step update  -----

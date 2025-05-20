@@ -157,9 +157,11 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);
 }
+
 double LognormalSampler::mean() const{
     return exp(mu + 0.5*sigma*sigma);
 }
+
 double LognormalSampler::sample(LocalRng& rng) const{
     if( sigma == 0.0 ){
         return exp( mu );
@@ -168,6 +170,14 @@ double LognormalSampler::sample(LocalRng& rng) const{
     }
 }
 
+double LognormalSampler::cdf(double x) const {
+    if (sigma == 0.0)
+    {
+        if(x >= mu) return 1.0;
+        else return 0.0;
+    }
+    return gsl_cdf_lognormal_P(x, mu, sigma);
+}
 
 // void GammaSampler::setParams( const scnXml::SampledValueLN& elt ){
 //     const double mean = elt.getMean();
@@ -202,7 +212,8 @@ void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
 
 void GammaSampler::setMeanCV( double mean, double CV ){
     mu = mean;
-    
+    this->CV = CV;
+
     if( CV == 0.0 )
         return;
 
@@ -231,14 +242,24 @@ void GammaSampler::setMeanVariance( double mean, double variance ){
     theta = mu / k;
 }
 
-void GammaSampler::scaleMean(double scalar){
+void GammaSampler::scaleMean(double scalar) {
+    if (scalar <= 0.0) {
+        // Invalid scalar, return without making changes
+        return;
+    }
+
+    // Scale the mean
     mu *= scalar;
-    // if(!isnan(this->variance))
-    // {
-    //     k = (mu*mu)/this->variance;
-    // }
-    if(!isnan(k))
-        theta = mu / k;
+
+    if (!std::isnan(this->CV) && this->CV > 0.0) {
+        this->variance = (mu * this->CV) * (mu * this->CV);
+    }
+
+    if (!std::isnan(this->variance) && this->variance > 0.0) {
+        // Recalculate k and theta based on the scaled mean and fixed variance
+        k = (mu * mu) / this->variance;  // Shape parameter
+        theta = this->variance / mu;    // Scale parameter
+    }
 }
 
 double GammaSampler::mean() const {
@@ -246,11 +267,20 @@ double GammaSampler::mean() const {
 }
 
 double GammaSampler::sample(LocalRng& rng) const{
-    if(isnan(theta))
+    if(isnan(theta)) // CV=0
         return mu;
     return rng.gamma(k, theta);
 }
 
+double GammaSampler::cdf(double x) const {
+    if(isnan(theta)) // CV=0
+    {
+        if(x >= mu) return 1.0;
+        else return 0.0;
+    }
+    return gsl_cdf_gamma_P(x, k, theta);
+}
+        
 void BetaSampler::setParamsMV( double mean, double variance ){
     if( variance > 0.0 ){
         // double c = mean / (1.0 - mean);
