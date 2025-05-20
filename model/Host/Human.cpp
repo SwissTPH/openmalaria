@@ -185,7 +185,6 @@ void Human::checkpoint(istream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
-    avail & stream;
 }
 
 void Human::checkpoint(ostream &stream)
@@ -201,7 +200,6 @@ void Human::checkpoint(ostream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
-    avail & stream;
 }
 
 // -----  Non-static functions: per-time-step update  -----
