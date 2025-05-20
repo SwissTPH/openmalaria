@@ -641,7 +641,7 @@ public:
         }else if( deployAge == age ){
             double availability = 0.0;
             for(size_t i = 0; i < Transmission::PerHostAnophParams::numSpecies(); ++i)
-                availability += human.perHostTransmission.anophEntoAvailability[i];
+                availability += human.perHostTransmission.anophEntoAvailabilityRaw[i];
 
             if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) )
             {
