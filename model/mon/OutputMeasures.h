@@ -483,6 +483,14 @@ void defineOutMeasures(){
     namedOutMeasures["expectedSevereWithoutComorbidities"] =
         OutMeasure::humanAC( 82, MHF_EXPECTED_SEVERE_WITHOUT_COMORBIDITIES, true );
 
+    // Check for duplicate outId
+    std::set<int> seenIDs;
+    for (const auto& pair : namedOutMeasures) {
+        int id = pair.second.outId;
+        if (!seenIDs.insert(id).second)
+            throw std::runtime_error("Duplicate OutMeasure (outId) detected: " + std::to_string(id));
+    }
+
     // Now initialise valid condition measures:
     for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){
         Measure m = v.second.m;
