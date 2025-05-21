@@ -82,6 +82,7 @@ private:
 
 // ———  parameters  ———
 
+// TODO : this comment will become obselete - address this.
 // Set from the parameters block:
 SimTime latentP = sim::never();       // attribute on parameters block
 
@@ -581,8 +582,9 @@ double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util:
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model ){
     try{
-        //NOTE: if XSD is changed, this should not have a default unit
-        latentP = UnitParse::readShortDuration( model.getParameters().getLatentp(), UnitParse::STEPS );
+        // TODO : make this not have a default unit.
+        // TODO : handle case where latentp is not defined explicitly in XML.
+        latentP = UnitParse::readShortDuration( model.getParameters().get().getLatentp(), UnitParse::STEPS );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
     }

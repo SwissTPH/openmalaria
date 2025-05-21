@@ -102,9 +102,10 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
     try{
-        //NOTE: if XSD is changed, this should not have a default unit
         SimTime latentP = UnitParse::readShortDuration(
-            model.getParameters().getLatentp(), UnitParse::STEPS );
+            // TODO : make this not have a default unit.
+            // TODO : handle case where latentp is not defined explicitly in XML.
+            model.getParameters().get().getLatentp(), UnitParse::STEPS );
         Infection::init( latentP );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );

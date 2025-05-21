@@ -101,6 +101,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ModelName">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of an pre-set model.  E.g. "base".  A value must be given for the name attribute.
+        </xs:documentation>
+        <xs:appinfo>name:Pre-set model name.;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
  </xs:complexType>
  <xs:complexType name="DoubleList">
   <xs:sequence>

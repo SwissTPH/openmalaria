@@ -147,11 +147,15 @@ int main(int argc, char* argv[])
         sim::init(*scenario); // also reads survey dates
     
         // 1) elements with no dependencies on other elements initialised here:
-        Parameters parameters( scenario->getModel().getParameters() );     // depends on nothing
+        // TODO : handle case where <parameters> is not defined explicitly in XML.
+        Parameters parameters( scenario->getModel().getParameters().get() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         
-        util::master_RNG.seed( scenario->getModel().getParameters().getIseed(), 0 ); // Init RNG with Iseed
-        util::ModelOptions::init( scenario->getModel().getModelOptions() );
+        // TODO : make this use some default value if ComputationParameters is undefined in input XML.
+        util::master_RNG.seed( scenario->getModel().getComputationParameters().get().getIseed(), 0 ); // Init RNG with Iseed
+
+        // TODO : handle case where <ModelOptions> is not defined explicitly in XML.
+        util::ModelOptions::init( scenario->getModel().getModelOptions().get() );
         
         // 2) elements depending on only elements initialised in (1):
         WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters

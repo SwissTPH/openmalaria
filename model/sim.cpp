@@ -29,7 +29,9 @@
 namespace OM {
 
 void sim::init( const scnXml::Scenario& scenario ){
-    SimData::interval = scenario.getModel().getParameters().getInterval();
+    // TODO : make this use some default value if ComputationParameters is undefined in input XML.
+    SimData::interval = scenario.getModel().getComputationParameters().get().getInterval();
+
     SimData::steps_per_year = sim::inSteps(sim::oneYear());
     SimData::years_per_step = 1.0 / SimData::steps_per_year;
     sim::s_max_human_age = sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
