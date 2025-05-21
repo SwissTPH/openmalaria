@@ -315,7 +315,8 @@
                 <group lowerbound="20.0" value="60.0"/>
             </weight>
         </human>
-        <parameters interval="5" iseed="1" latentp="3">
+        <computationParameters interval="5" iseed="1"/>
+        <parameters latentp="3">
             <parameter include="0" name="'-ln(1-Sinf)'    " number="1" value="0.050736"/>
             <parameter include="0" name="Estar    " number="2" value="0.03247"/>
             <parameter include="1" name="Simm     " number="3" value="0.153741"/>

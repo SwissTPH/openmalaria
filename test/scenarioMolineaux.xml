@@ -1057,7 +1057,8 @@
       </weight>
     </human>
     <!-- run id=898 parameterization id=265074 sampling date=2011-02-23 00:09:18 lossfunction=68.507534 -->
-    <parameters interval="1" iseed="0" latentp="15d">
+    <computationParameters interval="1" iseed="0"/>
+    <parameters latentp="15d">
       <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="0" name="Estar" number="2" value="0.03247"/>
       <parameter include="1" name="Simm" number="3" value="0.198704"/>

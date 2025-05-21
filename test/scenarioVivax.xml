@@ -546,7 +546,8 @@
         <vivaxClinOption>A2j</vivaxClinOption> 
       </clinicalEvents> 
     </vivax> 
-     <parameters interval="5" iseed="0" latentp="10d"> 
+     <computationParameters interval="5" iseed="0"/>
+     <parameters latentp="10d"> 
       <!-- base --> 
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/> 
       <parameter include="false" name="        Estar   " number="2" value="0.03247"/> 
