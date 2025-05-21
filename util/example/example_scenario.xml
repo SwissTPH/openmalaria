@@ -307,6 +307,8 @@
             </availabilityToMosquitoes>
         </human>
 
+        <!-- TODO : update this w.r.t. schema changes. -->
+
         <!-- DO NOT CHANGE THE MODEL PARAMETERS BELOW -->
         <parameters interval="5" iseed="1" latentp="15d">
            <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
