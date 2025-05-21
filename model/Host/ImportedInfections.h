@@ -116,7 +116,9 @@ namespace Host {
             if( rateNow > 0.0 ){
                 for(Human& human : population){
                     if(human.rng.bernoulli( rateNow )){
-                        human.withinHostModel->importInfection(human.rng, WithinHost::InfectionOrigin::Imported);
+                        human.withinHostModel->importInfection(human.rng);
+                        mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, 1);
+                        mon::reportEventMHI( mon::MHR_NEW_INFECTIONS_IMPORTED, human, 1);
                     }
                 }
             }

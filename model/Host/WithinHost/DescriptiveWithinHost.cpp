@@ -41,7 +41,12 @@ bool reportPatentInfected = false;
 // -----  Initialization  -----
 
 void DescriptiveWithinHostModel::initDescriptive(){
-    reportPatentInfected = mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
+    reportPatentInfected = (
+                                mon::isUsedM(mon::MHR_PATENT_INFECTIONS) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_IMPORTED) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_INTRODUCED) 
+                                || mon::isUsedM(mon::MHR_PATENT_INFECTIONS_INDIGENOUS) 
+                            );
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor ) :
@@ -90,7 +95,7 @@ void DescriptiveWithinHostModel::clearImmunity() {
     m_cumulative_Y_lag = 0.0;
 }
 
-void DescriptiveWithinHostModel::importInfection(LocalRng& rng, int origin){
+void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
@@ -98,8 +103,7 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng, int origin){
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
         uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
-        infections.push_back(new DescriptiveInfection(rng, genotype, origin));
-
+        infections.push_back(new DescriptiveInfection(rng, genotype, WithinHost::InfectionOrigin::Imported));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }

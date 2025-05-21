@@ -120,7 +120,7 @@ public:
     virtual bool summarize(Host::Human& human) const =0;
 
     /// Create a new infection within this human
-    virtual void importInfection(LocalRng& rng, int origin) =0;
+    virtual void importInfection(LocalRng& rng) =0;
 
     /**
      * Carry out the effects of some treatment option, optionally with intervention deployment.
