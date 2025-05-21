@@ -106,6 +106,9 @@ enum class ParameterName {
 };
 
 /*
+* This class' job is to make the values of model parameters available to clients when the simulation
+* is running.
+*
 * From a user perspective, each parameter has these 3 parts:
 *
 * 1. The name of the parameter as written in XML.
@@ -163,7 +166,7 @@ public:
                             " required but not described.");
                 }
             }
-            throw util::base_exception("A parameter required by this simulation is missing a definition fo r its ID in C++ code");
+            throw util::base_exception("A parameter required by this simulation is missing a definition fo r its ID in C++ code.");
         }
 
         return nameToValueMap.at(name).value();
@@ -198,7 +201,8 @@ private:
                 // If we throw here, old scenarios containing the deprecated parameter
                 // will need manual work to migrate to new OpenMalaria versions.  This
                 // isn't unacceptable, but it's simpler here to just skip over the
-                // deprecated parameter.
+                // deprecated parameter.  In particular, many tests specify values for
+                // deprecated some parameters.
                 continue;
             }
             const ParameterName nameOfParamToSet = idCodeToNameMap.at(paramId);
