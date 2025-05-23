@@ -304,7 +304,8 @@ public:
         scnXml::Diagnostics diagsElt;
         diagsElt.getDiagnostic().push_back( microscopy );
         diagsElt.getDiagnostic().push_back( rdt );
-        Parameters parameters( prepareParameters() );
+        dummyXML::model.setParameters(prepareParameters());
+        Parameters parameters( dummyXML::model );
         dummyXML::scenario.setDiagnostics(diagsElt);
         dummyXML::surveys.setDetectionLimit(numeric_limits<double>::quiet_NaN());
         dummyXML::monitoring.setSurveys(dummyXML::surveys);
@@ -446,7 +447,8 @@ public:
         }
         
         // Set parameters; all of these were estimated externally from OpenMalaria
-        Parameters params(prepareParameters());
+        dummyXML::model.setParameters(prepareParameters());
+        Parameters params( dummyXML::model );
         
         // This sets up the model based on parameters and options
         WithinHost::MolineauxInfection::init(params);

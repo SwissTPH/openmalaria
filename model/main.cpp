@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     
         // 1) elements with no dependencies on other elements initialised here:
         // TODO : handle case where <parameters> is not defined explicitly in XML.
-        Parameters parameters( scenario->getModel().getParameters().get() );     // depends on nothing
+        Parameters parameters( scenario->getModel() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         
         // TODO : make this use some default value if ComputationParameters is undefined in input XML.

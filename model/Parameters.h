@@ -129,7 +129,7 @@ enum class ParameterName {
 *       This is used to map parameters in XML to parameters in OpenMalaria,
 *       and for error reporting.
 *
-* 2. A (possible) floating point number representing the actual value assigned to the parameter. 
+* 2. A (possible) floating point number representing the actual value assigned to the parameter.
 *       If the user does not explicitly or implicitly set a value, an empty
 *       value is assigned.  If a client of this class attempts to read the
 *       parameter's value, but the value is empty, this is considered an
@@ -138,15 +138,37 @@ enum class ParameterName {
 class Parameters {
 public:
 
-    Parameters( const scnXml::Parameters& parameters )
+    /*
+    * Expects that the scenario XML either explicitly describes a collection of parameters and values
+    * or describes the name of a model to use.
+    */
+    Parameters( const scnXml::Model& model )
     {
+        const bool useNamedModel = model.getModelName().present();
+
         for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
         {
             const ParameterName name = pair.second;
             nameToValueMap[name] = std::nullopt;
         }
 
-        initializeParamsFromXML(parameters);
+        if (useNamedModel)
+        {
+            std::string name = model.getModelName().get().getName();
+            if (name == "base")
+            {
+                // TODO : test fails when doing this.  Determine cause.
+                initializeParamsBaseModel();
+            }
+            else
+            {
+                throw util::xml_scenario_error("Unrecognized model name: " + name);
+            }
+        }
+        else
+        {
+            initializeParamsFromXML(model.getParameters().get());
+        }
     }
 
     /**
