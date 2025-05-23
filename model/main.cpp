@@ -26,6 +26,7 @@
 #include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
+#include "util/XMLChecker.h"
 
 #include "mon/Continuous.h"
 #include "mon/management.h"
@@ -143,6 +144,8 @@ int main(int argc, char* argv[])
         
         scenarioFile = util::CommandLine::parse (argc, argv);
         unique_ptr<scnXml::Scenario> scenario = util::loadScenario(scenarioFile);
+
+        util::XMLChecker().PerformPostValidationChecks(*scenario);
 
         sim::init(*scenario); // also reads survey dates
     
