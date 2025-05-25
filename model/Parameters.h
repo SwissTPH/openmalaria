@@ -251,6 +251,8 @@ private:
     {
         // Handles the error condition where idCodeToNameMap.at() is called with a non-existant key argument,
         // e.g. for a deprecated parameter.  This is so that a more informative error message can be given.
+        // std::unordered_map is not able to be made constexpr, which means it would be non-trivial to handle
+        // this error condition with a compile-time check instead.
         auto retrieveParamName = [&idCodeToNameMap = std::as_const(idCodeToNameMap)](const int id) -> ParameterName
         {
             try
