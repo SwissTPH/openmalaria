@@ -150,7 +150,6 @@ int main(int argc, char* argv[])
         sim::init(*scenario); // also reads survey dates
     
         // 1) elements with no dependencies on other elements initialised here:
-        // TODO : handle case where <parameters> is not defined explicitly in XML.
         Parameters parameters( scenario->getModel() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         

@@ -155,9 +155,10 @@ public:
         if (useNamedModel)
         {
             std::string name = model.getModelName().get().getName();
+            // TODO : consider having model names defined in e.g. a static class somewhere.
+            // This is because they need to be accessible in various places e.g. here, and in ModelOptions::init.
             if (name == "base")
             {
-                // TODO : test fails when doing this.  Determine cause.
                 initializeParamsBaseModel();
             }
             else
@@ -247,6 +248,9 @@ private:
     */
     void initializeParamsBaseModel()
     {
+        // TODO : handle the error case where idCodeToNameMap.at() is called with a non-existant key argument, e.g. for a deprecated parameter.
+        // E.g. wrap the .at() call in a lambda which throws an exception with a better error message than "Error: unordered_map::at".
+
         nameToValueMap[ idCodeToNameMap.at( 1) ] = 0.050736; // '-ln(1-Sinf)'
         nameToValueMap[ idCodeToNameMap.at( 2) ] = 0.03247; // Estar
         nameToValueMap[ idCodeToNameMap.at( 3) ] = 0.138161050830301; // Simm
