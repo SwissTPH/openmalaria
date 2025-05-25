@@ -25,6 +25,7 @@
 #include <map>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 #include <schema/scenario.h>
 #include "util/CommandLine.h"
 #include "util/errors.h"
@@ -248,38 +249,51 @@ private:
     */
     void initializeParamsBaseModel()
     {
-        // TODO : handle the error case where idCodeToNameMap.at() is called with a non-existant key argument, e.g. for a deprecated parameter.
-        // E.g. wrap the .at() call in a lambda which throws an exception with a better error message than "Error: unordered_map::at".
+        // Handles the error condition where idCodeToNameMap.at() is called with a non-existant key argument,
+        // e.g. for a deprecated parameter.  This is so that a more informative error message can be given.
+        auto retrieveParamName = [&idCodeToNameMap = std::as_const(idCodeToNameMap)](const int id) -> ParameterName
+        {
+            try
+            {
+                return idCodeToNameMap.at(id);
+            }
+            catch (const exception& e)
+            {
+                cerr << "Error: " << e.what() << endl;
+                throw util::traced_exception( "Base model attempted to set a value for a parameter with id: " + std::to_string(id)
+                        + ", which is not currently supported." , __FILE__, __LINE__);
+            }
+        };
 
-        nameToValueMap[ idCodeToNameMap.at( 1) ] = 0.050736; // '-ln(1-Sinf)'
-        nameToValueMap[ idCodeToNameMap.at( 2) ] = 0.03247; // Estar
-        nameToValueMap[ idCodeToNameMap.at( 3) ] = 0.138161050830301; // Simm
-        nameToValueMap[ idCodeToNameMap.at( 4) ] = 1514.385853233699891; // Xstar_p
-        nameToValueMap[ idCodeToNameMap.at( 5) ] = 2.03692533424484; // gamma_p
-        nameToValueMap[ idCodeToNameMap.at( 6) ] = 10.173598698525799; // sigma2i
-        nameToValueMap[ idCodeToNameMap.at( 7) ] = 35158523.31132510304451; // CumulativeYstar
-        nameToValueMap[ idCodeToNameMap.at( 8) ] = 97.334652723897705; // CumulativeHstar
-        nameToValueMap[ idCodeToNameMap.at( 9) ] = 2.33031045876193; // '-ln(1-alpha_m)'
-        nameToValueMap[ idCodeToNameMap.at(10) ] = 2.53106547375805; // decay_m
-        nameToValueMap[ idCodeToNameMap.at(11) ] = 0.655747311168152; // sigma2_0
-        nameToValueMap[ idCodeToNameMap.at(12) ] = 0.916181104713054; // Xstar_v
-        nameToValueMap[ idCodeToNameMap.at(13) ] = 6502.26335600001039; // Ystar2
-        nameToValueMap[ idCodeToNameMap.at(14) ] = 142601.912520000012591; // alpha
-        nameToValueMap[ idCodeToNameMap.at(15) ] = 0.177378570987455; // Density bias (non Garki)
-        nameToValueMap[ idCodeToNameMap.at(16) ] = 1.0; //  sigma2
-        nameToValueMap[ idCodeToNameMap.at(17) ] = 0.736202; // log oddsr CF community
-        nameToValueMap[ idCodeToNameMap.at(18) ] = 0.018777338; // Indirect risk cofactor
-        nameToValueMap[ idCodeToNameMap.at(19) ] = 49.539046599999999; // Non-malaria infant mortality
-        nameToValueMap[ idCodeToNameMap.at(20) ] = 4.79610772546704; // Density bias (Garki)
-        nameToValueMap[ idCodeToNameMap.at(21) ] = 784455.599999999976717; // Severe Malaria Threshhold
-        nameToValueMap[ idCodeToNameMap.at(22) ] = 1; // Immunity Penalty
-        nameToValueMap[ idCodeToNameMap.at(23) ] = 0; // Immune effector decay
-        nameToValueMap[ idCodeToNameMap.at(24) ] = 0.0968; // comorbidity intercept
-        nameToValueMap[ idCodeToNameMap.at(25) ] = 0.275437402; // Ystar half life
-        nameToValueMap[ idCodeToNameMap.at(26) ] = 0.596539864; // Ystar1
-        nameToValueMap[ idCodeToNameMap.at(27) ] = 0; // Asexual immunity decay
-        nameToValueMap[ idCodeToNameMap.at(28) ] = 296.302437899999973; // Ystar0
-        nameToValueMap[ idCodeToNameMap.at(30) ] = 0.117383; // critical age for comorbidity
+        nameToValueMap[ retrieveParamName( 1) ] = 0.050736; // '-ln(1-Sinf)'
+        nameToValueMap[ retrieveParamName( 2) ] = 0.03247; // Estar
+        nameToValueMap[ retrieveParamName( 3) ] = 0.138161050830301; // Simm
+        nameToValueMap[ retrieveParamName( 4) ] = 1514.385853233699891; // Xstar_p
+        nameToValueMap[ retrieveParamName( 5) ] = 2.03692533424484; // gamma_p
+        nameToValueMap[ retrieveParamName( 6) ] = 10.173598698525799; // sigma2i
+        nameToValueMap[ retrieveParamName( 7) ] = 35158523.31132510304451; // CumulativeYstar
+        nameToValueMap[ retrieveParamName( 8) ] = 97.334652723897705; // CumulativeHstar
+        nameToValueMap[ retrieveParamName( 9) ] = 2.33031045876193; // '-ln(1-alpha_m)'
+        nameToValueMap[ retrieveParamName(10) ] = 2.53106547375805; // decay_m
+        nameToValueMap[ retrieveParamName(11) ] = 0.655747311168152; // sigma2_0
+        nameToValueMap[ retrieveParamName(12) ] = 0.916181104713054; // Xstar_v
+        nameToValueMap[ retrieveParamName(13) ] = 6502.26335600001039; // Ystar2
+        nameToValueMap[ retrieveParamName(14) ] = 142601.912520000012591; // alpha
+        nameToValueMap[ retrieveParamName(15) ] = 0.177378570987455; // Density bias (non Garki)
+        nameToValueMap[ retrieveParamName(16) ] = 1.0; //  sigma2
+        nameToValueMap[ retrieveParamName(17) ] = 0.736202; // log oddsr CF community
+        nameToValueMap[ retrieveParamName(18) ] = 0.018777338; // Indirect risk cofactor
+        nameToValueMap[ retrieveParamName(19) ] = 49.539046599999999; // Non-malaria infant mortality
+        nameToValueMap[ retrieveParamName(20) ] = 4.79610772546704; // Density bias (Garki)
+        nameToValueMap[ retrieveParamName(21) ] = 784455.599999999976717; // Severe Malaria Threshhold
+        nameToValueMap[ retrieveParamName(22) ] = 1; // Immunity Penalty
+        nameToValueMap[ retrieveParamName(23) ] = 0; // Immune effector decay
+        nameToValueMap[ retrieveParamName(24) ] = 0.0968; // comorbidity intercept
+        nameToValueMap[ retrieveParamName(25) ] = 0.275437402; // Ystar half life
+        nameToValueMap[ retrieveParamName(26) ] = 0.596539864; // Ystar1
+        nameToValueMap[ retrieveParamName(27) ] = 0; // Asexual immunity decay
+        nameToValueMap[ retrieveParamName(28) ] = 296.302437899999973; // Ystar0
+        nameToValueMap[ retrieveParamName(30) ] = 0.117383; // critical age for comorbidity
     }
 
     /*
