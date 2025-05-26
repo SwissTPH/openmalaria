@@ -37,6 +37,7 @@ namespace checkpoint {
     void operator& (unique_ptr<T> & x, ostream& stream) {
         (*x) & stream;
     }
+
     template<class T>
     void operator& (unique_ptr<T>& x, istream& stream) {
         (*x) & stream;
@@ -58,6 +59,7 @@ namespace checkpoint {
             y & stream;
         }
     }
+
     template<class T>
     void operator& (vector<T>& x, istream& stream) {
         size_t l;
@@ -68,6 +70,7 @@ namespace checkpoint {
             y & stream;
         }
     }
+
     /// Version of above taking an element to initialize each element from.
     template<class T>
     void checkpoint (vector<T>& x, istream& stream, T templateInstance) {
@@ -97,61 +100,28 @@ namespace checkpoint {
             y & stream;
         }
     }
-    
-    /* The following templates compile on gcc but don't appear to work when S is a string and T a double.
-    // Template templates:
-    template<class S, class T>
-    void operator& (map<S,T> x, ostream& stream) {
-        x.size() & stream;
-        for( typename map<S,T>::const_iterator it = x.begin(); it != x.end(); ++it ){
-            it->first & stream;
-            it->second & stream;
-        }
-        cerr<<"operator&(map<S,T> x, ostream&) where S="<<typeid(S).name()<<", T="<<typeid(T).name()<<", x.size()="<<x.size()<<endl;
-    }
 
-    template<class S, class T>
-    void operator& (map<S,T> x, istream& stream) {
-        size_t l;
-        l & stream;
-        validateListSize (l);
-        x.clear ();
-        typename map<S,T>::iterator pos = x.begin ();
-        for(size_t i = 0; i < l; ++i) {
-            S s;
-            T t;
-            s & stream;
-            t & stream;
-            pos = x.insert (pos, make_pair (s,t));
-        }
-    }
-    */
-
-    // serialize
     template<class K, class V>
     void operator& (std::map<K,V> const& m, std::ostream& stream) {
-        // write number of entries
         size_t n = m.size();
-        n & stream;
-        // then each key/value
+        n & stream; // write count
         for (auto const& kv : m) {
-            kv.first  & stream;  // ComponentId::operator&(ostream&)
-            kv.second & stream;  // double & stream (if you have primitive overloads)
+            kv.first  & stream;
+            kv.second & stream;
         }
     }
 
-    // deserialize
     template<class K, class V>
     void operator& (std::map<K,V>& m, std::istream& stream) {
         size_t n;
-        n & stream;              // read count
+        n & stream; // read count
         validateListSize(n);
         m.clear();
         for (size_t i = 0; i < n; ++i) {
-            K key{stream};       // calls ComponentId(istream&)
+            K key{stream};
             V val;
-            val & stream;        // V::operator&(istream&) or primitive
-            m.emplace(std::move(key), val);
+            val & stream;
+            m.emplace(std::move(key), std::move(val));
         }
     }
     
