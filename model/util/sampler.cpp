@@ -184,11 +184,6 @@ double LognormalSampler::cdf(double x) const {
     return gsl_cdf_lognormal_P(x, mu, sigma);
 }
 
-// void GammaSampler::setParams( const scnXml::SampledValueLN& elt ){
-//     const double mean = elt.getMean();
-//     setParams( mean, elt );
-// }
-
 void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
     if( elt.getDistr() == "const" ){
         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
