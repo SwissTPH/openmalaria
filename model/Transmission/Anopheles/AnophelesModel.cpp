@@ -239,7 +239,7 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
     }
 
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
-    PerHostAnophParams::scaleEntoAvailability(species, (P_A1 / populationSize) * availFactor);
+    PerHostAnophParams::setEntoAvailabilityFactor(species, (P_A1 / populationSize) * availFactor);
 
     initAvail = (P_A1 / populationSize) * availFactor;
 
