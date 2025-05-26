@@ -49,6 +49,7 @@ namespace OM { namespace util {
         
         /// convert sample to N(mu,sigma)
         double asNormal( double mu, double sigma ) const;
+
         /// convert sample to lnN(mu,sigma)
         double asLognormal( double mu, double sigma ) const;
         
@@ -84,6 +85,7 @@ namespace OM { namespace util {
          * @param s Square-root of variance of sampled variates
          */
         void setParams( double m, double s );
+
         /** As above, using an XML element. */
         void setParams( const scnXml::SampledValueN& elt );
         
@@ -99,6 +101,7 @@ namespace OM { namespace util {
         inline double getMu() const{
             return mu;
         }
+
         /// Return sigma / standard deviation of distribution
         inline double getSigma() const{
             return sigma;
@@ -148,6 +151,18 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        /**
+         * Compute the cumulative distribution function (CDF) of this log-normal sampler.
+         *
+         * Special cases:
+         *  - If x ≤ 0, returns 0.
+         *  - If sigma == 0, the distribution collapses to a point mass,
+         * so returns 1 if log(x) ≥ mu, else 0.
+         *  - Otherwise uses gsl_cdf_lognormal_P(x, mu, sigma).
+         *
+         * @param x  The point at which to evaluate the CDF (must be a real number).
+         * @return   P(X ≤ x), where X ~ LogNormal(mu, sigma²).
+         */
         double cdf(double x) const;
 
         /** Create a log-normal sample from an existing normal sample. */
@@ -166,7 +181,7 @@ namespace OM { namespace util {
         double CV;
     };
 
-    /** Sampler for log-normal values */
+    /** Sampler for gamma values */
     class GammaSampler : public Sampler {
     public:
         GammaSampler(const scnXml::SampledValueCV& elt) :
@@ -179,8 +194,6 @@ namespace OM { namespace util {
             setParams(mu, elt);
         }
         
-        // /// Set parameters from XML element
-        // void setParams( const scnXml::SampledValueLN& elt );
         /// Set specified mean and CV from XML element
         void setParams( double mean, const scnXml::SampledValueCV& elt );
         
@@ -202,6 +215,20 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        /**
+         * Compute the cumulative distribution function (CDF) of this gamma sampler.
+         *
+         * Special cases:
+         *  - If x ≤ 0, returns 0.
+         *  - If CV == 0 or variance == 0, the distribution collapses to a point mass,
+         * so returns 1 if x ≥ mu, else 0.
+         *  - Otherwise uses gsl_cdf_gamma_P(x, k, theta) where
+         *      • k     = shape parameter
+         *      • theta = scale parameter
+         *
+         * @param x  The point at which to evaluate the CDF (must be a real number).
+         * @return   P(X ≤ x), where X ~ Gamma(k, θ).
+         */
         double cdf(double x) const;
         
     private:
