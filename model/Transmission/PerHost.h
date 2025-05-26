@@ -74,8 +74,7 @@ public:
      * 
      * It should be called exactly once.
       */
-    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
-        //params[species].entoAvailability->scaleMean( entoAvailability );
+    inline static void setEntoAvailabilityFactor(size_t species, double entoAvailability){
         params[species].entoAvailabilityFactor = entoAvailability;
     }
 
