@@ -114,13 +114,14 @@ namespace OM { namespace util {
 	    throw TRACED_EXCEPTION_DEFAULT ("toString called with unknown code");	// this is a code error
 	}
     };
-    
-    void ModelOptions::init( const scnXml::OptionSet& optionsElt ){
-	OptionCodeMap codeMap;
-	
-	// State of all default options:
-	bitset<NUM_OPTIONS> defaultOptSet;
-	defaultOptSet.set (MAX_DENS_CORRECTION);
+
+    void ModelOptions::init(const scnXml::Model& model){
+    const scnXml::OptionSet& optionsElt = model.getModelOptions().get();
+    OptionCodeMap codeMap;
+
+    // State of all default options:
+    bitset<NUM_OPTIONS> defaultOptSet;
+    defaultOptSet.set (MAX_DENS_CORRECTION);
     defaultOptSet.set (INNATE_MAX_DENS);
     defaultOptSet.set (INDIRECT_MORTALITY_FIX);
     defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);

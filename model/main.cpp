@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
         util::master_RNG.seed( scenario->getModel().getComputationParameters().get().getIseed(), 0 ); // Init RNG with Iseed
 
         // TODO : handle case where <ModelOptions> is not defined explicitly in XML.
-        util::ModelOptions::init( scenario->getModel().getModelOptions().get() );
+        util::ModelOptions::init( scenario->getModel() );
         
         // 2) elements depending on only elements initialised in (1):
         WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters

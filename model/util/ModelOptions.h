@@ -23,6 +23,7 @@
 #define Hmod_util_ModelOptions
 
 #include "Global.h"
+#include <schema/scenario.h>
 #include <bitset>
 
 class UnittestUtil;
@@ -286,7 +287,7 @@ namespace OM { namespace util {
 	}
 	
 	/** Read options from the XML element. */
-	static void init (const scnXml::OptionSet& options);
+	static void init (const scnXml::Model& model);
         
     private:
         // Reset opts to default. Used by unit tests.
