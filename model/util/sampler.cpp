@@ -173,7 +173,7 @@ double LognormalSampler::sample(LocalRng& rng) const{
 double LognormalSampler::cdf(double x) const {
     if (sigma == 0.0)
     {
-        if(x >= mu) return 1.0;
+        if(log(x) >= mu) return 1.0;
         else return 0.0;
     }
     return gsl_cdf_lognormal_P(x, mu, sigma);
