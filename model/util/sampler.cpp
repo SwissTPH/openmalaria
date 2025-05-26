@@ -29,6 +29,7 @@ namespace OM { namespace util {
 double NormalSample::asNormal( double mu, double sigma )const{
     return sigma*x + mu;
 }
+
 double NormalSample::asLognormal( double mu, double sigma )const{
     return exp( sigma*x + mu );
 }
@@ -48,6 +49,7 @@ void NormalSampler::setParams( double m, double s ){
     mu = m;
     sigma = s;
 }
+
 void NormalSampler::setParams(const scnXml::SampledValueN& elt){
     mu = elt.getMean();
     if( elt.getDistr() == "const" ){
@@ -66,6 +68,7 @@ void NormalSampler::setParams(const scnXml::SampledValueN& elt){
     }
     sigma = elt.getSD().get();
 }
+
 double NormalSampler::sample(LocalRng& rng) const{
     if( sigma == 0.0 ){
         return mu;
@@ -131,6 +134,7 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
     mu = log( mean / sqrt(a) );
     sigma = sqrt(log(a));
 }
+
 void LognormalSampler::setMeanVariance( double mean, double variance ){
     if( !(mean > 0.0) ){
         throw util::xml_scenario_error( "log-normal: required mean > 0" );
@@ -313,6 +317,7 @@ void BetaSampler::setParamsMV( double mean, double variance ){
     else
         throw util::xml_scenario_error("BetaSampler::setParamsMV: require variance ≥ 0");
 }
+
 double BetaSampler::sample(LocalRng& rng) const{
     if( b == 0.0 ){
         return a;
