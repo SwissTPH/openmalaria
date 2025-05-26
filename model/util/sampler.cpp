@@ -171,6 +171,11 @@ double LognormalSampler::sample(LocalRng& rng) const{
 }
 
 double LognormalSampler::cdf(double x) const {
+    // 1) anything at or below 0 has CDF = 0
+    if (x <= 0.0)
+        return 0.0;
+
+    // 2) Degenerate case
     if (sigma == 0.0)
     {
         if(log(x) >= mu) return 1.0;
@@ -273,11 +278,17 @@ double GammaSampler::sample(LocalRng& rng) const{
 }
 
 double GammaSampler::cdf(double x) const {
-    if(isnan(theta)) // CV=0
+    // 1) anything at or below 0 has CDF = 0
+    if (x <= 0.0)
+        return 0.0;
+
+    // 2) Degenerate case
+    if(isnan(theta)) // CV=0 or variance=0
     {
         if(x >= mu) return 1.0;
         else return 0.0;
     }
+
     return gsl_cdf_gamma_P(x, k, theta);
 }
         
