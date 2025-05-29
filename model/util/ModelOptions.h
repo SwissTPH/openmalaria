@@ -285,12 +285,19 @@ namespace OM { namespace util {
 	static inline bool option(OptionCodes code) {
 	    return options.test( code );
 	}
+
+	/*
+	* Just obtains the model options element from the model element and passes it to
+	* the private init method.  Avoids unnecessary data being passed to the init method.
+	* TODO : pass information related to whether/how to override based on model name.
+	*/
+	static void initFromModel(const scnXml::Model& model);
 	
-	/** Read options from the XML element. */
-	static void init (const scnXml::Model& model);
-        
     private:
-        // Reset opts to default. Used by unit tests.
+	/** Read options from the XML element. */
+	static void init (const scnXml::OptionSet& optionsElt);
+
+	// Reset opts to default. Used by unit tests.
         static inline void reset() {
             options.reset();
             options.set( MAX_DENS_CORRECTION );

@@ -115,8 +115,12 @@ namespace OM { namespace util {
 	}
     };
 
-    void ModelOptions::init(const scnXml::Model& model){
-    const scnXml::OptionSet& optionsElt = model.getModelOptions().get();
+    void ModelOptions::initFromModel(const scnXml::Model& model)
+    {
+        ModelOptions::init(model.getModelOptions().get());
+    }
+
+    void ModelOptions::init(const scnXml::OptionSet& optionsElt){
     OptionCodeMap codeMap;
 
     // State of all default options:
