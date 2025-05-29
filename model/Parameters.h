@@ -167,10 +167,11 @@ public:
                 throw util::xml_scenario_error("Unrecognized model name: " + name);
             }
         }
-        else
-        {
-            initializeParamsFromXML(model.getParameters().get());
-        }
+
+        // If the user has selected a named model, then this now overrides any parameter values set by the
+        // named model with values set explicitly by the used.  Otherwise, it sets parameter values for the
+        // first time.
+        initializeParamsFromXML(model.getParameters().get());
     }
 
     /**
@@ -190,7 +191,7 @@ public:
                             " required but not described.");
                 }
             }
-            throw util::base_exception("A parameter required by this simulation is missing a definition fo r its ID in C++ code.");
+            throw util::base_exception("A parameter required by this simulation is missing a definition for its ID in C++ code.");
         }
 
         return nameToValueMap.at(name).value();
@@ -208,10 +209,17 @@ private:
     {
         const scnXml::Parameters::ParameterSequence& paramSeq = parameters.getParameter();
 
-        for(auto iter = paramSeq.begin(); iter != paramSeq.end(); ++iter)
+        // It's okay if a user overwrites the value of a parameter that was set before this
+        // method was called.  E.g. if they used a named model, and then chose to manually
+        // override the value of a parameter set by it.  It's not okay if a user sets a value
+        // for the same parameter twice.  That represents a mistake in the input XML which
+        // we need to handle here.  This has the potential to save users time debugging inputs.
+        std::set<int> paramIdsSetByUser;
+
+        for (auto param : paramSeq)
         {
-            const int paramId = iter->getNumber();
-            const double paramValueFromXML = iter->getValue();
+            const int paramId = param.getNumber();
+            const double paramValueFromXML = param.getValue();
 
             // C++20 offers "contains" which would be more expressive than "count" here.
             const bool paramIdIsValid = idCodeToNameMap.count(paramId);
@@ -231,12 +239,11 @@ private:
             }
             const ParameterName nameOfParamToSet = idCodeToNameMap.at(paramId);
 
-            // C++20 offers "contains" which would be more expressive than "count" here.
-            const bool paramValueAlreadySet = nameToValueMap.at(nameOfParamToSet) != std::nullopt;
+            const bool paramValueAlreadySet = !paramIdsSetByUser.insert(paramId).second;
             if (paramValueAlreadySet)
             {
                 throw util::xml_scenario_error("Parameter with index " + to_string(paramId) +
-                        " described twice.");
+                        " described twice in XML.");
             }
 
             nameToValueMap[nameOfParamToSet] = paramValueFromXML;
