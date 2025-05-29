@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<!-- TODO : make copies of this and adapt them to cover various combinations of elements made possible by the new schema. -->
-
 <om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="example" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_current.xsd">
     <!-- This is an example scenario.
     More information is available in the official documentation: https://swisstph.github.io/openmalaria/schema-latest.html
@@ -273,6 +271,9 @@
     <!-- Here you can specify additional model parameters, or model variants. -->
     <model>
         <ModelName name="base"/>
+        <ModelOptions>
+            <option name="COMORB_HET" value="true"/>
+        </ModelOptions>
 
         <!-- Clinical model parameters.
         The healthSystemMemory is often overlooked. It corresponds to the follow-up period during which a recurrence is considered to be a treatment failure and is not counted as new clinical case. A recurrence after this period will be counted as new clinical case. --> 
