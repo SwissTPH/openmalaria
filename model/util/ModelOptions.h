@@ -25,6 +25,7 @@
 #include "Global.h"
 #include <schema/scenario.h>
 #include <bitset>
+#include <optional>
 
 class UnittestUtil;
 
@@ -286,16 +287,36 @@ namespace OM { namespace util {
 	    return options.test( code );
 	}
 
-	/*
-	* Just obtains the model options element from the model element and passes it to
-	* the private init method.  Avoids unnecessary data being passed to the init method.
-	* TODO : pass information related to whether/how to override based on model name.
-	*/
-	static void initFromModel(const scnXml::Model& model);
-	
+    /*
+    * Calls the private init method, passing the name of the model that the
+    * input XML specifies to use (if any) and explicitly stated model option
+    * settins (if any) from the input XML.
+    */
+    static void initFromModel(const scnXml::Model& model);
+
     private:
-	/** Read options from the XML element. */
-	static void init (const scnXml::OptionSet& optionsElt);
+    /*
+    * Initialize the set of model options to use, based on input XML contents.
+    */
+    static void init (const std::optional<scnXml::OptionSet>& optionsElt,
+                            const std::optional<std::string>& modelName);
+
+    /*
+    * Returns a bitset representing a collection of model options that correspond
+    * exactly to the "base" model.
+    *
+    * Note: at present the base model sets values that are not considered "default".
+    * This is because there are default model options which are often not desired,
+    * but are turned on in the absence of anything in the input suggesting they should
+    * be turned off for legacy (i.e. backwards compatibility) reasons.
+    */
+    static std::bitset<NUM_OPTIONS> getBaseModelOptions();
+
+    /*
+    * Returns a bitset representing all and only model options which are required
+    * to be turned on by default for backwards compatibility.
+    */
+    static std::bitset<NUM_OPTIONS> getLegacyDefaultModelOptions();
 
 	// Reset opts to default. Used by unit tests.
         static inline void reset() {

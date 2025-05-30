@@ -117,30 +117,87 @@ namespace OM { namespace util {
 
     void ModelOptions::initFromModel(const scnXml::Model& model)
     {
-        ModelOptions::init(model.getModelOptions().get());
+        // Determine model name, if any.
+        std::optional<std::string> modelName = std::nullopt;
+        const bool useNamedModel = model.getModelName().present();
+        if (useNamedModel)
+        {
+            modelName.emplace(model.getModelName().get().getName());
+        }
+
+        // Get model options specified expicitly in input XML, if any.
+        std::optional<scnXml::OptionSet> optionsElt = std::nullopt;
+        const bool useExplicitOverrides = model.getModelOptions().present();
+        if (useExplicitOverrides)
+        {
+            optionsElt.emplace(model.getModelOptions().get());
+        }
+
+        ModelOptions::init(optionsElt, modelName);
     }
 
-    void ModelOptions::init(const scnXml::OptionSet& optionsElt){
+
+    std::bitset<NUM_OPTIONS> ModelOptions::getBaseModelOptions()
+    {
+        // The base mode is very simple in this regard,
+        // *no* model options are turned on.
+        bitset<NUM_OPTIONS> allOptionsOff;
+
+        return allOptionsOff;
+    }
+
+    std::bitset<NUM_OPTIONS> ModelOptions::getLegacyDefaultModelOptions()
+    {
+        bitset<NUM_OPTIONS> defaultOptSet;
+
+        // Kept for legacy reasons.  That is, when an input XML does not specify a model name
+        // and does not set these model options to false, they are turned on *for backwards
+        // compatibility*.
+        defaultOptSet.set (MAX_DENS_CORRECTION);
+        defaultOptSet.set (INNATE_MAX_DENS);
+        defaultOptSet.set (INDIRECT_MORTALITY_FIX);
+        defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);
+
+        return defaultOptSet;
+    }
+
+    void ModelOptions::init(const std::optional<scnXml::OptionSet>& optionsElt,
+                            const std::optional<std::string>& modelName)
+    {
     OptionCodeMap codeMap;
 
-    // State of all default options:
-    bitset<NUM_OPTIONS> defaultOptSet;
-    defaultOptSet.set (MAX_DENS_CORRECTION);
-    defaultOptSet.set (INNATE_MAX_DENS);
-    defaultOptSet.set (INDIRECT_MORTALITY_FIX);
-    defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);
-	
-	// Set options to defaults, then override any given in the XML file:
-	options = defaultOptSet;
-	
-	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
-	for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
-            OptionCodes opt = codeMap[it->getName()];
-            if( opt != IGNORE ) options[opt] = it->getValue();
-	}
+	// Set options to legacy defaults, then override any given in the XML file:
+	options = getLegacyDefaultModelOptions();
+
+    // TODO : consider having model names defined in e.g. a static class somewhere.
+    // This is because they need to be accessible in various places e.g. here, and in Parameters ctor.
+    if (modelName.has_value())
+    {
+        const std::string name = modelName.value();
+        if (name == "base")
+        {
+            // This completely discards any legacy model options set above.
+            options = getBaseModelOptions();
+        }
+        else
+        {
+            throw util::xml_scenario_error("Unrecognized model name: " + name);
+        }
+    }
+
+    // Apply any user-specified overrides.
+    if (optionsElt.has_value())
+    {
+	    const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.value().getOption();
+	    for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
+                OptionCodes opt = codeMap[it->getName()];
+                if( opt != IGNORE ) options[opt] = it->getValue();
+	    }
+    }
 	
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
+        const std::bitset<NUM_OPTIONS> defaultOptSet = getLegacyDefaultModelOptions();
 	    cout << "Non-default model options:";
 	    for(int i = 0; i < NUM_OPTIONS; ++i) {
 		if (options[i] != defaultOptSet[i])

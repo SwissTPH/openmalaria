@@ -168,10 +168,14 @@ public:
             }
         }
 
-        // If the user has selected a named model, then this now overrides any parameter values set by the
-        // named model with values set explicitly by the used.  Otherwise, it sets parameter values for the
-        // first time.
-        initializeParamsFromXML(model.getParameters().get());
+        // Get parameters specified expicitly in input XML, if any.
+        // Any such explicitly specified parameters will override any values that may have been set
+        // earlier by the specification of a named model.
+        const bool useExplicitParamValues = model.getParameters().present();
+        if (useExplicitParamValues)
+        {
+            initializeParamsFromXML(model.getParameters().get());
+        }
     }
 
     /**
