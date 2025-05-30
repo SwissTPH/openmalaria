@@ -105,7 +105,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
         SimTime latentP = UnitParse::readShortDuration(
             // TODO : make this not have a default unit.
             // TODO : handle case where latentp is not defined explicitly in XML.
-            model.getParameters().get().getLatentp(), UnitParse::STEPS );
+            model.getParameters().get().getLatentp(), UnitParse::NONE );
         Infection::init( latentP );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );

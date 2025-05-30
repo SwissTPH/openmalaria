@@ -228,15 +228,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
     </xs:sequence>
-    <!-- TODO : make latentp not have a default unit. -->
     <xs:attribute name="latentp" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           Pre-erythrocytic latent period
-          
+
           Can be specified in steps (e.g. 3t) or days (e.g. 15d).
+
+          A time unit must be defined explicitly.
         </xs:documentation>
-        <xs:appinfo>units:User defined (default: steps);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
+        <xs:appinfo>units:User defined (either timesteps or days);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

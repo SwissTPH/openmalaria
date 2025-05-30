@@ -1011,7 +1011,7 @@
     </human>
     <!-- run id=1101 parameterization id=220288 sampling date=2011-04-10 13:58:03 lossfunction=4699975.42996 -->
     <computationParameters interval="1" iseed="0"/>
-    <parameters latentp="15">
+    <parameters latentp="15t">
       <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="0" name="Estar" number="2" value="0.03247"/>
       <parameter include="1" name="Simm" number="3" value="0.184877"/>

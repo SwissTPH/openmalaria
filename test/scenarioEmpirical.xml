@@ -1216,7 +1216,7 @@
       </weight>
     </human>
     <computationParameters interval="1" iseed="1"/>
-    <parameters latentp="0">
+    <parameters latentp="0t">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

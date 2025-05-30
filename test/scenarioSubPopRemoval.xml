@@ -174,7 +174,7 @@
       </availabilityToMosquitoes>
     </human>
     <computationParameters interval="5" iseed="61321"/>
-    <parameters latentp="3">
+    <parameters latentp="3t">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0502"/>
       <parameter include="false" name="Estar" number="2" value="0.032"/>
       <parameter include="false" name="Simm" number="3" value="0.0809506710366894"/>
