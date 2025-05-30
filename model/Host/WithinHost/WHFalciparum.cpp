@@ -101,15 +101,22 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
-    try{
-        SimTime latentP = UnitParse::readShortDuration(
-            // TODO : make this not have a default unit.
-            // TODO : handle case where latentp is not defined explicitly in XML.
-            model.getParameters().get().getLatentp(), UnitParse::NONE );
-        Infection::init( latentP );
-    }catch( const util::format_error& e ){
-        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    // Default value to use if no <parameters> element is present in XML.
+    SimTime latentP = UnitParse::readShortDuration("15d", UnitParse::NONE);
+    try
+    {
+        if (model.getParameters().present())
+        {
+            latentP = UnitParse::readShortDuration(
+                model.getParameters().get().getLatentp(), UnitParse::NONE);
+        }
     }
+    catch( const util::format_error& e )
+    {
+            throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    }
+
+    Infection::init( latentP );
 }
 
 void WHFalciparum::setParams(double cumYStar, double cumHStar, double aM, double dM) {
