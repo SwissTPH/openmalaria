@@ -41,37 +41,37 @@ namespace OM
             *
             * Performs custom checks on the input XML which are not enforced in the schema itself.
             *
+            * It would be better to handle as many such issues as possible in the schema itself
+            * However, some required checks are not possible to do using the version of the XSD
+            * spec supported by the XML validation library used by OpenMalaria.
+            *
             * Throws iff a check fails.
             *
-            * The purpose of these this XML checking is to indentify certain problems in the input XML
-            * as early as possible, so that the program can be exited (this is a job for the caller)
-            * instead of execution time being wasted on a simulation that will ultimately crash
-            * (or worse, produce meaningless results).
-            *
-            * Of course, it would be better to handle as many such issues as possible in the schema
-            * itself, rather than here.  However, some required checks are not possible to do using
-            * the version of the XSD spec supported by the XML validation library used by OpenMalaria.
+            * The purpose of these XML checks to:
+            *  - identify certain problems in the input XML as early as possible, and
+            *  - enable the user to obtain a more informative error message.
             */
             void PerformPostValidationChecks(const scnXml::Scenario& scenario)
             {
-                CheckModelOptionsAndParams();
+                CheckModelOptionsAndParams(scenario);
             }
         private:
 
             /*
-            * Verifies that either:
-            *
-            *  1) Both model options and parameters are explicitly stated in the input XML but not a
-            *     model name.
-            *
-            *  or
-            *
-            *  2) At least a model name (e.g. a name referring to the base model) *is* explicitly stated.
-            *     (Optionally, model options and/or parameters may also be stated.)
+            * Verifies that, if no model name is written in input XML, then both parameters and
+            * model options and written explicitly.
             */
-            void CheckModelOptionsAndParams()
+            void CheckModelOptionsAndParams(const scnXml::Scenario& scenario)
             {
-                // TODO
+                // For each relevant element, determine whether it's specified explicitly in XML.
+                const bool modelName = scenario.getModel().getModelName().present();
+                const bool parameters = scenario.getModel().getParameters().present();
+                const bool modelOptions = scenario.getModel().getModelOptions().present();
+                if (!modelName && (!parameters || !modelOptions))
+                {
+                    throw util::xml_scenario_error(
+                        "If a model name is not specified then both <ModelOptions> and <parameters> must be specified");
+                }
             }
         };
     }
