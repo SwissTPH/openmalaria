@@ -239,7 +239,7 @@ namespace dummyXML{
         0 /* interval */,
         0 /* iseed */);
     scnXml::Parameters modelParams("dummy" /* latentP */);
-    scnXml::Model model(modelClinical, modelHuman);
+    scnXml::Model model(modelClinical, modelHuman, computationParams);
     
     scnXml::Scenario scenario(
         demography,

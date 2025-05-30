@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
         Parameters parameters( scenario->getModel() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         
-        util::master_RNG.seed( scenario->getModel().getComputationParameters().get().getIseed(), 0 ); // Init RNG with Iseed
+        util::master_RNG.seed( scenario->getModel().getComputationParameters().getIseed(), 0 ); // Init RNG with Iseed
 
         util::ModelOptions::initFromModel( scenario->getModel() );
         

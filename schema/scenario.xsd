@@ -120,7 +120,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>name:Vivax model parameters;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="computationParameters" type="om:ComputationParameters" minOccurs="0">
+              <xs:element name="computationParameters" type="om:ComputationParameters" minOccurs="1">
                 <xs:annotation>
                   <xs:documentation>
                     Parameters of how the simulation does computation.
