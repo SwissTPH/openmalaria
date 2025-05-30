@@ -66,8 +66,8 @@ namespace OM
             *
             *  or
             *
-            *  2) Neither model options nor parameters are expliclitly stated in the input XML, but a
-            *     model name (e.g. a name referring to the base model) *is* explicitly stated.
+            *  2) At least a model name (e.g. a name referring to the base model) *is* explicitly stated.
+            *     (Optionally, model options and/or parameters may also be stated.)
             */
             void CheckModelOptionsAndParams()
             {
