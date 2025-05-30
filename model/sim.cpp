@@ -29,7 +29,6 @@
 namespace OM {
 
 void sim::init( const scnXml::Scenario& scenario ){
-    // TODO : make this use some default value if ComputationParameters is undefined in input XML.
     SimData::interval = scenario.getModel().getComputationParameters().get().getInterval();
 
     SimData::steps_per_year = sim::inSteps(sim::oneYear());

@@ -153,10 +153,8 @@ int main(int argc, char* argv[])
         Parameters parameters( scenario->getModel() );     // depends on nothing
         WithinHost::Genotypes::init( *scenario );
         
-        // TODO : make this use some default value if ComputationParameters is undefined in input XML.
         util::master_RNG.seed( scenario->getModel().getComputationParameters().get().getIseed(), 0 ); // Init RNG with Iseed
 
-        // TODO : handle case where <ModelOptions> is not defined explicitly in XML.
         util::ModelOptions::initFromModel( scenario->getModel() );
         
         // 2) elements depending on only elements initialised in (1):

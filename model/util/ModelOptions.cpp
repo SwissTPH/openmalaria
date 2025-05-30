@@ -139,8 +139,7 @@ namespace OM { namespace util {
 
     std::bitset<NUM_OPTIONS> ModelOptions::getBaseModelOptions()
     {
-        // The base mode is very simple in this regard,
-        // *no* model options are turned on.
+        // The base mode is very simple: *no* model options are turned on.
         bitset<NUM_OPTIONS> allOptionsOff;
 
         return allOptionsOff;

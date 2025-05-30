@@ -235,8 +235,8 @@ private:
                 }
 
                 // If we throw here, old scenarios containing the deprecated parameter
-                // will need manual work to migrate to new OpenMalaria versions.  This
-                // isn't unacceptable, but it's simpler here to just skip over the
+                // will need more manual work to migrate to new OpenMalaria versions.
+                // This isn't unacceptable.  But it's simpler here to just skip over the
                 // deprecated parameter.  In particular, many tests specify values for
                 // deprecated some parameters.
                 continue;
