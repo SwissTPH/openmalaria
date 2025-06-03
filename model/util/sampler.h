@@ -36,6 +36,7 @@ namespace OM { namespace util {
         virtual double sample(LocalRng& rng) const = 0;
         virtual void scaleMean( double scalar ) = 0;
         virtual double mean() const = 0;
+        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
     };
 
     /** A normal sample, which can be turned into various log-normal samples.
@@ -48,6 +49,7 @@ namespace OM { namespace util {
         
         /// convert sample to N(mu,sigma)
         double asNormal( double mu, double sigma ) const;
+
         /// convert sample to lnN(mu,sigma)
         double asLognormal( double mu, double sigma ) const;
         
@@ -83,12 +85,13 @@ namespace OM { namespace util {
          * @param s Square-root of variance of sampled variates
          */
         void setParams( double m, double s );
+
         /** As above, using an XML element. */
         void setParams( const scnXml::SampledValueN& elt );
         
         /** Sample a value. */
         double sample(LocalRng& rng) const;
-        
+
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
             return sample.asNormal( mu, sigma );
@@ -98,6 +101,7 @@ namespace OM { namespace util {
         inline double getMu() const{
             return mu;
         }
+
         /// Return sigma / standard deviation of distribution
         inline double getSigma() const{
             return sigma;
@@ -129,10 +133,39 @@ namespace OM { namespace util {
         /// Set specified mean and CV from XML element
         void setParams( double mean, const scnXml::SampledValueCV& elt );
 
-        /** Set log-normal parameters from mean and CV. */
+        /**
+         * Configure the log-normal distribution from a target mean and coefficient of variation.
+         *
+         * For CV > 0, this computes the underlying normal parameters μ and σ such that
+         *  E[X] = exp(μ + σ²/2) = mean
+         *  CV   = √(exp(σ²) − 1)
+         *
+         * If CV == 0, the distribution collapses to a point mass:
+         *  - σ is set to 0
+         *  - μ is set to ln(mean), or –∞ if mean == 0
+         *  - sampling and CDF methods treat X == exp(μ)
+         *
+         * @param mean  Desired mean of X (must be ≥ 0; if mean == 0 then CV must be 0).
+         * @param CV    Desired coefficient of variation (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean < 0 or CV < 0, or if mean > 0 but CV == 0 is invalid.
+         */
         void setMeanCV( double mean, double CV );
 
-        /** Set log-normal parameters from mean and variance. */
+        /**
+         * Configure the log-normal distribution from a target mean and variance.
+         *
+         * For variance > 0, this computes the equivalent CV = variance/mean and then
+         * derives μ and σ via the same formulas as in setMeanCV.
+         *
+         * If variance == 0, the distribution collapses to a point mass:
+         *  - σ is set to 0
+         *  - μ is set to ln(mean)
+         *  - sampling and CDF methods treat X == exp(μ)
+         *
+         * @param mean      Desired mean of X (must be > 0).
+         * @param variance  Desired variance of X (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
+         */
         void setMeanVariance( double mean, double CV );
 
         /** Scale the mean (i.e. multiply by a scalar).
@@ -143,9 +176,24 @@ namespace OM { namespace util {
         
         /** Get the mean. */
         double mean() const;
+
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        /**
+         * Compute the cumulative distribution function (CDF) of this log-normal sampler.
+         *
+         * Special cases:
+         *  - If x ≤ 0, returns 0.
+         *  - If sigma == 0, the distribution collapses to a point mass,
+         * so returns 1 if log(x) ≥ mu, else 0.
+         *  - Otherwise uses gsl_cdf_lognormal_P(x, mu, sigma).
+         *
+         * @param x  The point at which to evaluate the CDF (must be a real number).
+         * @return   P(X ≤ x), where X ~ LogNormal(mu, sigma²).
+         */
+        double cdf(double x) const;
+
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
             return sample.asLognormal( mu, sigma );
@@ -162,27 +210,54 @@ namespace OM { namespace util {
         double CV;
     };
 
-        /** Sampler for log-normal values */
+    /** Sampler for gamma values */
     class GammaSampler : public Sampler {
     public:
         GammaSampler(const scnXml::SampledValueCV& elt) :
             mu( 1.0 ),
             k( numeric_limits<double>::signaling_NaN() ),
             theta( numeric_limits<double>::signaling_NaN() ),
-            variance( numeric_limits<double>::signaling_NaN() )
+            variance( numeric_limits<double>::signaling_NaN() ),
+            CV( numeric_limits<double>::signaling_NaN() )
         {
             setParams(mu, elt);
         }
         
-        // /// Set parameters from XML element
-        // void setParams( const scnXml::SampledValueLN& elt );
         /// Set specified mean and CV from XML element
         void setParams( double mean, const scnXml::SampledValueCV& elt );
         
-        /** Set gamma parameters from mean and CV. */
+        /**
+         * Configure the gamma distribution from a target mean and coefficient of variation.
+         *
+         * Computes the shape (k) and scale (θ) parameters so that
+         *  mean = k * θ
+         *  CV   = 1 / √k
+         *
+         * If CV == 0, the distribution collapses to a point mass; in this case
+         *  - k and θ are set to NaN
+         *  - sampling and CDF methods treat this as a degenerate distribution.
+         *
+         * @param mean  Desired mean of the distribution (must be > 0).
+         * @param CV    Desired coefficient of variation (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or CV < 0.
+         */
         void setMeanCV( double mean, double CV );
 
-        /** Set gamma parameters from mean and variance. */
+        /**
+         * Configure the gamma distribution from a target mean and variance.
+         *
+         * Computes the shape (k) and scale (θ) parameters so that
+         *  mean     = k * θ
+         *  variance = k * θ²
+         *
+         * If variance == 0, the distribution collapses to a point mass; in this case
+         *  - k and θ are set to NaN
+         *  - sampling and CDF methods treat this as a degenerate distribution at `mean`.
+         *
+         * @param mean      Desired mean of the distribution (must be > 0).
+         * @param variance  Desired variance of the distribution (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
+         */
         void setMeanVariance( double mean, double variance );
 
         /** Scale the mean (i.e. multiply by a scalar).
@@ -197,19 +272,26 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
-        // /** Create a log-normal sample from an existing normal sample. */
-        // inline double sample(NormalSample sample) const{
-        //     return sample.asLognormal( mu, sigma );
-        // }
-        
-        // /** Return true if and only if parameters have been set. */
-        // inline bool isSet() const{
-        //     return mu == mu;    // mu is NaN iff not set
-        // }
+        /**
+         * Compute the cumulative distribution function (CDF) of this gamma sampler.
+         *
+         * Special cases:
+         *  - If x ≤ 0, returns 0.
+         *  - If CV == 0 or variance == 0, the distribution collapses to a point mass,
+         * so returns 1 if x ≥ mu, else 0.
+         *  - Otherwise uses gsl_cdf_gamma_P(x, k, theta) where
+         *      k     = shape parameter
+         *      theta = scale parameter
+         *
+         * @param x  The point at which to evaluate the CDF (must be a real number).
+         * @return   P(X ≤ x), where X ~ Gamma(k, θ).
+         */
+        double cdf(double x) const;
         
     private:
         double mu, k, theta;
         double variance;
+        double CV;
     };
     
     /** Sampler for the Beta distribution.
