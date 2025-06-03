@@ -47,7 +47,7 @@ PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
         if(distr == "lognormal")
             entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
         else if(distr == "gamma")
-            entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
+            entoAvailability = make_unique<util::GammaSampler>(1.0, mosq.getAvailability());
         else
             throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): unknown distribution "+distr);
     }
