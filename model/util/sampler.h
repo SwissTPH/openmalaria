@@ -114,16 +114,9 @@ namespace OM { namespace util {
     /** Sampler for log-normal values */
     class LognormalSampler : public Sampler {
     public:
-        LognormalSampler() :
-            mu( numeric_limits<double>::signaling_NaN() ),
-            sigma( numeric_limits<double>::signaling_NaN() ),
-            CV( numeric_limits<double>::signaling_NaN() )
-        {}
+        LognormalSampler() = default;
 
-        LognormalSampler(double mean, const scnXml::SampledValueCV& elt) :
-            mu( numeric_limits<double>::signaling_NaN() ),
-            sigma( numeric_limits<double>::signaling_NaN() )
-        {
+        LognormalSampler(double mean, const scnXml::SampledValueCV& elt) {
             setParams(mean, elt);
         }
         
@@ -206,21 +199,18 @@ namespace OM { namespace util {
         
     private:
         // log-space parameters
-        double mu, sigma;
-        double CV;
+        double mu       = std::numeric_limits<double>::signaling_NaN(); 
+        double sigma    = std::numeric_limits<double>::signaling_NaN();
+        double CV       = std::numeric_limits<double>::signaling_NaN();
     };
 
     /** Sampler for gamma values */
     class GammaSampler : public Sampler {
     public:
-        GammaSampler(const scnXml::SampledValueCV& elt) :
-            mu( 1.0 ),
-            k( numeric_limits<double>::signaling_NaN() ),
-            theta( numeric_limits<double>::signaling_NaN() ),
-            variance( numeric_limits<double>::signaling_NaN() ),
-            CV( numeric_limits<double>::signaling_NaN() )
-        {
-            setParams(mu, elt);
+        GammaSampler() = default;
+
+        GammaSampler(double mean, const scnXml::SampledValueCV& elt) {
+            setParams(mean, elt);
         }
         
         /// Set specified mean and CV from XML element
@@ -289,9 +279,11 @@ namespace OM { namespace util {
         double cdf(double x) const;
         
     private:
-        double mu, k, theta;
-        double variance;
-        double CV;
+        double mu       = std::numeric_limits<double>::signaling_NaN();
+        double k        = std::numeric_limits<double>::signaling_NaN();
+        double theta    = std::numeric_limits<double>::signaling_NaN();
+        double variance = std::numeric_limits<double>::signaling_NaN();
+        double CV       = std::numeric_limits<double>::signaling_NaN();
     };
     
     /** Sampler for the Beta distribution.
