@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <utility>
 #include <schema/scenario.h>
+#include "util/ModelName.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 

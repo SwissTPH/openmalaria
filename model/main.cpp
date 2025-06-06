@@ -24,6 +24,7 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
+#include "util/ModelName.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
 #include "util/XMLChecker.h"
@@ -148,19 +149,23 @@ int main(int argc, char* argv[])
         util::XMLChecker().PerformPostValidationChecks(*scenario);
 
         sim::init(*scenario); // also reads survey dates
-    
+
         // 1) elements with no dependencies on other elements initialised here:
-        Parameters parameters( scenario->getModel() );     // depends on nothing
+        util::ModelNameProvider(scenario->getModel());
         WithinHost::Genotypes::init( *scenario );
-        
+
         util::master_RNG.seed( scenario->getModel().getComputationParameters().getIseed(), 0 ); // Init RNG with Iseed
 
-        util::ModelOptions::initFromModel( scenario->getModel() );
-        
         // 2) elements depending on only elements initialised in (1):
-        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters
-        mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
+        Parameters parameters( scenario->getModel() );     // Depends on ModelNameProvider.
+        util::ModelOptions::initFromModel( scenario->getModel() ); // Depends on ModelNameProvider.
         
+        // 3) elements depending on only elements initialised in (2).
+        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.
+
+        // 4) elements depending on only elements initialised in (3).
+        mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
+
         // Init models used by humans
         Transmission::PerHost::init( scenario->getModel().getHuman().getAvailabilityToMosquitoes() );
         Host::InfectionIncidenceModel::init( parameters );

@@ -69,6 +69,7 @@ set (Model_CPP
   util/errors.cpp
   util/checkpoint.cpp
   util/ModelOptions.cpp
+  util/ModelName.cpp
   util/CommandLine.cpp
   util/AgeGroupInterpolation.cpp
   util/sampler.cpp

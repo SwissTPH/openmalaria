@@ -170,6 +170,7 @@ namespace OM { namespace util {
 
     // TODO : consider having model names defined in e.g. a static class somewhere.
     // This is because they need to be accessible in various places e.g. here, and in Parameters ctor.
+    // TODO : might not need all this optional-ity then...
     if (modelName.has_value())
     {
         const std::string name = modelName.value();
