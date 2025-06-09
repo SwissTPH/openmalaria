@@ -24,7 +24,7 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
-#include "util/ModelName.h"
+#include "util/ModelNameProvider.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
 #include "util/XMLChecker.h"

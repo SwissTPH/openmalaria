@@ -23,7 +23,7 @@
 #define Hmod_util_ModelOptions
 
 #include "Global.h"
-#include "util/ModelName.h"
+#include "util/ModelNameProvider.h"
 #include <schema/scenario.h>
 #include <bitset>
 #include <optional>

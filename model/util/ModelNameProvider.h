@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_util_ModelName
-#define Hmod_util_ModelName
+#ifndef Hmod_util_ModelNameProvider
+#define Hmod_util_ModelNameProvider
 
 #include <schema/scenario.h>
 #include "util/errors.h"
