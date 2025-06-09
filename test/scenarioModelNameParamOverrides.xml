@@ -305,7 +305,7 @@
 
         <computationParameters interval="5" iseed="1"/>
         <parameters latentp="15d">
-           <parameter include="0" name="decay_m" number="10" value="2.7"/>
+           <parameter name="decay_m" number="10" value="2.7"/>
        </parameters>
    </model>
 </om:scenario>
