@@ -151,14 +151,14 @@ int main(int argc, char* argv[])
         sim::init(*scenario); // also reads survey dates
 
         // 1) elements with no dependencies on other elements initialised here:
-        util::ModelNameProvider(scenario->getModel());
+        util::ModelNameProvider modelNameProvider(scenario->getModel());
         WithinHost::Genotypes::init( *scenario );
 
         util::master_RNG.seed( scenario->getModel().getComputationParameters().getIseed(), 0 ); // Init RNG with Iseed
 
         // 2) elements depending on only elements initialised in (1):
-        Parameters parameters( scenario->getModel() );     // Depends on ModelNameProvider.
-        util::ModelOptions::initFromModel( scenario->getModel() ); // Depends on ModelNameProvider.
+        Parameters parameters( scenario->getModel().getParameters(), modelNameProvider ); // Depends on ModelNameProvider.
+        util::ModelOptions::initFromModel( scenario->getModel()); // Depends on ModelNameProvider.
         
         // 3) elements depending on only elements initialised in (2).
         WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.

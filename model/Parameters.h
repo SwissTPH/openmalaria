@@ -144,38 +144,37 @@ public:
     * Expects that the scenario XML either explicitly describes a collection of parameters and values
     * or describes the name of a model to use.
     */
-    Parameters( const scnXml::Model& model )
+    Parameters( const scnXml::Model::ParametersOptional& xmlParameterValues, util::ModelNameProvider mnp )
     {
-        const bool useNamedModel = model.getModelName().present();
-
         for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
         {
             const ParameterName name = pair.second;
             nameToValueMap[name] = std::nullopt;
         }
 
+        const util::ModelNames namedModelToUse = mnp.GetModelName();
+        const bool useNamedModel = namedModelToUse != util::ModelNames::none;
         if (useNamedModel)
         {
-            std::string name = model.getModelName().get().getName();
-            // TODO : consider having model names defined in e.g. a static class somewhere.
-            // This is because they need to be accessible in various places e.g. here, and in ModelOptions::init.
-            if (name == "base")
+            if (namedModelToUse == util::ModelNames::base)
             {
                 initializeParamsBaseModel();
             }
             else
             {
-                throw util::xml_scenario_error("Unrecognized model name: " + name);
+                throw util::xml_scenario_error(
+                    "No pre-set parameter values are available for the specified model name.");
             }
         }
 
         // Get parameters specified expicitly in input XML, if any.
-        // Any such explicitly specified parameters will override any values that may have been set
-        // earlier by the specification of a named model.
-        const bool useExplicitParamValues = model.getParameters().present();
+        // In the event where a named model was used to set parameter values earlier, it is intended
+        // that any parameter values written explicitly in XML will override any values set by the
+        // named model.
+        const bool useExplicitParamValues = xmlParameterValues.present();
         if (useExplicitParamValues)
         {
-            initializeParamsFromXML(model.getParameters().get());
+            initializeParamsFromXML(xmlParameterValues.get());
         }
     }
 
