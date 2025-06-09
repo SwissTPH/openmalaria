@@ -3,6 +3,7 @@
  
  Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
  Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
+ Copyright (C) 2025 The Kids Research Institute Australia
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
