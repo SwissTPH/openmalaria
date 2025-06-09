@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
         // 2) elements depending on only elements initialised in (1):
         Parameters parameters( scenario->getModel().getParameters(), modelNameProvider ); // Depends on ModelNameProvider.
-        util::ModelOptions::initFromModel( scenario->getModel()); // Depends on ModelNameProvider.
+        util::ModelOptions::init( scenario->getModel().getModelOptions(), modelNameProvider ); // Depends on ModelNameProvider.
         
         // 3) elements depending on only elements initialised in (2).
         WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.

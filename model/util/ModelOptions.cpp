@@ -115,31 +115,9 @@ namespace OM { namespace util {
 	}
     };
 
-    void ModelOptions::initFromModel(const scnXml::Model& model)
-    {
-        // Determine model name, if any.
-        std::optional<std::string> modelName = std::nullopt;
-        const bool useNamedModel = model.getModelName().present();
-        if (useNamedModel)
-        {
-            modelName.emplace(model.getModelName().get().getName());
-        }
-
-        // Get model options specified expicitly in input XML, if any.
-        std::optional<scnXml::OptionSet> optionsElt = std::nullopt;
-        const bool useExplicitOverrides = model.getModelOptions().present();
-        if (useExplicitOverrides)
-        {
-            optionsElt.emplace(model.getModelOptions().get());
-        }
-
-        ModelOptions::init(optionsElt, modelName);
-    }
-
-
     std::bitset<NUM_OPTIONS> ModelOptions::getBaseModelOptions()
     {
-        // The base mode is very simple: *no* model options are turned on.
+        // The "base" model is very simple: *no* model options are turned on.
         bitset<NUM_OPTIONS> allOptionsOff;
 
         return allOptionsOff;
@@ -160,35 +138,34 @@ namespace OM { namespace util {
         return defaultOptSet;
     }
 
-    void ModelOptions::init(const std::optional<scnXml::OptionSet>& optionsElt,
-                            const std::optional<std::string>& modelName)
+    void ModelOptions::init(scnXml::Model::ModelOptionsOptional& optionsElt,
+                            util::ModelNameProvider mnp)
     {
     OptionCodeMap codeMap;
 
 	// Set options to legacy defaults, then override any given in the XML file:
 	options = getLegacyDefaultModelOptions();
 
-    // TODO : consider having model names defined in e.g. a static class somewhere.
-    // This is because they need to be accessible in various places e.g. here, and in Parameters ctor.
-    // TODO : might not need all this optional-ity then...
-    if (modelName.has_value())
+    const util::ModelNames namedModelToUse = mnp.GetModelName();
+    const bool useNamedModel = namedModelToUse != util::ModelNames::none;
+    if (useNamedModel)
     {
-        const std::string name = modelName.value();
-        if (name == "base")
+        if (namedModelToUse == util::ModelNames::base)
         {
             // This completely discards any legacy model options set above.
             options = getBaseModelOptions();
         }
         else
         {
-            throw util::xml_scenario_error("Unrecognized model name: " + name);
+            throw util::xml_scenario_error(
+                "No pre-set model options are available for the specified model name.");
         }
     }
 
     // Apply any user-specified overrides.
-    if (optionsElt.has_value())
+    if (optionsElt.present())
     {
-	    const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.value().getOption();
+	    const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.get().getOption();
 	    for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
                 OptionCodes opt = codeMap[it->getName()];
                 if( opt != IGNORE ) options[opt] = it->getValue();

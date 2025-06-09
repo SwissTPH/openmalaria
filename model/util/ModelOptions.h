@@ -289,19 +289,12 @@ namespace OM { namespace util {
 	}
 
     /*
-    * Calls the private init method, passing the name of the model that the
-    * input XML specifies to use (if any) and explicitly stated model option
-    * settins (if any) from the input XML.
-    */
-    static void initFromModel(const scnXml::Model& model);
-
-    private:
-    /*
     * Initialize the set of model options to use, based on input XML contents.
     */
-    static void init (const std::optional<scnXml::OptionSet>& optionsElt,
-                            const std::optional<std::string>& modelName);
+    static void init(scnXml::Model::ModelOptionsOptional& optionsElt,
+                            util::ModelNameProvider mnp);
 
+    private:
     /*
     * Returns a bitset representing a collection of model options that correspond
     * exactly to the "base" model.
