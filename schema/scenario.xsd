@@ -98,7 +98,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:annotation>
           <xs:complexType>
             <xs:all>
-              <xs:element name="ModelOptions" type="om:OptionSet">
+              <xs:element name="ModelName" type="om:ModelName" minOccurs="0"/>
+              <xs:element name="ModelOptions" type="om:OptionSet" minOccurs="0">
                 <xs:annotation>
                   <xs:documentation>
                     All model options (bug fixes, choices between models, etc.).                    
@@ -119,7 +120,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>name:Vivax model parameters;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="parameters" type="om:Parameters">
+              <xs:element name="computationParameters" type="om:ComputationParameters" minOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    Parameters of how the simulation does computation.
+                    Not related to the mathematical model of malaria.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="parameters" type="om:Parameters" minOccurs="0">
                 <xs:annotation>
                   <xs:documentation>
                     Parameters of the epidemiological model
@@ -192,10 +201,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="Parameters">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
-    </xs:sequence>
+  <xs:complexType name="ComputationParameters">
     <xs:attribute name="interval" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Simulation step</xs:documentation>
@@ -208,14 +214,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Parameters">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
+    </xs:sequence>
     <xs:attribute name="latentp" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           Pre-erythrocytic latent period
-          
+
           Can be specified in steps (e.g. 3t) or days (e.g. 15d).
+
+          A time unit must be defined explicitly.
         </xs:documentation>
-        <xs:appinfo>units:User defined (default: steps);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
+        <xs:appinfo>units:User defined (either timesteps or days);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

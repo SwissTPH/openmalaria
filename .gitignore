@@ -12,3 +12,5 @@ util/SchemaTranslator/*.class
 build*/
 lib
 .clangd
+*.swp
+.vscode

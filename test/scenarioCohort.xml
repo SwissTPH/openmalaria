@@ -1291,7 +1291,8 @@
         <group lowerbound="20.0" value="60.0"/>
       </weight>
     </human>
-    <parameters interval="1" iseed="1" latentp="15t">
+    <computationParameters interval="1" iseed="1"/>
+    <parameters latentp="15t">
       <parameter name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter name="Estar" number="2" value="0.03247"/>
       <parameter name="Simm" number="3" value="0.138161050830301"/>

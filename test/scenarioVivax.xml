@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
  
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax clinical illness" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_47.xsd"> 
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax clinical illness" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_current.xsd"> 
   <demography maximumAgeYrs="90" name="PNG" popSize="200"> 
   <!-- make popSize larger for the actual runs, smaller for testing --> 
   <!-- age-group for demography currently based on old Ethiopia data, but doesn't matter in any case since using fixed EIR rather than dynamic transmission --> 
@@ -546,7 +546,8 @@
         <vivaxClinOption>A2j</vivaxClinOption> 
       </clinicalEvents> 
     </vivax> 
-     <parameters interval="5" iseed="0" latentp="10d"> 
+     <computationParameters interval="5" iseed="0"/>
+     <parameters latentp="10d"> 
       <!-- base --> 
       <parameter name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/> 
       <parameter name="        Estar   " number="2" value="0.03247"/> 

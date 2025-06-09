@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,28 +115,67 @@ namespace OM { namespace util {
 	    throw TRACED_EXCEPTION_DEFAULT ("toString called with unknown code");	// this is a code error
 	}
     };
-    
-    void ModelOptions::init( const scnXml::OptionSet& optionsElt ){
-	OptionCodeMap codeMap;
-	
-	// State of all default options:
-	bitset<NUM_OPTIONS> defaultOptSet;
-	defaultOptSet.set (MAX_DENS_CORRECTION);
-    defaultOptSet.set (INNATE_MAX_DENS);
-    defaultOptSet.set (INDIRECT_MORTALITY_FIX);
-    defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);
-	
-	// Set options to defaults, then override any given in the XML file:
-	options = defaultOptSet;
-	
-	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
-	for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
-            OptionCodes opt = codeMap[it->getName()];
-            if( opt != IGNORE ) options[opt] = it->getValue();
-	}
+
+    std::bitset<NUM_OPTIONS> ModelOptions::getBaseModelOptions()
+    {
+        // The "base" model is very simple: *no* model options are turned on.
+        bitset<NUM_OPTIONS> allOptionsOff;
+
+        return allOptionsOff;
+    }
+
+    std::bitset<NUM_OPTIONS> ModelOptions::getLegacyDefaultModelOptions()
+    {
+        bitset<NUM_OPTIONS> defaultOptSet;
+
+        // Kept for legacy reasons.  That is, when an input XML does not specify a model name
+        // and does not set these model options to false, they are turned on *for backwards
+        // compatibility*.
+        defaultOptSet.set (MAX_DENS_CORRECTION);
+        defaultOptSet.set (INNATE_MAX_DENS);
+        defaultOptSet.set (INDIRECT_MORTALITY_FIX);
+        defaultOptSet.set (HEALTH_SYSTEM_MEMORY_FIX);
+
+        return defaultOptSet;
+    }
+
+    void ModelOptions::init(scnXml::Model::ModelOptionsOptional& optionsElt,
+                            util::ModelNameProvider mnp)
+    {
+    OptionCodeMap codeMap;
+
+	// Set options to legacy defaults, then override any given in the XML file:
+	options = getLegacyDefaultModelOptions();
+
+    const util::ModelNames namedModelToUse = mnp.GetModelName();
+    const bool useNamedModel = namedModelToUse != util::ModelNames::none;
+    if (useNamedModel)
+    {
+        if (namedModelToUse == util::ModelNames::base)
+        {
+            // This completely discards any legacy model options set above.
+            options = getBaseModelOptions();
+        }
+        else
+        {
+            throw util::xml_scenario_error(
+                "No pre-set model options are available for the specified model name.");
+        }
+    }
+
+    // Apply any user-specified overrides.
+    if (optionsElt.present())
+    {
+	    const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.get().getOption();
+	    for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
+                OptionCodes opt = codeMap[it->getName()];
+                if( opt != IGNORE ) options[opt] = it->getValue();
+	    }
+    }
 	
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
+        const std::bitset<NUM_OPTIONS> defaultOptSet = getLegacyDefaultModelOptions();
 	    cout << "Non-default model options:";
 	    for(int i = 0; i < NUM_OPTIONS; ++i) {
 		if (options[i] != defaultOptSet[i])
