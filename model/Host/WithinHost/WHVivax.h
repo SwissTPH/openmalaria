@@ -155,7 +155,7 @@ public:
     
     virtual bool summarize(Host::Human& human) const;
     
-    virtual void importInfection(LocalRng& rng, int origin);
+    virtual void importInfection(LocalRng& rng);
 	
 	
 	virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 

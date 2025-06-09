@@ -46,7 +46,7 @@ public:
     virtual ~CommonWithinHost();
     
     
-    virtual void importInfection(LocalRng& rng, int origin);
+    virtual void importInfection(LocalRng& rng);
     
     virtual void treatPkPd(size_t schedule, size_t dosage, double age, double delay_d);
     virtual void clearImmunity();

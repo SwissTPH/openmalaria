@@ -308,8 +308,7 @@
         </human>
 
         <!-- DO NOT CHANGE THE MODEL PARAMETERS BELOW -->
-        <computationParameters interval="5" iseed="1"/>
-        <parameters latentp="15d">
+        <parameters interval="5" iseed="1" latentp="15d">
            <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
            <parameter include="0" name="Estar" number="2" value="0.03247"/>
            <parameter include="0" name="Simm" number="3" value="0.138161050830301"/>

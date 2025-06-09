@@ -55,6 +55,7 @@ set (OM_BOXTEST_NAMES
   DecisionTree5DayDielmo
   HetVecDailyEIR
   AvailabilityHeterogeneity
+  InfectionOrigin
   ModelNameNoOverrides
   ModelNameParamOverrides
   ModelNameModelOptionOverrides
@@ -66,7 +67,7 @@ set (OM_BOXTEST_NC_NAMES)
 
 # Use python script.
 foreach (TEST_NAME ${OM_BOXTEST_NAMES})
-    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py ${TEST_NAME})
+    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py ${TEST_NAME} -- --checkpoint-stop)
 endforeach (TEST_NAME)
 foreach (TEST_NAME ${OM_BOXTEST_NC_NAMES})
     add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- ${TEST_NAME})

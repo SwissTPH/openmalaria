@@ -23,7 +23,6 @@
 #define Hmod_TransmissionModel
 
 #include <string.h>
-
 #include <fstream>
 
 #include "Global.h"
@@ -57,7 +56,6 @@ class Human;
 }
 namespace Transmission
 {
-class PerHost;
 
 inline double averageEIR(const scnXml::NonVector &nonVectorData)
 {
@@ -367,9 +365,11 @@ protected:
         annualEIR &stream;
         _annualAverageKappa &stream;
         _sumAnnualKappa &stream;
-        // tsAdultEIR &stream;
-        // surveyInputEIR &stream;
-        // surveySimulatedEIR &stream;
+        tsAdultEIR &stream;
+        surveyInputEIR &stream;
+        surveySimulatedEIR &stream;
+        surveySimulatedEIR_i &stream;
+        surveySimulatedEIR_l &stream;
         lastSurveyTime &stream;
         adultAge &stream;
         numTransmittingHumans &stream;
@@ -384,9 +384,11 @@ protected:
         annualEIR &stream;
         _annualAverageKappa &stream;
         _sumAnnualKappa &stream;
-        // tsAdultEIR &stream;
-        // surveyInputEIR &stream;
-        // surveySimulatedEIR &stream;
+        tsAdultEIR &stream;
+        surveyInputEIR &stream;
+        surveySimulatedEIR_i &stream;
+        surveySimulatedEIR_l &stream;
+        surveySimulatedEIR &stream;
         lastSurveyTime &stream;
         adultAge &stream;
         numTransmittingHumans &stream;

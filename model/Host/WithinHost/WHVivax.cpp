@@ -361,9 +361,9 @@ bool WHVivax::summarize(Host::Human& human) const{
     return patentHost;
 }
 
-void WHVivax::importInfection(LocalRng& rng, int origin){
+void WHVivax::importInfection(LocalRng& rng){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.push_back( VivaxBrood( rng, origin, this ) );
+    infections.push_back( VivaxBrood( rng, WithinHost::InfectionOrigin::Imported, this ) );
 }
 
 void WHVivax::update(Host::Human &human, LocalRng& rng, int &nNewInfs_i, int &nNewInfs_l, 

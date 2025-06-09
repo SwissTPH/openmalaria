@@ -127,10 +127,10 @@ void findNamedMeasuresUsing( Measure m, ostream& msg ){
 // outputs), type of output (integer or floating point), aggregation, and the
 // corresponding internal measure code.
 void defineOutMeasures(){
-    //NOTE: measures are ordered by their output codes.
-    // Add new outputs with next available code at end of list.
-    // Don't reuse old codes.
-    
+    /* Don't ever make an existing numerical identifier point to a new/different 
+    output measure because this would violate users' expectations */
+    // Don't reuse old numerical identifiers
+
     /// Total number of humans
     namedOutMeasures["nHost"] = OutMeasure::humanAC( 0, MHR_HOSTS, false );
     /** The number of human hosts with an infection (patent or not) at the time
@@ -289,8 +289,11 @@ void defineOutMeasures(){
     namedOutMeasures["Clinical_HospitalFirstDayDeaths"] =
         OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
     /** The number of actual infections since the last survey. */
-    namedOutMeasures["nNewInfections"] =
-        OutMeasure::humanAC( 43, MHR_NEW_INFECTIONS, false );
+    namedOutMeasures["nNewInfections"] = OutMeasure::humanAC( 43, MHR_NEW_INFECTIONS, false );
+        namedOutMeasures["nNewInfections_Imported"] = OutMeasure::humanAC( 1043, MHR_NEW_INFECTIONS_IMPORTED, false );
+        namedOutMeasures["nNewInfections_Introduced"] = OutMeasure::humanAC( 2043, MHR_NEW_INFECTIONS_INTRODUCED, false );
+        namedOutMeasures["nNewInfections_Indigenous"] = OutMeasure::humanAC( 3043, MHR_NEW_INFECTIONS_INDIGENOUS, false );
+        
     /** The number of ITNs delivered by mass distribution since last survey.
      *
      * These are "modelled ITNs": cover only a single person, cannot be passed
@@ -482,6 +485,14 @@ void defineOutMeasures(){
      * to coinfection" (the same as the `nSevereWithoutComorbidities` output). */
     namedOutMeasures["expectedSevereWithoutComorbidities"] =
         OutMeasure::humanAC( 82, MHF_EXPECTED_SEVERE_WITHOUT_COMORBIDITIES, true );
+
+    // Check for duplicate outId
+    std::set<int> seenIDs;
+    for (const auto& pair : namedOutMeasures) {
+        int id = pair.second.outId;
+        if (!seenIDs.insert(id).second)
+            throw std::runtime_error("Duplicate OutMeasure (outId) detected: " + std::to_string(id));
+    }
 
     // Now initialise valid condition measures:
     for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){

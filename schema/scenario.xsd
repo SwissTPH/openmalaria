@@ -200,15 +200,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Number;min:0;name:Parameter value;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="include" type="xs:boolean" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          True if parameter is to be sampled in optimization
-          runs. Not used in simulator app.
-        </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ComputationParameters">
     <xs:attribute name="interval" type="xs:int" use="required">

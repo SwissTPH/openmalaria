@@ -196,6 +196,7 @@ void Human::checkpoint(istream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
+    avail & stream;
 }
 
 void Human::checkpoint(ostream &stream)
@@ -211,6 +212,7 @@ void Human::checkpoint(ostream &stream)
     cohortSet & stream;
     nextCtsDist & stream;
     subPopExp & stream;
+    avail & stream;
 }
 
 // -----  Non-static functions: per-time-step update  -----
@@ -277,7 +279,7 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
 
     // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
     human.withinHostModel->update(human, human.rng, nNewInfs_i, nNewInfs_l, EIR_per_genotype_i, EIR_per_genotype_l, age1);
-    human.infIncidence->reportNumNewInfections(human, nNewInfs_i+nNewInfs_l);
+    human.infIncidence->reportNumNewInfections(human, nNewInfs_i, nNewInfs_l);
 
     // age1 used to get case fatality and sequelae probabilities, determine pathogenesis
     human.clinicalModel->update( human, age1, age0 == sim::zero() );

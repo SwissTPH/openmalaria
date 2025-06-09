@@ -127,6 +127,7 @@ const size_t GSL_INTG_MAX_ITER = 1000;     // 10 seems enough, but no harm in us
 gsl_integration_workspace *gsl_intgr_wksp = gsl_integration_workspace_alloc (GSL_INTG_MAX_ITER);
 //NOTE: we "should" free, but mem-leaks at end of program aren't really important
 // gsl_integration_workspace_free (gsl_intgr_wksp);
+
 double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) const{
     gsl_function F;
     F.function = &func_fC;
@@ -134,7 +135,7 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
     F.params = static_cast<void*>(const_cast<Params_fC*>(&p));
     
     // NOTE: tolerances are arbitrary, but seem to be sufficient
-    const double abs_eps = 1e-2, rel_eps = 1e-2;
+    const double abs_eps = 1e-4, rel_eps = 1e-4;
     // NOTE: 1 through 6 are different algorithms of increasing complexity
     const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;

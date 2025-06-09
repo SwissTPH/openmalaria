@@ -121,9 +121,10 @@ public:
    * This number might be lower than the numNewInfections from this model
    * due to vaccine factors being applied in the WithinHost model
    * 
-   * @param int newNumInfections  Number of infections to be reported
+   * @param int newNumInfections_i  Number of introduced infections to be reported
+   * @param int newNumInfections_l  Number of local (indigenous) infections to be reported
    */
-  void reportNumNewInfections(Human& human, int newNumInfections);
+  void reportNumNewInfections(Human& human, int newNumInfections_i, int newNumInfections_l);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects

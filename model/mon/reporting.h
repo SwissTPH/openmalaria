@@ -52,7 +52,7 @@ enum Measure{
     // Number of patent infections in humans. Units: infections
     MHR_PATENT_INFECTIONS, MHR_PATENT_INFECTIONS_IMPORTED, MHR_PATENT_INFECTIONS_INTRODUCED, MHR_PATENT_INFECTIONS_INDIGENOUS,
     // Number of new infections in humans. Units: infections
-    MHR_NEW_INFECTIONS,
+    MHR_NEW_INFECTIONS, MHR_NEW_INFECTIONS_IMPORTED, MHR_NEW_INFECTIONS_INTRODUCED, MHR_NEW_INFECTIONS_INDIGENOUS,
     // Number of sub-population removals due to first event. Units: humans
     MHR_SUB_POP_REM_FIRST_EVENT,
     // Number of sub-population removals due to expiry. Units: humans
