@@ -583,7 +583,7 @@ double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util:
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model ){
 
     // Default value to use if no <parameters> element is present in XML.
-    latentP = UnitParse::readShortDuration("15d", UnitParse::NONE);
+    latentP = UnitParse::readShortDuration("15d", UnitParse::DAYS);
     try
     {
         if (model.getParameters().present())

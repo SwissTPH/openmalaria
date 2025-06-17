@@ -103,7 +103,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
     // Default value to use if no <parameters> element is present in XML.
-    SimTime latentP = UnitParse::readShortDuration("15d", UnitParse::NONE);
+    SimTime latentP = UnitParse::readShortDuration("15d", UnitParse::DAYS);
     try
     {
         if (model.getParameters().present())
