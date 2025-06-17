@@ -64,10 +64,10 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
     }
     if( nmfOnly ) return;
     
-    pg_indirRiskCoFactor = 1 - exp(-parameters[ParameterName::INDIRECT_RISK_COFACTOR]);
-    pg_severeMalThreshold = parameters[ParameterName::SEVERE_MALARIA_THRESHHOLD] + 1;
-    pg_comorbIntercept = 1 - exp(-parameters[ParameterName::COMORBIDITY_INTERCEPT]);
-    pg_inv_critAgeComorb = 1 / parameters[ParameterName::CRITICAL_AGE_FOR_COMORBIDITY];
+    pg_indirRiskCoFactor = 1 - exp(-parameters[Parameter::INDIRECT_RISK_COFACTOR]);
+    pg_severeMalThreshold = parameters[Parameter::SEVERE_MALARIA_THRESHHOLD] + 1;
+    pg_comorbIntercept = 1 - exp(-parameters[Parameter::COMORBIDITY_INTERCEPT]);
+    pg_inv_critAgeComorb = 1 / parameters[Parameter::CRITICAL_AGE_FOR_COMORBIDITY];
 
     if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
         opt_predetermined_episodes = true;

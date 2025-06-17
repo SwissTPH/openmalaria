@@ -62,8 +62,8 @@ void DescriptiveInfection::init (const Parameters& parameters) {
     bugfix_max_dens = util::ModelOptions::option (util::MAX_DENS_CORRECTION);
     
     // Read parameters
-    sigma0sq=parameters[ParameterName::SIGMA0_SQ];
-    xNuStar=parameters[ParameterName::X_NU_STAR];
+    sigma0sq=parameters[Parameter::SIGMA0_SQ];
+    xNuStar=parameters[Parameter::X_NU_STAR];
     
     // Read file empirical parasite densities
     string densities_filename = util::CommandLine::lookupResource ("densities.csv");

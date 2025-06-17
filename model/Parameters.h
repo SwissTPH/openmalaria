@@ -44,7 +44,7 @@ namespace OM {
 * a parameter codes (positive ingeger) to the new parameter names.  If no
 * such entry is added, the new parameter will not be usable in the simulation.
 */
-enum class ParameterName {
+enum class Parameter {
     /// @b Infection incidence model parameters
     //@{
     NEG_LOG_ONE_MINUS_SINF,
@@ -125,8 +125,8 @@ enum class ParameterName {
 *
 * From a developer perspective, each "parameter" can be thought of as having these 3 parts:
 *
-* 1. A ParameterName.
-*       Clients of this class use a ParameterName to refer to the parameter.
+* 1. A parameter name (see Parameter enum class).
+*       Clients of this class use a parameter name to refer to the parameter.
 *
 * 2. A numerical ID to identify the parameter.
 *       This is used to map parameters in XML to parameters in OpenMalaria,
@@ -147,9 +147,9 @@ public:
     */
     Parameters( const scnXml::Model::ParametersOptional& xmlParameterValues, util::ModelNameProvider mnp )
     {
-        for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
+        for (const std::pair<int, Parameter> pair : idCodeToNameMap)
         {
-            const ParameterName name = pair.second;
+            const Parameter name = pair.second;
             nameToValueMap[name] = std::nullopt;
         }
 
@@ -182,12 +182,12 @@ public:
     /**
      * Get a parameter, using one of the Parameter codes.
      */
-    double operator[]( ParameterName name )const{
+    double operator[]( Parameter name )const{
         // First check the parameter actually exists and has a value.
         const bool paramHasAValueSet = nameToValueMap.at(name) != std::nullopt;
         if (!paramHasAValueSet)
         {
-            for (const std::pair<int, ParameterName> pair : idCodeToNameMap)
+            for (const std::pair<int, Parameter> pair : idCodeToNameMap)
             {
                 if (pair.second == name)
                 {
@@ -242,7 +242,7 @@ private:
                 // deprecated some parameters.
                 continue;
             }
-            const ParameterName nameOfParamToSet = idCodeToNameMap.at(paramId);
+            const Parameter nameOfParamToSet = idCodeToNameMap.at(paramId);
 
             const bool paramValueAlreadySet = !paramIdsSetByUser.insert(paramId).second;
             if (paramValueAlreadySet)
@@ -265,7 +265,7 @@ private:
         // e.g. for a deprecated parameter.  This is so that a more informative error message can be given.
         // std::unordered_map is not able to be made constexpr, which means it would be non-trivial to handle
         // this error condition with a compile-time check instead.
-        auto retrieveParamName = [&idCodeToNameMap = std::as_const(idCodeToNameMap)](const int id) -> ParameterName
+        auto retrieveParamName = [&idCodeToNameMap = std::as_const(idCodeToNameMap)](const int id) -> Parameter
         {
             try
             {
@@ -319,48 +319,48 @@ private:
     * The keys of this map need not form a contiguous sequence.
     * E.g. in the case where a parameter is deleted altogether from the simulation code.
     */
-    const std::unordered_map<int, ParameterName> idCodeToNameMap
+    const std::unordered_map<int, Parameter> idCodeToNameMap
     {
-        { 1,  ParameterName::NEG_LOG_ONE_MINUS_SINF },
-        { 2,  ParameterName::E_STAR },
-        { 3,  ParameterName::SIMM },
-        { 4,  ParameterName::X_STAR_P },
-        { 5,  ParameterName::GAMMA_P },
-        { 6,  ParameterName::SIGMA_I_SQ },
-        { 7,  ParameterName::CUMULATIVE_Y_STAR },
-        { 8,  ParameterName::CUMULATIVE_H_STAR },
-        { 9,  ParameterName::NEG_LOG_ONE_MINUS_ALPHA_M },
-        { 10, ParameterName::DECAY_M },
-        { 11, ParameterName::SIGMA0_SQ },
-        { 12, ParameterName::X_NU_STAR },
-        { 13, ParameterName::Y_STAR_SQ },
-        { 14, ParameterName::ALPHA },
-        { 15, ParameterName::DENSITY_BIAS_NON_GARKI },
-        { 16, ParameterName::BASELINE_AVAILABILITY_SHAPE },
-        { 17, ParameterName::LOG_ODDS_RATIO_CF_COMMUNITY },
-        { 18, ParameterName::INDIRECT_RISK_COFACTOR },
-        { 19, ParameterName::NON_MALARIA_INFANT_MORTALITY },
-        { 20, ParameterName::DENSITY_BIAS_GARKI },
-        { 21, ParameterName::SEVERE_MALARIA_THRESHHOLD },
-        { 22, ParameterName::IMMUNITY_PENALTY },
-        { 23, ParameterName::IMMUNE_EFFECTOR_DECAY },
-        { 24, ParameterName::COMORBIDITY_INTERCEPT },
-        { 25, ParameterName::Y_STAR_HALF_LIFE },
-        { 26, ParameterName::Y_STAR_1 },
-        { 27, ParameterName::ASEXUAL_IMMUNITY_DECAY },
-        { 28, ParameterName::Y_STAR_0 },
+        { 1,  Parameter::NEG_LOG_ONE_MINUS_SINF },
+        { 2,  Parameter::E_STAR },
+        { 3,  Parameter::SIMM },
+        { 4,  Parameter::X_STAR_P },
+        { 5,  Parameter::GAMMA_P },
+        { 6,  Parameter::SIGMA_I_SQ },
+        { 7,  Parameter::CUMULATIVE_Y_STAR },
+        { 8,  Parameter::CUMULATIVE_H_STAR },
+        { 9,  Parameter::NEG_LOG_ONE_MINUS_ALPHA_M },
+        { 10, Parameter::DECAY_M },
+        { 11, Parameter::SIGMA0_SQ },
+        { 12, Parameter::X_NU_STAR },
+        { 13, Parameter::Y_STAR_SQ },
+        { 14, Parameter::ALPHA },
+        { 15, Parameter::DENSITY_BIAS_NON_GARKI },
+        { 16, Parameter::BASELINE_AVAILABILITY_SHAPE },
+        { 17, Parameter::LOG_ODDS_RATIO_CF_COMMUNITY },
+        { 18, Parameter::INDIRECT_RISK_COFACTOR },
+        { 19, Parameter::NON_MALARIA_INFANT_MORTALITY },
+        { 20, Parameter::DENSITY_BIAS_GARKI },
+        { 21, Parameter::SEVERE_MALARIA_THRESHHOLD },
+        { 22, Parameter::IMMUNITY_PENALTY },
+        { 23, Parameter::IMMUNE_EFFECTOR_DECAY },
+        { 24, Parameter::COMORBIDITY_INTERCEPT },
+        { 25, Parameter::Y_STAR_HALF_LIFE },
+        { 26, Parameter::Y_STAR_1 },
+        { 27, Parameter::ASEXUAL_IMMUNITY_DECAY },
+        { 28, Parameter::Y_STAR_0 },
         // 29 corresponds to a now-deprecated parameter.  If adding a new parameter,
         // don't use 29.  Since some old scenarios likely define a parameter value
         // with index 29 already.
-        { 30, ParameterName::CRITICAL_AGE_FOR_COMORBIDITY },
-        { 31, ParameterName::MUELLER_RATE_MULTIPLIER },
-        { 32, ParameterName::MUELLER_DENSITY_EXPONENT },
-        { 33, ParameterName::CFR_SCALE_FACTOR },
-        { 34, ParameterName::MEAN_LOCAL_MAX_DENSITY },
-        { 35, ParameterName::SD_LOCAL_MAX_DENSITY },
-        { 36, ParameterName::MEAN_DIFF_POS_DAYS },
-        { 37, ParameterName::SD_DIFF_POS_DAYS },
-        { 38, ParameterName::CFR_NEG_LOG_ALPHA }
+        { 30, Parameter::CRITICAL_AGE_FOR_COMORBIDITY },
+        { 31, Parameter::MUELLER_RATE_MULTIPLIER },
+        { 32, Parameter::MUELLER_DENSITY_EXPONENT },
+        { 33, Parameter::CFR_SCALE_FACTOR },
+        { 34, Parameter::MEAN_LOCAL_MAX_DENSITY },
+        { 35, Parameter::SD_LOCAL_MAX_DENSITY },
+        { 36, Parameter::MEAN_DIFF_POS_DAYS },
+        { 37, Parameter::SD_DIFF_POS_DAYS },
+        { 38, Parameter::CFR_NEG_LOG_ALPHA }
     };
 
     /*
@@ -369,12 +369,12 @@ private:
     * The map values are made optional because many scenarios will specify
     * values for less than the full set of parameters.
     *
-    * Any given ParameterName has a value (other than std::nullopt) iff
+    * Any given Parameter has a value (other than std::nullopt) iff
     * either the XML explicitly states a value for the parameter or the
     * XML explicitly states to use some model which itself contains the
     * given parameter among its preset values.
     */
-    std::unordered_map<ParameterName, std::optional<double>> nameToValueMap;
+    std::unordered_map<Parameter, std::optional<double>> nameToValueMap;
 };
 
 }
