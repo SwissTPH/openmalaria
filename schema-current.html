@@ -10221,23 +10221,38 @@ specificity = .942;</p>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a></p>
 <pre><code class="language-xml">&lt;model&gt;
 IN ANY ORDER:
-|   &lt;ModelOptions ... /&gt; 
+| [ &lt;ModelName ... /&gt; ]
+| [ &lt;ModelOptions ... /&gt; ]
 |   &lt;clinical ... /&gt; 
 |   &lt;human ... /&gt; 
 | [ &lt;vivax ... /&gt; ]
-|   &lt;parameters ... /&gt; 
+|   &lt;computationParameters ... /&gt; 
+| [ &lt;parameters ... /&gt; ]
 &lt;/model&gt;
 </code></pre>
 <ul>
+<li><a href="#elt-ModelName">ModelName</a></li>
 <li><a href="#elt-ModelOptions">ModelOptions</a></li>
 <li><a href="#elt-clinical">clinical</a></li>
 <li><a href="#elt-human-2">human</a></li>
 <li><a href="#elt-vivax">vivax</a></li>
+<li><a href="#elt-computationParameters">computationParameters</a></li>
 <li><a href="#elt-parameters">parameters</a></li>
 </ul>
 <h4><a class="header" href="#documentation-element-208" id="documentation-element-208">Documentation (element)</a></h4>
 <p>Encapsulation of all parameters which describe the model according
 to which fitting is done.</p>
+<h2><a class="header" href="#a-nameelt-modelnamea-modelname" id="a-nameelt-modelnamea-modelname"><a name="elt-ModelName"></a> ModelName</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-ModelName">ModelName</a></p>
+<pre><code class="language-xml">&lt;ModelName
+    name=string
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-259" id="attributes-259">Attributes</a></h3>
+<h4><a class="header" href="#pre-set-model-name" id="pre-set-model-name">Pre-set model name.</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p>Name of an pre-set model.  E.g. &quot;base&quot;.  A value must be given for the name attribute.</p>
 <h2><a class="header" href="#a-nameelt-modeloptionsa-model-options" id="a-nameelt-modeloptionsa-model-options"><a name="elt-ModelOptions"></a> Model Options</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-ModelOptions">ModelOptions</a></p>
 <pre><code class="language-xml">&lt;ModelOptions&gt;
@@ -10269,7 +10284,7 @@ IN ANY ORDER:
 <h4><a class="header" href="#documentation-type-125" id="documentation-type-125">Documentation (type)</a></h4>
 <p>Description of clinical parameters that are related to the health-system description, but which contain data
 that cannot be changed as part of an intervention and that are not restricted to treatment.</p>
-<h3><a class="header" href="#attributes-259" id="attributes-259">Attributes</a></h3>
+<h3><a class="header" href="#attributes-260" id="attributes-260">Attributes</a></h3>
 <h4><a class="header" href="#follow-up-period-during-which-recurrence-is-considered-a-treatment-failure" id="follow-up-period-during-which-recurrence-is-considered-a-treatment-failure">Follow-up period during which recurrence is considered a treatment failure</a></h4>
 <pre><code class="language-xml">healthSystemMemory=string
 </code></pre>
@@ -10283,7 +10298,7 @@ Can be specified in steps (e.g. 6t) or days (e.g. 28d).</p>
     diagnostic=string
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-260" id="attributes-260">Attributes</a></h3>
+<h3><a class="header" href="#attributes-261" id="attributes-261">Attributes</a></h3>
 <h4><a class="header" href="#diagnostic-used-to-parameterise-model" id="diagnostic-used-to-parameterise-model">Diagnostic used to parameterise model</a></h4>
 <pre><code class="language-xml">diagnostic=string
 </code></pre>
@@ -10327,7 +10342,7 @@ IN THIS ORDER:
 <strong>Max:</strong> 1.0</p>
 <p>Probability that a non-malaria fever occurs given that no concurrent
 malaria fever occurs.</p>
-<h3><a class="header" href="#attributes-261" id="attributes-261">Attributes</a></h3>
+<h3><a class="header" href="#attributes-262" id="attributes-262">Attributes</a></h3>
 <h4><a class="header" href="#interpolation-3" id="interpolation-3">interpolation</a></h4>
 <pre><code class="language-xml">interpolation=(&quot;none&quot; or &quot;linear&quot;)
 </code></pre>
@@ -10369,7 +10384,7 @@ IN THIS ORDER:
 <p>Probability that a non-malarial fever requires treatment with
 antibiotics (assuming fever is not induced by malaria, although
 concurrent parasites may be present).</p>
-<h3><a class="header" href="#attributes-262" id="attributes-262">Attributes</a></h3>
+<h3><a class="header" href="#attributes-263" id="attributes-263">Attributes</a></h3>
 <h4><a class="header" href="#interpolation-4" id="interpolation-4">interpolation</a></h4>
 <pre><code class="language-xml">interpolation=(&quot;none&quot; or &quot;linear&quot;)
 </code></pre>
@@ -10413,7 +10428,7 @@ antibiotics (assuming fever is induced by malaria, although
 concurrent bacteria may be present).</p>
 <p>Meaning partially overlaps with separate model for comorbidity
 given malaria.</p>
-<h3><a class="header" href="#attributes-263" id="attributes-263">Attributes</a></h3>
+<h3><a class="header" href="#attributes-264" id="attributes-264">Attributes</a></h3>
 <h4><a class="header" href="#interpolation-5" id="interpolation-5">interpolation</a></h4>
 <pre><code class="language-xml">interpolation=(&quot;none&quot; or &quot;linear&quot;)
 </code></pre>
@@ -10467,7 +10482,7 @@ IN THIS ORDER:
 <strong>Min:</strong> 0
 <strong>Max:</strong> 1</p>
 <p>Availability of humans to mosquitoes relative to an adult, categorized by age group</p>
-<h3><a class="header" href="#attributes-264" id="attributes-264">Attributes</a></h3>
+<h3><a class="header" href="#attributes-265" id="attributes-265">Attributes</a></h3>
 <h4><a class="header" href="#interpolation-6" id="interpolation-6">interpolation</a></h4>
 <pre><code class="language-xml">interpolation=(&quot;none&quot; or &quot;linear&quot;)
 </code></pre>
@@ -10507,7 +10522,7 @@ IN THIS ORDER:
 <p><strong>Units:</strong> kg
 <strong>Min:</strong> 0</p>
 <p>By age group data on human weight (mass).</p>
-<h3><a class="header" href="#attributes-265" id="attributes-265">Attributes</a></h3>
+<h3><a class="header" href="#attributes-266" id="attributes-266">Attributes</a></h3>
 <h4><a class="header" href="#interpolation-7" id="interpolation-7">interpolation</a></h4>
 <pre><code class="language-xml">interpolation=(&quot;none&quot; or &quot;linear&quot;)
 </code></pre>
@@ -10573,7 +10588,7 @@ VIVAX_SIMPLE_MODEL model option.</p>
 <strong>Max:</strong> 1</p>
 <p>The chance of a feeding mosquito becoming infected, given that the
 host is patent. (This may be adjusted by transmission-blocking vaccines.)</p>
-<h3><a class="header" href="#attributes-266" id="attributes-266">Attributes</a></h3>
+<h3><a class="header" href="#attributes-267" id="attributes-267">Attributes</a></h3>
 <h4><a class="header" href="#input-parameter-value-56" id="input-parameter-value-56">Input parameter value</a></h4>
 <pre><code class="language-xml">value=double
 </code></pre>
@@ -10603,7 +10618,7 @@ IN ANY ORDER:
 <p>randomReleaseDelay is based on one or two lognormal distributions, which are defined in firstRelease and optionally secondRelease.</p>
 <p>You can define 2 release distributions, which get added together and represent the probability of hypnozoites which get released before winter (first release) or after (second release).</p>
 <p>You can omit the secondRelease element if no release to the blood happens after winter.</p>
-<h3><a class="header" href="#attributes-267" id="attributes-267">Attributes</a></h3>
+<h3><a class="header" href="#attributes-268" id="attributes-268">Attributes</a></h3>
 <h4><a class="header" href="#latent-relapse-days" id="latent-relapse-days">latent relapse days</a></h4>
 <pre><code class="language-xml">pSecondRelease=double
 </code></pre>
@@ -10622,7 +10637,7 @@ IN ANY ORDER:
 <p>max
 ∑ (base ^ n)
 n = 0</p>
-<h3><a class="header" href="#attributes-268" id="attributes-268">Attributes</a></h3>
+<h3><a class="header" href="#attributes-269" id="attributes-269">Attributes</a></h3>
 <h4><a class="header" href="#max" id="max">max</a></h4>
 <pre><code class="language-xml">max=int
 </code></pre>
@@ -10655,7 +10670,7 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>A parameter with optional heterogeneity.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
-<h3><a class="header" href="#attributes-269" id="attributes-269">Attributes</a></h3>
+<h3><a class="header" href="#attributes-270" id="attributes-270">Attributes</a></h3>
 <h4><a class="header" href="#coefficient-of-variation-36" id="coefficient-of-variation-36">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
@@ -10718,7 +10733,7 @@ and coefficient of variation (&quot;CV&quot;) may be specified.</p>
 <p>A parameter with optional heterogeneity.</p>
 <p>The mean cannot be specified (unless this type is extended).
 Optionally, a distribution (&quot;distr&quot;) and coefficient of variation (&quot;CV&quot;) may be specified.</p>
-<h3><a class="header" href="#attributes-270" id="attributes-270">Attributes</a></h3>
+<h3><a class="header" href="#attributes-271" id="attributes-271">Attributes</a></h3>
 <h4><a class="header" href="#coefficient-of-variation-38" id="coefficient-of-variation-38">Coefficient of variation</a></h4>
 <pre><code class="language-xml">CV=double
 </code></pre>
@@ -10767,7 +10782,7 @@ disables sampling of this parameter, even if distr is not &quot;const&quot;. </p
 which relapses from the same brood are supressed by the immune
 system.</p>
 <p>This is rounded to the nearest time-step.</p>
-<h3><a class="header" href="#attributes-271" id="attributes-271">Attributes</a></h3>
+<h3><a class="header" href="#attributes-272" id="attributes-272">Attributes</a></h3>
 <h4><a class="header" href="#input-parameter-value-57" id="input-parameter-value-57">Input parameter value</a></h4>
 <pre><code class="language-xml">value=double
 </code></pre>
@@ -10786,7 +10801,7 @@ system.</p>
 a Weibull distribution (scale parameter lambda, shape parameter k).</p>
 <h4><a class="header" href="#documentation-type-131" id="documentation-type-131">Documentation (type)</a></h4>
 <p>Parameters of a Weibull distribution.</p>
-<h3><a class="header" href="#attributes-272" id="attributes-272">Attributes</a></h3>
+<h3><a class="header" href="#attributes-273" id="attributes-273">Attributes</a></h3>
 <h4><a class="header" href="#scale" id="scale">Scale</a></h4>
 <pre><code class="language-xml">scale=double
 </code></pre>
@@ -10827,7 +10842,7 @@ IN THIS ORDER:
     b=double
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-273" id="attributes-273">Attributes</a></h3>
+<h3><a class="header" href="#attributes-274" id="attributes-274">Attributes</a></h3>
 <h4><a class="header" href="#a" id="a">a</a></h4>
 <pre><code class="language-xml">a=double
 </code></pre>
@@ -10841,7 +10856,7 @@ IN THIS ORDER:
     b=double
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-274" id="attributes-274">Attributes</a></h3>
+<h3><a class="header" href="#attributes-275" id="attributes-275">Attributes</a></h3>
 <h4><a class="header" href="#a-1" id="a-1">a</a></h4>
 <pre><code class="language-xml">a=double
 </code></pre>
@@ -10855,7 +10870,7 @@ IN THIS ORDER:
     b=double
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-275" id="attributes-275">Attributes</a></h3>
+<h3><a class="header" href="#attributes-276" id="attributes-276">Attributes</a></h3>
 <h4><a class="header" href="#a-2" id="a-2">a</a></h4>
 <pre><code class="language-xml">a=double
 </code></pre>
@@ -10868,7 +10883,7 @@ IN THIS ORDER:
     value=double
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-276" id="attributes-276">Attributes</a></h3>
+<h3><a class="header" href="#attributes-277" id="attributes-277">Attributes</a></h3>
 <h4><a class="header" href="#input-parameter-value-58" id="input-parameter-value-58">Input parameter value</a></h4>
 <pre><code class="language-xml">value=double
 </code></pre>
@@ -10879,23 +10894,17 @@ IN THIS ORDER:
     string
 &lt;/vivaxClinOption&gt;
 </code></pre>
-<h2><a class="header" href="#a-nameelt-parametersa-parameters-of-the-model-of-epidemiology" id="a-nameelt-parametersa-parameters-of-the-model-of-epidemiology"><a name="elt-parameters"></a> Parameters of the model of epidemiology</a></h2>
-<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-parameters">parameters</a></p>
-<pre><code class="language-xml">&lt;parameters
+<h2><a class="header" href="#a-nameelt-computationparametersa-computationparameters" id="a-nameelt-computationparametersa-computationparameters"><a name="elt-computationParameters"></a> computationParameters</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-computationParameters">computationParameters</a></p>
+<pre><code class="language-xml">&lt;computationParameters
     interval=int
     iseed=int
-    latentp=string
-  &gt;
-IN THIS ORDER:
-| ( &lt;parameter ... /&gt; )+
-&lt;/parameters&gt;
+  /&gt;
 </code></pre>
-<ul>
-<li><a href="#elt-parameter">parameter</a></li>
-</ul>
 <h4><a class="header" href="#documentation-element-221" id="documentation-element-221">Documentation (element)</a></h4>
-<p>Parameters of the epidemiological model</p>
-<h3><a class="header" href="#attributes-277" id="attributes-277">Attributes</a></h3>
+<p>Parameters of how the simulation does computation.
+Not related to the mathematical model of malaria.</p>
+<h3><a class="header" href="#attributes-278" id="attributes-278">Attributes</a></h3>
 <h4><a class="header" href="#simulation-step" id="simulation-step">Simulation step</a></h4>
 <pre><code class="language-xml">interval=int
 </code></pre>
@@ -10906,14 +10915,30 @@ IN THIS ORDER:
 </code></pre>
 <p><strong>Units:</strong> Number</p>
 <p>Seed for RNG</p>
+<h2><a class="header" href="#a-nameelt-parametersa-parameters-of-the-model-of-epidemiology" id="a-nameelt-parametersa-parameters-of-the-model-of-epidemiology"><a name="elt-parameters"></a> Parameters of the model of epidemiology</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-parameters">parameters</a></p>
+<pre><code class="language-xml">&lt;parameters
+    latentp=string
+  &gt;
+IN THIS ORDER:
+| ( &lt;parameter ... /&gt; )+
+&lt;/parameters&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-parameter">parameter</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-222" id="documentation-element-222">Documentation (element)</a></h4>
+<p>Parameters of the epidemiological model</p>
+<h3><a class="header" href="#attributes-279" id="attributes-279">Attributes</a></h3>
 <h4><a class="header" href="#pre-erythrocytic-latent-period" id="pre-erythrocytic-latent-period">Pre-erythrocytic latent period</a></h4>
 <pre><code class="language-xml">latentp=string
 </code></pre>
-<p><strong>Units:</strong> User defined (default: steps)
+<p><strong>Units:</strong> User defined (either timesteps or days)
 <strong>Min:</strong> 0
 <strong>Max:</strong> 20</p>
 <p>Pre-erythrocytic latent period
-Can be specified in steps (e.g. 3t) or days (e.g. 15d).</p>
+Can be specified in steps (e.g. 3t) or days (e.g. 15d).
+A time unit must be defined explicitly.</p>
 <h2><a class="header" href="#a-nameelt-parametera-parameter" id="a-nameelt-parametera-parameter"><a name="elt-parameter"></a> parameter</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-parameters">parameters</a> → <a href="#elt-parameter">parameter</a></p>
 <pre><code class="language-xml">&lt;parameter
@@ -10922,7 +10947,7 @@ Can be specified in steps (e.g. 3t) or days (e.g. 15d).</p>
     value=double
   /&gt;
 </code></pre>
-<h3><a class="header" href="#attributes-278" id="attributes-278">Attributes</a></h3>
+<h3><a class="header" href="#attributes-280" id="attributes-280">Attributes</a></h3>
 <h4><a class="header" href="#name-of-parameter" id="name-of-parameter">Name of parameter</a></h4>
 <pre><code class="language-xml">name=string
 </code></pre>
