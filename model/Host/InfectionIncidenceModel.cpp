@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,14 +70,14 @@ int InfectionIncidenceModel::ctsNewInfections = 0;
 // -----  static initialisation  -----
 
 void InfectionIncidenceModel::init ( const Parameters& parameters ) {
-    baseline_avail_shape_param = parameters[Parameters::BASELINE_AVAILABILITY_SHAPE];
+    baseline_avail_shape_param = parameters[Parameter::BASELINE_AVAILABILITY_SHAPE];
     baseline_avail_offset = 0.5 * pow(baseline_avail_shape_param, 2);
     
-    gamma_p=parameters[Parameters::GAMMA_P];
-    Sinf=1-exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_SINF]);
-    Simm=parameters[Parameters::SIMM];
-    EstarInv = 1.0/parameters[Parameters::E_STAR];
-    Xstar_pInv = 1.0/parameters[Parameters::X_STAR_P];
+    gamma_p=parameters[Parameter::GAMMA_P];
+    Sinf=1-exp(-parameters[Parameter::NEG_LOG_ONE_MINUS_SINF]);
+    Simm=parameters[Parameter::SIMM];
+    EstarInv = 1.0/parameters[Parameter::E_STAR];
+    Xstar_pInv = 1.0/parameters[Parameter::X_STAR_P];
     
     //! constant defining the constraint for the Gamma shape parameters
     /// Used for the case where availability is assumed gamma distributed

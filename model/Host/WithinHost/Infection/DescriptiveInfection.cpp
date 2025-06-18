@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +62,8 @@ void DescriptiveInfection::init (const Parameters& parameters) {
     bugfix_max_dens = util::ModelOptions::option (util::MAX_DENS_CORRECTION);
     
     // Read parameters
-    sigma0sq=parameters[Parameters::SIGMA0_SQ];
-    xNuStar=parameters[Parameters::X_NU_STAR];
+    sigma0sq=parameters[Parameter::SIGMA0_SQ];
+    xNuStar=parameters[Parameter::X_NU_STAR];
     
     // Read file empirical parasite densities
     string densities_filename = util::CommandLine::lookupResource ("densities.csv");

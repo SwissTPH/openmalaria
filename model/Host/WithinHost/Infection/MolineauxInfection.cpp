@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,11 +167,11 @@ void MolineauxInfection::init( const Parameters& parameters ){
     
     pairwise_P_star_sample = util::ModelOptions::option( util::MOLINEAUX_PAIRWISE_SAMPLE );
     if( !pairwise_P_star_sample ){
-        mean_shape_first_local_max = parameters[Parameters::MEAN_LOCAL_MAX_DENSITY];
-        sd_scale_first_local_max = parameters[Parameters::SD_LOCAL_MAX_DENSITY];
+        mean_shape_first_local_max = parameters[Parameter::MEAN_LOCAL_MAX_DENSITY];
+        sd_scale_first_local_max = parameters[Parameter::SD_LOCAL_MAX_DENSITY];
         
-        mean_shape_diff_pos_days = parameters[Parameters::MEAN_DIFF_POS_DAYS];
-        sd_scale_diff_pos_days = parameters[Parameters::SD_DIFF_POS_DAYS];
+        mean_shape_diff_pos_days = parameters[Parameter::MEAN_DIFF_POS_DAYS];
+        sd_scale_diff_pos_days = parameters[Parameter::SD_DIFF_POS_DAYS];
         
         
         // with gamma distribution shape and scale parameters has to be recalculated 

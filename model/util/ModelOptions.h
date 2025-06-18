@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +24,10 @@
 #define Hmod_util_ModelOptions
 
 #include "Global.h"
+#include "util/ModelNameProvider.h"
+#include <schema/scenario.h>
 #include <bitset>
+#include <optional>
 
 class UnittestUtil;
 
@@ -284,12 +288,32 @@ namespace OM { namespace util {
 	static inline bool option(OptionCodes code) {
 	    return options.test( code );
 	}
-	
-	/** Read options from the XML element. */
-	static void init (const scnXml::OptionSet& options);
-        
+
+    /*
+    * Initialize the set of model options to use, based on input XML contents.
+    */
+    static void init(scnXml::Model::ModelOptionsOptional& optionsElt,
+                            util::ModelNameProvider mnp);
+
     private:
-        // Reset opts to default. Used by unit tests.
+    /*
+    * Returns a bitset representing a collection of model options that correspond
+    * exactly to the "base" model.
+    *
+    * Note: at present the base model sets values that are not considered "default".
+    * This is because there are default model options which are often not desired,
+    * but are turned on in the absence of anything in the input suggesting they should
+    * be turned off for legacy (i.e. backwards compatibility) reasons.
+    */
+    static std::bitset<NUM_OPTIONS> getBaseModelOptions();
+
+    /*
+    * Returns a bitset representing all and only model options which are required
+    * to be turned on by default for backwards compatibility.
+    */
+    static std::bitset<NUM_OPTIONS> getLegacyDefaultModelOptions();
+
+	// Reset opts to default. Used by unit tests.
         static inline void reset() {
             options.reset();
             options.set( MAX_DENS_CORRECTION );

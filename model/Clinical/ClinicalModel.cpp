@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +55,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
         indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
         //NOTE: if changing XSD, this should not have a default unit:
         healthSystemMemory = UnitParse::readShortDuration(clinical.getHealthSystemMemory(), UnitParse::STEPS);
-        oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
+        oddsRatioThreshold = exp( parameters[Parameter::LOG_ODDS_RATIO_CF_COMMUNITY] );
         InfantMortality::init( parameters );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/clinical/healthSystemMemory: ").append(e.message()) );
@@ -201,7 +202,7 @@ double nonMalariaMortality;
 void InfantMortality::init( const OM::Parameters& parameters ){
     infantDeaths.resize(sim::stepsPerYear());
     infantIntervalsAtRisk.resize(sim::stepsPerYear());
-    nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+    nonMalariaMortality=parameters[Parameter::NON_MALARIA_INFANT_MORTALITY];
 }
 
 void InfantMortality::preMainSimInit() {

@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,8 +83,8 @@ private:
 
 // ———  parameters  ———
 
-// Set from the parameters block:
-SimTime latentP = sim::never();       // attribute on parameters block
+// Set from the parameters block, or a default value is assumed.
+SimTime latentP = sim::never();       // attribute on <parameters> element.
 
 // Set from <vivax .../> element:
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
@@ -580,12 +581,22 @@ double WHVivax::getCumulative_h() const{ throw TRACED_EXCEPTION( not_impl, util:
 double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model ){
-    try{
-        //NOTE: if XSD is changed, this should not have a default unit
-        latentP = UnitParse::readShortDuration( model.getParameters().getLatentp(), UnitParse::STEPS );
-    }catch( const util::format_error& e ){
-        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+
+    // Default value to use if no <parameters> element is present in XML.
+    latentP = UnitParse::readShortDuration("15d", UnitParse::DAYS);
+    try
+    {
+        if (model.getParameters().present())
+        {
+            latentP = UnitParse::readShortDuration(
+                model.getParameters().get().getLatentp(), UnitParse::NONE);
+        }
     }
+    catch( const util::format_error& e )
+    {
+            throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    }
+
     if( !model.getVivax().present() )
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );
     const scnXml::Vivax& elt = model.getVivax().get();

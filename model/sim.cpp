@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +30,8 @@
 namespace OM {
 
 void sim::init( const scnXml::Scenario& scenario ){
-    SimData::interval = scenario.getModel().getParameters().getInterval();
+    SimData::interval = scenario.getModel().getComputationParameters().getInterval();
+
     SimData::steps_per_year = sim::inSteps(sim::oneYear());
     SimData::years_per_step = 1.0 / SimData::steps_per_year;
     sim::s_max_human_age = sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );

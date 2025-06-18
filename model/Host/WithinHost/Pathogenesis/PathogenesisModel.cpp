@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,10 +64,10 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
     }
     if( nmfOnly ) return;
     
-    pg_indirRiskCoFactor = 1 - exp(-parameters[Parameters::INDIRECT_RISK_COFACTOR]);
-    pg_severeMalThreshold = parameters[Parameters::SEVERE_MALARIA_THRESHHOLD] + 1;
-    pg_comorbIntercept = 1 - exp(-parameters[Parameters::COMORBIDITY_INTERCEPT]);
-    pg_inv_critAgeComorb = 1 / parameters[Parameters::CRITICAL_AGE_FOR_COMORBIDITY];
+    pg_indirRiskCoFactor = 1 - exp(-parameters[Parameter::INDIRECT_RISK_COFACTOR]);
+    pg_severeMalThreshold = parameters[Parameter::SEVERE_MALARIA_THRESHHOLD] + 1;
+    pg_comorbIntercept = 1 - exp(-parameters[Parameter::COMORBIDITY_INTERCEPT]);
+    pg_inv_critAgeComorb = 1 / parameters[Parameter::CRITICAL_AGE_FOR_COMORBIDITY];
 
     if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
         opt_predetermined_episodes = true;

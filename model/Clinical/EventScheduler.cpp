@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,12 +64,12 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::C
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
     
-    alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
+    alpha = exp( -parameters[Parameter::CFR_NEG_LOG_ALPHA] );
     if( !(0.0<=alpha && alpha<=1.0) ){
         throw util::xml_scenario_error(
             "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
     }
-    neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
+    neg_v = -parameters[Parameter::CFR_SCALE_FACTOR];
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
         if( !clinical.getNonMalariaFevers().present() ){

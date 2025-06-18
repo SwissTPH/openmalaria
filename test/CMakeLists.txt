@@ -56,6 +56,10 @@ set (OM_BOXTEST_NAMES
   HetVecDailyEIR
   AvailabilityHeterogeneity
   InfectionOrigin
+  ModelNameNoOverrides
+  ModelNameParamOverrides
+  ModelNameModelOptionOverrides
+  ModelNameManyOverrides
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

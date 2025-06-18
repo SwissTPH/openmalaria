@@ -3,6 +3,7 @@
  
  Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
  Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
+ Copyright (C) 2025 The Kids Research Institute Australia
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -235,11 +236,11 @@ namespace dummyXML{
     scnXml::Clinical modelClinical( "dummy" /* HS memory */ );
     scnXml::AgeGroupValues modelHumanAvailMosq;
     scnXml::Human modelHuman( modelHumanAvailMosq );
-    scnXml::Parameters modelParams(
+    scnXml::ComputationParameters computationParams(
         0 /* interval */,
-        0 /* iseed */,
-        "dummy" /* latentP */ );
-    scnXml::Model model( modelOpts, modelClinical, modelHuman, modelParams );
+        0 /* iseed */);
+    scnXml::Parameters modelParams("dummy" /* latentP */);
+    scnXml::Model model(modelClinical, modelHuman, computationParams);
     
     scnXml::Scenario scenario(
         demography,
@@ -255,8 +256,10 @@ namespace dummyXML{
 class UnittestUtil {
 public:
     static void initTime(int daysPerStep){
-        dummyXML::modelParams.setInterval( daysPerStep );
+        dummyXML::model.setModelOptions(dummyXML::modelOpts);
         dummyXML::model.setParameters(dummyXML::modelParams);
+        dummyXML::computationParams.setInterval( daysPerStep );
+        dummyXML::model.setComputationParameters(dummyXML::computationParams);
         dummyXML::scenario.setModel(dummyXML::model);
         dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
         dummyXML::surveys.getSurveyTime().push_back( scnXml::SurveyTime ( "1t" ) );
@@ -302,7 +305,8 @@ public:
         scnXml::Diagnostics diagsElt;
         diagsElt.getDiagnostic().push_back( microscopy );
         diagsElt.getDiagnostic().push_back( rdt );
-        Parameters parameters( prepareParameters() );
+        dummyXML::model.setParameters(prepareParameters());
+        Parameters parameters( dummyXML::model.getParameters(), util::ModelNameProvider(dummyXML::model) );
         dummyXML::scenario.setDiagnostics(diagsElt);
         dummyXML::surveys.setDetectionLimit(numeric_limits<double>::quiet_NaN());
         dummyXML::monitoring.setSurveys(dummyXML::surveys);
@@ -444,10 +448,11 @@ public:
         }
         
         // Set parameters; all of these were estimated externally from OpenMalaria
-        Parameters params(prepareParameters());
+        dummyXML::model.setParameters(prepareParameters());
+        Parameters parameters( dummyXML::model.getParameters(), util::ModelNameProvider(dummyXML::model) );
         
         // This sets up the model based on parameters and options
-        WithinHost::MolineauxInfection::init(params);
+        WithinHost::MolineauxInfection::init(parameters);
     }
     
     static void MosqLifeCycle_init() {

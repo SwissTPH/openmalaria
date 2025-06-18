@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,30 +86,38 @@ int WHFalciparum::y_lag_len = 0;
 // -----  static functions  -----
 
 void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& model ) {
-    sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
-    immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
-    immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
-    asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
+    sigma_i=sqrt(parameters[Parameter::SIGMA_I_SQ]);
+    immPenalty_22=1-exp(parameters[Parameter::IMMUNITY_PENALTY]);
+    immEffectorRemain=exp(-parameters[Parameter::IMMUNE_EFFECTOR_DECAY]);
+    asexImmRemain=exp(-parameters[Parameter::ASEXUAL_IMMUNITY_DECAY]);
     
     // calculate inverses here, so we can use multiplication later (faster):
-    invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
-    invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
-    alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
-    decayM = parameters[Parameters::DECAY_M];
+    invCumulativeYstar = 1.0 / parameters[Parameter::CUMULATIVE_Y_STAR];
+    invCumulativeHstar = 1.0 / parameters[Parameter::CUMULATIVE_H_STAR];
+    alpha_m = 1.0 - exp(-parameters[Parameter::NEG_LOG_ONE_MINUS_ALPHA_M]);
+    decayM = parameters[Parameter::DECAY_M];
     
     y_lag_len = sim::inSteps(sim::fromDays(20)) + 1;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
-    try{
-        //NOTE: if XSD is changed, this should not have a default unit
-        SimTime latentP = UnitParse::readShortDuration(
-            model.getParameters().getLatentp(), UnitParse::STEPS );
-        Infection::init( latentP );
-    }catch( const util::format_error& e ){
-        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    // Default value to use if no <parameters> element is present in XML.
+    SimTime latentP = UnitParse::readShortDuration("15d", UnitParse::DAYS);
+    try
+    {
+        if (model.getParameters().present())
+        {
+            latentP = UnitParse::readShortDuration(
+                model.getParameters().get().getLatentp(), UnitParse::NONE);
+        }
     }
+    catch( const util::format_error& e )
+    {
+            throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    }
+
+    Infection::init( latentP );
 }
 
 void WHFalciparum::setParams(double cumYStar, double cumHStar, double aM, double dM) {

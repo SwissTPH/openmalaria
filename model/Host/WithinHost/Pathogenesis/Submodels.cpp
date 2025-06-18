@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +38,9 @@ double rateMultiplier_31;
 double densityExponent_32;
 
 void MuellerPathogenesis::init( const Parameters& parameters ){
-    rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER]
+    rateMultiplier_31 = parameters[Parameter::MUELLER_RATE_MULTIPLIER]
         * sim::yearsPerStep();
-    densityExponent_32 = parameters[Parameters::MUELLER_DENSITY_EXPONENT];
+    densityExponent_32 = parameters[Parameter::MUELLER_DENSITY_EXPONENT];
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
@@ -64,21 +65,21 @@ double a = numeric_limits<double>::signaling_NaN(),
     b = numeric_limits<double>::signaling_NaN();
 
 void PyrogenPathogenesis::init( const Parameters& parameters ){
-    initPyroThres = parameters[Parameters::Y_STAR_0];
+    initPyroThres = parameters[Parameter::Y_STAR_0];
     
     double delt = 1.0 / n;
     double smuY = -log(0.5) /
-        (sim::stepsPerYear() * parameters[Parameters::Y_STAR_HALF_LIFE]);
+        (sim::stepsPerYear() * parameters[Parameter::Y_STAR_HALF_LIFE]);
     b = -smuY * delt;
     
-    Ystar2_13 = parameters[Parameters::Y_STAR_SQ];
+    Ystar2_13 = parameters[Parameter::Y_STAR_SQ];
     
     //alpha: factor determining increase in pyrogenic threshold
-    double alpha14 = parameters[Parameters::ALPHA];
+    double alpha14 = parameters[Parameter::ALPHA];
     a = alpha14 * sim::oneTS() * delt;  
     
     //Ystar1: critical value of parasite density in determing increase in pyrog t
-    Ystar1_26 = parameters[Parameters::Y_STAR_1];
+    Ystar1_26 = parameters[Parameter::Y_STAR_1];
 }
 
 PyrogenPathogenesis::PyrogenPathogenesis(double cF) :

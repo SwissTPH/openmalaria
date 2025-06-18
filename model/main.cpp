@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
  * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +25,10 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
+#include "util/ModelNameProvider.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
+#include "util/XMLChecker.h"
 
 #include "mon/Continuous.h"
 #include "mon/management.h"
@@ -144,20 +147,26 @@ int main(int argc, char* argv[])
         scenarioFile = util::CommandLine::parse (argc, argv);
         unique_ptr<scnXml::Scenario> scenario = util::loadScenario(scenarioFile);
 
-        sim::init(*scenario);
-    
+        util::XMLChecker().PerformPostValidationChecks(*scenario);
+
+        sim::init(*scenario); // also reads survey dates
+
         // 1) elements with no dependencies on other elements initialised here:
-        // sim::init( *scenario );  // also reads survey dates
-        Parameters parameters( scenario->getModel().getParameters() );     // depends on nothing
+        util::ModelNameProvider modelNameProvider(scenario->getModel());
         WithinHost::Genotypes::init( *scenario );
-        
-        util::master_RNG.seed( scenario->getModel().getParameters().getIseed(), 0 ); // Init RNG with Iseed
-        util::ModelOptions::init( scenario->getModel().getModelOptions() );
-        
+
+        util::master_RNG.seed( scenario->getModel().getComputationParameters().getIseed(), 0 ); // Init RNG with Iseed
+
         // 2) elements depending on only elements initialised in (1):
-        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters
-        mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
+        Parameters parameters( scenario->getModel().getParameters(), modelNameProvider ); // Depends on ModelNameProvider.
+        util::ModelOptions::init( scenario->getModel().getModelOptions(), modelNameProvider ); // Depends on ModelNameProvider.
         
+        // 3) elements depending on only elements initialised in (2).
+        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.
+
+        // 4) elements depending on only elements initialised in (3).
+        mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
+
         // Init models used by humans
         Transmission::PerHost::init( scenario->getModel().getHuman().getAvailabilityToMosquitoes() );
         Host::InfectionIncidenceModel::init( parameters );
