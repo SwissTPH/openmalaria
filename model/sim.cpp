@@ -81,7 +81,7 @@ void sim::initInterval(const scnXml::Scenario& scenario, util::ModelNameProvider
     if (parameterBlockExistsInScenario)
     {
         // Schema dictates that interval attribute is required if parameter element exists.
-        // So no need to check for existsence if interval attribute in this case.
+        // So no need to check for existsence of interval attribute in this case.
         SimData::interval = scenario.getModel().getParameters().get().getInterval();
     }
 }
