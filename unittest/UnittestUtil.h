@@ -236,10 +236,8 @@ namespace dummyXML{
     scnXml::Clinical modelClinical( "dummy" /* HS memory */ );
     scnXml::AgeGroupValues modelHumanAvailMosq;
     scnXml::Human modelHuman( modelHumanAvailMosq );
-    scnXml::ComputationParameters computationParams(
-        0 /* interval */,
-        0 /* iseed */);
-    scnXml::Parameters modelParams("dummy" /* latentP */);
+    scnXml::ComputationParameters computationParams(0 /* iseed */);
+    scnXml::Parameters modelParams(0 /* interval*/, "dummy" /* latentP */);
     scnXml::Model model(modelClinical, modelHuman, computationParams);
     
     scnXml::Scenario scenario(
@@ -257,15 +255,16 @@ class UnittestUtil {
 public:
     static void initTime(int daysPerStep){
         dummyXML::model.setModelOptions(dummyXML::modelOpts);
+        dummyXML::modelParams.setInterval( daysPerStep );
         dummyXML::model.setParameters(dummyXML::modelParams);
-        dummyXML::computationParams.setInterval( daysPerStep );
         dummyXML::model.setComputationParameters(dummyXML::computationParams);
         dummyXML::scenario.setModel(dummyXML::model);
         dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
         dummyXML::surveys.getSurveyTime().push_back( scnXml::SurveyTime ( "1t" ) );
         dummyXML::monitoring.setSurveys( dummyXML::surveys );
         dummyXML::scenario.setMonitoring( dummyXML::monitoring );
-        sim::init( dummyXML::scenario );
+        util::ModelNameProvider modelNameProvider(dummyXML::scenario.getModel());
+        sim::init( dummyXML::scenario, modelNameProvider );
         
         // we could just use zero, but we may spot more errors by using some weird number
         sim::s_t0 = sim::fromYearsN(83.2591);

@@ -149,22 +149,22 @@ int main(int argc, char* argv[])
 
         util::XMLChecker().PerformPostValidationChecks(*scenario);
 
-        sim::init(*scenario); // also reads survey dates
-
         // 1) elements with no dependencies on other elements initialised here:
-        util::ModelNameProvider modelNameProvider(scenario->getModel());
         WithinHost::Genotypes::init( *scenario );
-
         util::master_RNG.seed( scenario->getModel().getComputationParameters().getIseed(), 0 ); // Init RNG with Iseed
+        util::ModelNameProvider modelNameProvider(scenario->getModel());
 
         // 2) elements depending on only elements initialised in (1):
+        sim::init(*scenario, modelNameProvider); // Also reads survey dates.
+
+        // 3) elements depending on only elements initialised in (2).
         Parameters parameters( scenario->getModel().getParameters(), modelNameProvider ); // Depends on ModelNameProvider.
         util::ModelOptions::init( scenario->getModel().getModelOptions(), modelNameProvider ); // Depends on ModelNameProvider.
-        
-        // 3) elements depending on only elements initialised in (2).
-        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.
 
         // 4) elements depending on only elements initialised in (3).
+        WithinHost::diagnostics::init( parameters, *scenario ); // Depends on Parameters.
+
+        // 5) elements depending on only elements initialised in (4).
         mon::initReporting( *scenario ); // Reporting init depends on diagnostics and monitoring
 
         // Init models used by humans
