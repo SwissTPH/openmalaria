@@ -306,8 +306,8 @@
             </availabilityToMosquitoes>
         </human>
 
-        <computationParameters interval="5" iseed="1"/>
-        <parameters latentp="15d">
+        <computationParameters iseed="1"/>
+        <parameters interval="5" latentp="15d">
            <parameter name="decay_m" number="10" value="2.55"/>
        </parameters>
    </model>

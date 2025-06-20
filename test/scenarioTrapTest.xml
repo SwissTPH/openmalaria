@@ -264,8 +264,8 @@ For simulating Rusinga
         <group lowerbound="5" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <computationParameters interval="5" iseed="1"/>
-    <parameters latentp="15d">
+    <computationParameters iseed="1"/>
+    <parameters interval="5" latentp="15d">
       <parameter name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter name="Estar" number="2" value="0.03247"/>
       <parameter name="Simm" number="3" value="0.138161050830301"/>

@@ -173,8 +173,8 @@
         <group lowerbound="90.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <computationParameters interval="5" iseed="61321"/>
-    <parameters latentp="3t">
+    <computationParameters iseed="61321"/>
+    <parameters interval="5" latentp="3t">
       <parameter name="'-ln(1-Sinf)'" number="1" value="0.0502"/>
       <parameter name="Estar" number="2" value="0.032"/>
       <parameter name="Simm" number="3" value="0.0809506710366894"/>
