@@ -50,7 +50,7 @@ vector<size_t> drugsInUse;
 
 LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     n = phenotype.getSlope ();
-    IC50.setParams( phenotype.getIC50() );
+    IC50 = util::createSampler<util::LognormalSampler>( phenotype.getIC50() );
     V = phenotype.getMax_killing_rate ();  
 }
 
@@ -74,7 +74,7 @@ double LSTMDrugPD::IC50_pow_slope(LocalRng& rng, size_t index, WithinHost::Commo
     if (inf->Kn.count(index) != 0) {
         Kn = inf->Kn.at(index);
     } else {
-        Kn = pow(IC50.sample(rng), n);
+        Kn = pow(IC50->sample(rng), n);
         inf->Kn[index] = Kn;
     }
     return Kn;
@@ -120,7 +120,7 @@ size_t LSTMDrugType::findDrug(string _abbreviation) {
     // We assume that drugs are used when and only when findDrug returns their
     // index or they are a metabolite of a drug returned here.
     drugIsUsed(index);
-    if( drugTypes[index].conversion_rate.isSet() /*conversion model used*/ ){
+    if( drugTypes[index].conversion_rate /*conversion model used*/ ){
         drugIsUsed(drugTypes[index].metabolite);
     }
     
@@ -137,10 +137,10 @@ const vector< size_t >& LSTMDrugType::getDrugsInUse(){
 
 unique_ptr<LSTMDrug> LSTMDrugType::createInstance(LocalRng& rng, size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
-    if( typeData.conversion_rate.isSet() ){
+    if( typeData.conversion_rate ){
         LSTMDrugType& metaboliteData = drugTypes[typeData.metabolite];
         return unique_ptr<LSTMDrug>(new LSTMDrugConversion( typeData, metaboliteData, rng ));
-    }else if( typeData.k12.isSet() ){
+    }else if( typeData.k12 ){
         // k21 is set when k12 is set; k13 and k31 may be set
         return unique_ptr<LSTMDrug>(new LSTMDrugThreeComp( typeData, rng ));
     }else{
@@ -168,34 +168,34 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         if( pk.getK().present() || pk.getM_exponent().present() ){
             throw util::xml_scenario_error( "PK data must specify one of half_life or (k, m_exponent); it specifies both" );
         }
-        elimination_rate.setMeanCV( log(2.0) / pk.getHalf_life().get(), 0.0 );
+        elimination_rate = LognormalSampler::fromMeanCV( log(2.0) / pk.getHalf_life().get(), 0.0 );
         neg_m_exp = 0.0; // no dependence on body mass
     }else{
         if( !(pk.getK().present() && pk.getM_exponent().present()) ){
             throw util::xml_scenario_error( "PK data must include either half_life or (k and m_exponent)" );
         }
-        elimination_rate.setParams( pk.getK().get() );
+        elimination_rate = util::createSampler<LognormalSampler>( pk.getK().get() );
         neg_m_exp = -pk.getM_exponent().get();
     }
-    vol_dist.setParams( pk.getVol_dist() );
+    vol_dist = util::createSampler<LognormalSampler>( pk.getVol_dist() );
     if( pk.getCompartment2().present() ){
-        k12.setParams( pk.getCompartment2().get().getK12() );
-        k21.setParams( pk.getCompartment2().get().getK21() );
+        k12 = util::createSampler<LognormalSampler>( pk.getCompartment2().get().getK12() );
+        k21 = util::createSampler<LognormalSampler>( pk.getCompartment2().get().getK21() );
         if( pk.getCompartment3().present() ){
-            k13.setParams( pk.getCompartment3().get().getK13() );
-            k31.setParams( pk.getCompartment3().get().getK31() );
+            k13 = util::createSampler<LognormalSampler>( pk.getCompartment3().get().getK13() );
+            k31 = util::createSampler<LognormalSampler>( pk.getCompartment3().get().getK31() );
         }else{
             // 2-compartment model: use 3-compartment code with these parameters set to zero
             // LognormalSampler supports 0,0 as a special case
-            k13.setMeanCV(0.0, 0.0);
-            k31.setMeanCV(0.0, 0.0);
+            k13 = LognormalSampler::fromMeanCV(0.0, 0.0);
+            k31 = LognormalSampler::fromMeanCV(0.0, 0.0);
         }
     }else if( pk.getCompartment3().present() ){
         throw util::xml_scenario_error( "PK model specifies parameters for "
                 "compartment3 without compartment2" );
     }
     if( pk.getConversion().present() ){
-        if( k12.isSet() ){
+        if( k12 ){
             throw util::xml_scenario_error( "PK conversion model is incompatible with 2/3-compartment model" );
         }
         const scnXml::Conversion& conv = pk.getConversion().get();
@@ -204,7 +204,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         }catch( util::xml_scenario_error& e ){
             throw util::xml_scenario_error( "PK: metabolite drug not found; metabolite must be defined *before* parent drug!" );
         }
-        conversion_rate.setParams( conv.getRate() );
+        conversion_rate = util::createSampler<LognormalSampler>( conv.getRate() );
         mwr = conv.getMolRatio();
         double correlation = conv.getIC50_log_correlation();
         if( correlation < 0.0 || correlation > 1.0 ){
@@ -214,14 +214,14 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         ic50_corr_factor = sqrt(1.0 - correlation * correlation);
     }
     if( pk.getK_a().present() ){
-        if( !k12.isSet() && !conversion_rate.isSet() ){
+        if( !k12 && !conversion_rate ){
             throw util::xml_scenario_error( "PK models only allow an "
                 "absorption rate parameter (k_a) when compartment2 or "
                 " conversion parameters are present" );
         }
-        absorption_rate.setParams(pk.getK_a().get());
+        absorption_rate = util::createSampler<LognormalSampler>(pk.getK_a().get());
     }else{
-        if( k12.isSet() ){
+        if( k12 ){
             throw util::xml_scenario_error( "PK models require an absorption "
                 "rate parameter (k_a) when compartment2 is present" );
         }
