@@ -83,7 +83,7 @@ private:
         friend class HumanGVI;
     };
     
-    unique_ptr<DecayFunction> decay;
+    unique_ptr<DecayFunction<util::Sampler>> decay;
     vector<GVIAnopheles> species;  // vector specific params
     
     // This is sparse vector: only indexes corresponding to a GVI component are used
@@ -129,7 +129,7 @@ protected:
     
 private:
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    unique_ptr<DecayFunction> decayHet;
+    unique_ptr<DecayFunction<util::Sampler>> decayHet;
 };
 
 } }

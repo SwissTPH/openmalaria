@@ -207,12 +207,12 @@ private:
     };
 
     NormalSampler initialInsecticide;
-    LognormalSampler holeRate;	// holes per step
-    LognormalSampler ripRate;	// rips per hole per step
+    unique_ptr<LognormalSampler> holeRate;	// holes per step
+    unique_ptr<LognormalSampler> ripRate;	// rips per hole per step
     double maxInsecticide;		// maximum initial insecticide
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
-    unique_ptr<DecayFunction> insecticideDecay;
-    unique_ptr<DecayFunction> attritionOfNets;
+    unique_ptr<DecayFunction<util::LognormalSampler>> insecticideDecay;
+    unique_ptr<DecayFunction<util::Sampler>> attritionOfNets;
     vector<ITNAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to ITN components are
@@ -269,7 +269,7 @@ private:
     // these parameters are sampled from log-normal per net, but thereafter constant:
     double holeRate;	// rate at which new holes are created (holes/time-step)
     double ripRate;		// rate at which holes are enlarged (rips/hole/time-step)
-    unique_ptr<DecayFunction> insecticideDecayHet;
+    unique_ptr<DecayFunction<util::LognormalSampler>> insecticideDecayHet;
 
 };
 

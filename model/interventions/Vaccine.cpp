@@ -42,7 +42,7 @@ ComponentId VaccineComponent::reportComponent = ComponentId::wholePop();
 VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
         HumanInterventionComponent(component),
         type(type),
-        decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
+        decayFunc(DecayFunction<util::Sampler>::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
 {
     if( type == Vaccine::BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )

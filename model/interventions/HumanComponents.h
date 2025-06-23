@@ -24,6 +24,7 @@
 
 #include "Global.h"
 #include "interventions/Interfaces.hpp"
+#include "util/sampler.h"
 #include "util/DecayFunction.h"
 
 namespace OM {
@@ -97,7 +98,7 @@ private:
     SimTime timeLastDeployment = sim::never();
     /// Efficacy at last deployment (undecayed)
     vector<double> perGenotypeInitialEfficacy;
-    unique_ptr<util::DecayFunction> hetSample;
+    unique_ptr<util::DecayFunction<util::Sampler>> hetSample;
     
     friend class PerHumanVaccine;
 };

@@ -44,7 +44,7 @@ public:
     
     /** Configure from an XML element. */
     inline void set (double initial_value, const scnXml::DecayFunction& elt, const char* name){
-        decay = DecayFunction::makeObject(elt, name);
+        decay = DecayFunction<util::Sampler>::makeObject(elt, name);
         initial = initial_value;
     }
 
@@ -78,13 +78,13 @@ public:
     
 private:
     /** Description of decay of effects on emergence. */
-    unique_ptr<util::DecayFunction> decay;
+    unique_ptr<util::DecayFunction<util::Sampler>> decay;
     
     /** Initial value. Is initialised to 0. */
     double initial;
     
     /** Description of larviciding decay. */
-    unique_ptr<util::DecayFunction> het;
+    unique_ptr<util::DecayFunction<util::Sampler>> het;
     
     /** Time of larviciding deployment. */
     SimTime deploy_t = sim::never();
