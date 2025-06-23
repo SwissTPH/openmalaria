@@ -142,7 +142,7 @@ private:
     
     NormalSampler initialInsecticide;
     double maxInsecticide;              // maximum initial insecticide
-    unique_ptr<DecayFunction> insecticideDecay;
+    unique_ptr<DecayFunction<util::Sampler>> insecticideDecay;
     vector<IRSAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to a IRS component are used
@@ -193,7 +193,7 @@ private:
     double initialInsecticide;	// units: mg/m²
     
     // this parameter is sampled on first deployment, but never resampled for the same human:
-    unique_ptr<DecayFunction> insecticideDecayHet;
+    unique_ptr<DecayFunction<util::Sampler>> insecticideDecayHet;
 };
 
 } }

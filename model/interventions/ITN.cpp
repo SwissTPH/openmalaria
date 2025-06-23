@@ -503,13 +503,13 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
-    holeRate.setParams( elt.getHoleRate() );    // per year
-    holeRate.scaleMean( sim::yearsPerStep() );  // convert to per step
-    ripRate.setParams( elt.getRipRate() );
-    ripRate.scaleMean( sim::yearsPerStep() );
+    holeRate = util::createSampler<util::LognormalSampler>(elt.getHoleRate());    // per year
+    holeRate->scaleMean( sim::yearsPerStep() );  // convert to per step
+    ripRate = util::createSampler<util::LognormalSampler>(elt.getRipRate());
+    ripRate->scaleMean( sim::yearsPerStep() );
     ripFactor = elt.getRipFactor().getValue();
-    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
-    attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
+    insecticideDecay = DecayFunction<util::LognormalSampler>::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
+    attritionOfNets = DecayFunction<util::Sampler>::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
     // assume usage modifier is 100% if none is specified
     double propUse;
     if (elt.getUsage().present()) {
@@ -636,8 +636,8 @@ HumanITN::HumanITN( LocalRng& rng, const ITNComponent& params ) :
     // handling of net. They are sampled once per human: human handling is
     // presumed to be the largest cause of variance.
     util::NormalSample x = util::NormalSample::generate(rng);
-    holeRate = params.holeRate.sample(x);
-    ripRate = params.ripRate.sample(x);
+    holeRate = params.holeRate->sample(x);
+    ripRate = params.ripRate->sample(x);
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 
     // Sample per-deployment variables as in redeploy:
