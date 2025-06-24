@@ -94,7 +94,7 @@ public:
         {
             double avail = 0.0;
             for(size_t s = 0; s < Transmission::PerHostAnophParams::numSpecies(); ++s)
-                avail += Transmission::PerHostAnophParams::get(s).entoAvailability->sample(rng);
+                avail += Transmission::PerHostAnophParams::get(s).entoAvailabilityFactor * Transmission::PerHostAnophParams::get(s).entoAvailability->sample(rng);
             samples[i] = avail;
         }
 
