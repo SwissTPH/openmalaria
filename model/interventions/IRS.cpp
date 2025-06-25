@@ -38,7 +38,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
-    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(),
+    insecticideDecay = DecayFunction<util::Sampler>::makeObject( elt.getInsecticideDecay(),
                                                   "interventions.human.IRS.description.insecticideDecay" );
     // assume usage modifier is 100% if none is specified
     double propUse;
