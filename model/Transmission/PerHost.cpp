@@ -36,14 +36,7 @@ vector<PerHostAnophParams> PerHostAnophParams::params;
 vector<double> PerHostAnophParams::entoAvailabilityPercentiles;
 
 PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
-    const string &distr = mosq.getAvailability().getDistr();
-    if(distr == "const" || distr == "lognormal")
-        entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
-    else if(distr == "gamma")
-        entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
-    else
-        throw util::xml_scenario_error( "error ento availability: unknown distirbution "+distr);
-
+    entoAvailability = util::createSampler(1.0, mosq.getAvailability());
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
@@ -63,12 +56,15 @@ PerHost::PerHost () :
 
 void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
     relativeAvailabilityHet = availabilityFactor;
+    anophEntoAvailabilityRaw.resize(PerHostAnophParams::numSpecies());
     anophEntoAvailability.resize(PerHostAnophParams::numSpecies());
     anophProbMosqBiting.resize(PerHostAnophParams::numSpecies());
     anophProbMosqResting.resize(PerHostAnophParams::numSpecies());
+
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
-        anophEntoAvailability[i] = base.entoAvailability->sample(rng) * availabilityFactor;
+        anophEntoAvailabilityRaw[i] = base.entoAvailability->sample(rng);//std::min(base.entoAvailability->sample(rng), 25.0);
+        anophEntoAvailability[i] = base.entoAvailabilityFactor * anophEntoAvailabilityRaw[i] * availabilityFactor;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);
         auto pRest2 = base.probMosqSurvivalResting.sample(rng);

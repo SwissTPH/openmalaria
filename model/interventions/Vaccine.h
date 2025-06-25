@@ -65,7 +65,7 @@ private:
     Vaccine::Types type;
     
     /// Function representing decay of effect
-    unique_ptr<util::DecayFunction> decayFunc;
+    unique_ptr<util::DecayFunction<util::Sampler>> decayFunc;
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */

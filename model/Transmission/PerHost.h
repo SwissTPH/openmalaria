@@ -74,8 +74,8 @@ public:
      * 
      * It should be called exactly once.
       */
-    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
-        params[species].entoAvailability->scaleMean( entoAvailability );
+    inline static void setEntoAvailabilityFactor(size_t species, double entoAvailability){
+        params[species].entoAvailabilityFactor = entoAvailability;
     }
 
     inline static void calcAvailabilityPercentiles(){
@@ -94,7 +94,7 @@ public:
         {
             double avail = 0.0;
             for(size_t s = 0; s < Transmission::PerHostAnophParams::numSpecies(); ++s)
-                avail += Transmission::PerHostAnophParams::get(s).entoAvailability->sample(rng);
+                avail += Transmission::PerHostAnophParams::get(s).entoAvailabilityFactor * Transmission::PerHostAnophParams::get(s).entoAvailability->sample(rng);
             samples[i] = avail;
         }
 
@@ -123,6 +123,10 @@ public:
      * P_C_i and P_D_i across the human population. */
     //@{
     /** Availability rate (α_i) */
+    double entoAvailabilityFactor = 1.0;
+
+    /** Availability heterogeneity factor
+     * This multiplies the entoAvailabilityFactor. */
     unique_ptr<util::Sampler> entoAvailability;
 
     /** Probability of mosquito successfully biting host (P_B_i) */
@@ -332,11 +336,13 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
+        anophEntoAvailabilityRaw & stream;
         anophEntoAvailability & stream;
         anophProbMosqBiting & stream;
         anophProbMosqResting & stream;
         relativeAvailabilityHet & stream;
         outsideTransmission & stream;
+        copulaGaussianSamples & stream;
         checkpointIntervs( stream );
     }
     //@}
@@ -348,7 +354,10 @@ public:
     // entoAvailability param stored in HostMosquitoInteraction.
     double relativeAvailabilityHet;
 
-    /** Species availability rate of human to mosquitoes, including hetergeneity factor
+    /** Species availability rate of human to mosquitoes */
+    vector<double> anophEntoAvailabilityRaw;
+
+    /** Species availability rate of human to mosquitoes, including heterogeneity factor
      * and base rate, but excluding age and intervention factors. */
     vector<double> anophEntoAvailability;
     
@@ -360,6 +369,12 @@ public:
      * resting without dying, after biting the human (P_C_i * P_D_i) in the
      * absense of interventions. */
     vector<double> anophProbMosqResting;
+
+    /** @brief gaussian sample used in the deployment of intervention 
+     * components using the gaussian copula transformation. The factors are 
+     * component specific and are sampled once per human during the first 
+     * deployment attempt. */
+    std::map<interventions::ComponentId, double> copulaGaussianSamples; 
 
 private:
     void checkpointIntervs( ostream& stream );

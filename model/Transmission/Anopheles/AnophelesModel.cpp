@@ -239,7 +239,8 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
     }
 
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
-    PerHostAnophParams::scaleEntoAvailability(species, (P_A1 / populationSize) * availFactor);
+    PerHostAnophParams::setEntoAvailabilityFactor(species, (P_A1 / populationSize) * availFactor);
+
     initAvail = (P_A1 / populationSize) * availFactor;
 
     nhh_avail = 0.0;
@@ -436,7 +437,7 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1 &desc, size_t ins
     assert(trapParams.size() == instance); // if triggered, this is a code error not XML
     TrapParams params;
     params.relAvail = desc.getRelativeAvailability().getValue();
-    params.availDecay = DecayFunction::makeObject(desc.getDecayOfAvailability(), "decayOfAvailability");
+    params.availDecay = DecayFunction<util::Sampler>::makeObject(desc.getDecayOfAvailability(), "decayOfAvailability");
     trapParams.push_back(move(params));
 }
 
@@ -455,7 +456,8 @@ void AnophelesModel::deployVectorTrap(LocalRng &rng, size_t species, size_t inst
     assert(instance < trapParams.size());
     TrapData data;
     data.instance = instance;
-    double adultAvail = PerHostAnophParams::get(species).entoAvailability->mean();
+    const PerHostAnophParams &anophParams = PerHostAnophParams::get(species);
+    double adultAvail = anophParams.entoAvailability->mean() * anophParams.entoAvailabilityFactor;
     data.initialAvail = popSize * adultAvail * trapParams[instance].relAvail;
     data.availHet = trapParams[instance].availDecay->hetSample(rng);
     data.deployTime = sim::now();

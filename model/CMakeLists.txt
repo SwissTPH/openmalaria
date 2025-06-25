@@ -65,7 +65,6 @@ set (Model_CPP
   mon/misc.cpp
   mon/Continuous.cpp
   
-  util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
   util/ModelOptions.cpp
