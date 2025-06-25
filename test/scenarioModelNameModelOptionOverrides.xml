@@ -306,6 +306,6 @@
             </availabilityToMosquitoes>
         </human>
 
-        <computationParameters interval="5" iseed="1"/>
+        <computationParameters iseed="1"/>
    </model>
 </om:scenario>

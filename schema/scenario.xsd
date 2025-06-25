@@ -202,12 +202,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ComputationParameters">
-    <xs:attribute name="interval" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>Simulation step</xs:documentation>
-        <xs:appinfo>units:Days;name:Simulation step;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute name="iseed" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Seed for RNG</xs:documentation>
@@ -219,6 +213,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
     </xs:sequence>
+    <xs:attribute name="interval" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>Simulation step</xs:documentation>
+        <xs:appinfo>units:Days;name:Simulation step;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="latentp" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
