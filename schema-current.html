@@ -10897,7 +10897,6 @@ IN THIS ORDER:
 <h2><a class="header" href="#a-nameelt-computationparametersa-computationparameters" id="a-nameelt-computationparametersa-computationparameters"><a name="elt-computationParameters"></a> computationParameters</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-computationParameters">computationParameters</a></p>
 <pre><code class="language-xml">&lt;computationParameters
-    interval=int
     iseed=int
   /&gt;
 </code></pre>
@@ -10905,11 +10904,6 @@ IN THIS ORDER:
 <p>Parameters of how the simulation does computation.
 Not related to the mathematical model of malaria.</p>
 <h3><a class="header" href="#attributes-278" id="attributes-278">Attributes</a></h3>
-<h4><a class="header" href="#simulation-step" id="simulation-step">Simulation step</a></h4>
-<pre><code class="language-xml">interval=int
-</code></pre>
-<p><strong>Units:</strong> Days</p>
-<p>Simulation step</p>
 <h4><a class="header" href="#random-number-seed" id="random-number-seed">Random number seed</a></h4>
 <pre><code class="language-xml">iseed=int
 </code></pre>
@@ -10918,6 +10912,7 @@ Not related to the mathematical model of malaria.</p>
 <h2><a class="header" href="#a-nameelt-parametersa-parameters-of-the-model-of-epidemiology" id="a-nameelt-parametersa-parameters-of-the-model-of-epidemiology"><a name="elt-parameters"></a> Parameters of the model of epidemiology</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-model">model</a> → <a href="#elt-parameters">parameters</a></p>
 <pre><code class="language-xml">&lt;parameters
+    interval=int
     latentp=string
   &gt;
 IN THIS ORDER:
@@ -10930,6 +10925,11 @@ IN THIS ORDER:
 <h4><a class="header" href="#documentation-element-222" id="documentation-element-222">Documentation (element)</a></h4>
 <p>Parameters of the epidemiological model</p>
 <h3><a class="header" href="#attributes-279" id="attributes-279">Attributes</a></h3>
+<h4><a class="header" href="#simulation-step" id="simulation-step">Simulation step</a></h4>
+<pre><code class="language-xml">interval=int
+</code></pre>
+<p><strong>Units:</strong> Days</p>
+<p>Simulation step</p>
 <h4><a class="header" href="#pre-erythrocytic-latent-period" id="pre-erythrocytic-latent-period">Pre-erythrocytic latent period</a></h4>
 <pre><code class="language-xml">latentp=string
 </code></pre>
