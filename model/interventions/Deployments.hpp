@@ -230,8 +230,6 @@ public:
     }
     
     virtual void deploy (vector<Host::Human> &population, Transmission::TransmissionModel& transmission) {
-        // update output name
-        // if condition if variance or coverage is 0
         for(Human& human : population) {
             SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
