@@ -548,11 +548,10 @@ public:
                 if (anophModel->nhhInstances.count(intervName) != 0)
                     throw util::xml_scenario_error("non human hosts type " + intervName + " already deployed during non human hosts deployment");
 
-                NhhParamsInterv &p = nhhParams[anophModel->mosq.name];
+                const NhhParamsInterv &p = nhhParams[anophModel->mosq.name];
+                const double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability->mean();
+                const double avail_i = Transmission::PerHostAnophParams::get(i).entoAvailabilityFactor * popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
                 Transmission::Anopheles::Nhh nhh;
-
-                double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability->mean();
-                double avail_i = Transmission::PerHostAnophParams::get(i).entoAvailabilityFactor * popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
 
                 nhh.avail_i = avail_i;
                 nhh.P_B_I = p.mosqProbBiting;
