@@ -457,7 +457,7 @@ void AnophelesModel::deployVectorTrap(LocalRng &rng, size_t species, size_t inst
     TrapData data;
     data.instance = instance;
     const PerHostAnophParams &anophParams = PerHostAnophParams::get(species);
-    double adultAvail = anophParams.entoAvailability->mean() * anophParams.entoAvailabilityFactor;
+    const double adultAvail = anophParams.entoAvailability->mean() * anophParams.entoAvailabilityFactor;
     data.initialAvail = popSize * adultAvail * trapParams[instance].relAvail;
     data.availHet = trapParams[instance].availDecay->hetSample(rng);
     data.deployTime = sim::now();
