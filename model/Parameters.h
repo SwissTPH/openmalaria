@@ -256,10 +256,11 @@ private:
     }
 
     /*
-    * Initializes some hardcoded values for some parameters, encapsulating the parameter values
-    * that make up the base model.
+    * Helper method to initialize the parameter identified by paramId with the specified value.
+    * The purpose of this method are to simplify code for initializing named models and to, in
+    * the event of an error, provide a more helpful error message than would otherwise be provided.
     */
-    void initializeParamsBaseModel()
+    void initParam(int paramId, double value)
     {
         // Handles the error condition where idCodeToNameMap.at() is called with a non-existant key argument,
         // e.g. for a deprecated parameter.  This is so that a more informative error message can be given.
@@ -278,36 +279,44 @@ private:
                         + ", which is not currently supported." , __FILE__, __LINE__);
             }
         };
+        nameToValueMap[ retrieveParamName(paramId) ] = value;
+    }
 
-        nameToValueMap[ retrieveParamName( 1) ] = 0.050736; // '-ln(1-Sinf)'
-        nameToValueMap[ retrieveParamName( 2) ] = 0.03247; // Estar
-        nameToValueMap[ retrieveParamName( 3) ] = 0.138161050830301; // Simm
-        nameToValueMap[ retrieveParamName( 4) ] = 1514.385853233699891; // Xstar_p
-        nameToValueMap[ retrieveParamName( 5) ] = 2.03692533424484; // gamma_p
-        nameToValueMap[ retrieveParamName( 6) ] = 10.173598698525799; // sigma2i
-        nameToValueMap[ retrieveParamName( 7) ] = 35158523.31132510304451; // CumulativeYstar
-        nameToValueMap[ retrieveParamName( 8) ] = 97.334652723897705; // CumulativeHstar
-        nameToValueMap[ retrieveParamName( 9) ] = 2.33031045876193; // '-ln(1-alpha_m)'
-        nameToValueMap[ retrieveParamName(10) ] = 2.53106547375805; // decay_m
-        nameToValueMap[ retrieveParamName(11) ] = 0.655747311168152; // sigma2_0
-        nameToValueMap[ retrieveParamName(12) ] = 0.916181104713054; // Xstar_v
-        nameToValueMap[ retrieveParamName(13) ] = 6502.26335600001039; // Ystar2
-        nameToValueMap[ retrieveParamName(14) ] = 142601.912520000012591; // alpha
-        nameToValueMap[ retrieveParamName(15) ] = 0.177378570987455; // Density bias (non Garki)
-        nameToValueMap[ retrieveParamName(16) ] = 1.0; //  sigma2
-        nameToValueMap[ retrieveParamName(17) ] = 0.736202; // log oddsr CF community
-        nameToValueMap[ retrieveParamName(18) ] = 0.018777338; // Indirect risk cofactor
-        nameToValueMap[ retrieveParamName(19) ] = 49.539046599999999; // Non-malaria infant mortality
-        nameToValueMap[ retrieveParamName(20) ] = 4.79610772546704; // Density bias (Garki)
-        nameToValueMap[ retrieveParamName(21) ] = 784455.599999999976717; // Severe Malaria Threshhold
-        nameToValueMap[ retrieveParamName(22) ] = 1; // Immunity Penalty
-        nameToValueMap[ retrieveParamName(23) ] = 0; // Immune effector decay
-        nameToValueMap[ retrieveParamName(24) ] = 0.0968; // comorbidity intercept
-        nameToValueMap[ retrieveParamName(25) ] = 0.275437402; // Ystar half life
-        nameToValueMap[ retrieveParamName(26) ] = 0.596539864; // Ystar1
-        nameToValueMap[ retrieveParamName(27) ] = 0; // Asexual immunity decay
-        nameToValueMap[ retrieveParamName(28) ] = 296.302437899999973; // Ystar0
-        nameToValueMap[ retrieveParamName(30) ] = 0.117383; // critical age for comorbidity
+    /*
+    * Initializes some hardcoded values for some parameters, encapsulating the parameter values
+    * that make up the base model.
+    */
+    void initializeParamsBaseModel()
+    {
+        initParam(  1, 0.050736 ); // '-ln(1-Sinf)'
+        initParam(  2, 0.03247 ); // Estar
+        initParam(  3, 0.138161050830301 ); // Simm
+        initParam(  4, 1514.385853233699891 ); // Xstar_p
+        initParam(  5, 2.03692533424484 ); // gamma_p
+        initParam(  6, 10.173598698525799 ); // sigma2i
+        initParam(  7, 35158523.31132510304451 ); // CumulativeYstar
+        initParam(  8, 97.334652723897705 ); // CumulativeHstar
+        initParam(  9, 2.33031045876193 ); // '-ln(1-alpha_m)'
+        initParam( 10, 2.53106547375805 ); // decay_m
+        initParam( 11, 0.655747311168152 ); // sigma2_0
+        initParam( 12, 0.916181104713054 ); // Xstar_v
+        initParam( 13, 6502.26335600001039 ); // Ystar2
+        initParam( 14, 142601.912520000012591 ); // alpha
+        initParam( 15, 0.177378570987455 ); // Density bias (non Garki)
+        initParam( 16, 1.0 ); //  sigma2
+        initParam( 17, 0.736202 ); // log oddsr CF community
+        initParam( 18, 0.018777338 ); // Indirect risk cofactor
+        initParam( 19, 49.539046599999999 ); // Non-malaria infant mortality
+        initParam( 20, 4.79610772546704 ); // Density bias (Garki)
+        initParam( 21, 784455.599999999976717 ); // Severe Malaria Threshhold
+        initParam( 22, 1 ); // Immunity Penalty
+        initParam( 23, 0 ); // Immune effector decay
+        initParam( 24, 0.0968 ); // comorbidity intercept
+        initParam( 25, 0.275437402 ); // Ystar half life
+        initParam( 26, 0.596539864 ); // Ystar1
+        initParam( 27, 0 ); // Asexual immunity decay
+        initParam( 28, 296.302437899999973 ); // Ystar0
+        initParam( 30, 0.117383 ); // critical age for comorbidity
     }
 
     /*
