@@ -55,6 +55,7 @@ set (OM_BOXTEST_NAMES
   DecisionTree5DayDielmo
   HetVecDailyEIR
   AvailabilityFilter
+  GaussianCopula
   InfectionOrigin
   ModelNameNoOverrides
   ModelNameParamOverrides
