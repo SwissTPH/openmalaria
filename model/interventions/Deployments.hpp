@@ -168,11 +168,22 @@ protected:
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
             throw util::xml_scenario_error("intervention deployment coverage must be in range [0,1]");
         }
-        if( coverage > 0 && deploy.getCoverageCorr().present() && deploy.getCoverageVar().present() && deploy.getCoverageVar().get() > 0)
+        // If coverageCorr or coverageVar is present, then the user is asking for the copula
+        if(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present())
         {
-            coverageCorr = deploy.getCoverageCorr().get();
-            coverageVar = deploy.getCoverageVar().get();
-            copula = true;
+            if(!(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present()))
+                throw std::runtime_error("Gaussian copula: both coverageCorr and coverageVar must be present");
+
+            if(deploy.getCoverageVar().get() < 0)
+                throw std::runtime_error("Gaussian copula: negative variance is not allowed");
+            
+            // if variance is 0, then no copula and fall back to probability = coverage
+            if(deploy.getCoverageVar().get() > 0)
+            {
+                coverageCorr = deploy.getCoverageCorr().get();
+                coverageVar = deploy.getCoverageVar().get();
+                copula = true;
+            }
         }
 
         vaccLimits.set( deploy );
@@ -239,50 +250,60 @@ public:
 
                 double probability = coverage;
 
-                if(copula)
+                if(copula && coverage > 0)
                 {
-                    // Beta distribution for intervention (Beta distributed)
-                    const double beta_mean = coverage;  // Assuming this value is given
-                    const double beta_var = coverageVar;       // Given as well
-                    const double alpha = ((1.0 - beta_mean) / beta_var - 1.0 / beta_mean) * (beta_mean * beta_mean);
-                    const double beta = alpha * (1.0 / beta_mean - 1.0);
-
-                    if(Transmission::PerHostAnophParams::numSpecies() > 1)
-                        throw std::runtime_error("Gaussian copula: (deployment with availability correlation) only supports one mosquito species");
-
-                    const double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(human.perHostTransmission.anophEntoAvailabilityRaw[0]);
-                    if(ux < 1)
+                    try 
                     {
-                        double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
+                        // Beta distribution for intervention (Beta distributed)
+                        const double beta_mean = coverage;  // Assuming this value is given
+                        const double beta_var = coverageVar;       // Given as well
+                        const double alpha = ((1.0 - beta_mean) / beta_var - 1.0 / beta_mean) * (beta_mean * beta_mean);
+                        const double beta = alpha * (1.0 / beta_mean - 1.0);
 
-                        // Apply the Gaussian copula transformation for correlation
-                        const ComponentId cid = subPop;
+                        if(Transmission::PerHostAnophParams::numSpecies() > 1)
+                            throw std::runtime_error("only supports one mosquito species");
 
-                        /** human.rng.gauss(0.0, 1.0) is calculated once per component and per human. Re-deployment of
-                         * the same component on the same human must use the same gaussian sample. Therefore we store
-                         * this value in the human the first time it is calculated. */
-                        double g = 0.0;
-                        const auto it = human.perHostTransmission.copulaGaussianSamples.find(cid);
-                        if (it != human.perHostTransmission.copulaGaussianSamples.end())
-                            g = it->second;
-                        else
+                        const double ux = Transmission::PerHostAnophParams::get(0).entoAvailability->cdf(human.perHostTransmission.anophEntoAvailabilityRaw[0]);
+                        if(ux < 1)
                         {
-                            g = human.rng.gauss(0.0, 1.0);
-                            human.perHostTransmission.copulaGaussianSamples[cid] = g;
+                            double xx = gsl_cdf_ugaussian_Pinv(ux);                      // Unit interval to Normal
+
+                            // Apply the Gaussian copula transformation for correlation
+                            const ComponentId cid = subPop;
+
+                            /** human.rng.gauss(0.0, 1.0) is calculated once per component and per human. Re-deployment of
+                             * the same component on the same human must use the same gaussian sample. Therefore we store
+                             * this value in the human the first time it is calculated. */
+                            double g = 0.0;
+                            const auto it = human.perHostTransmission.copulaGaussianSamples.find(cid);
+                            if (it != human.perHostTransmission.copulaGaussianSamples.end())
+                                g = it->second;
+                            else
+                            {
+                                g = human.rng.gauss(0.0, 1.0);
+                                human.perHostTransmission.copulaGaussianSamples[cid] = g;
+                            }
+                            const double yy = coverageCorr * xx + g * sqrt(1 - coverageCorr * coverageCorr);
+
+                            // Transform back to unit interval
+                            const double uy = gsl_cdf_ugaussian_P(yy);
+
+                            if (alpha < 0 || beta < 0)
+                                throw std::runtime_error("resulting alpha and beta parameters must be positive");
+
+                            // Get the final probability from Beta distribution
+                            probability = gsl_cdf_beta_Pinv(uy, alpha, beta);
                         }
-                        const double yy = coverageCorr * xx + g * sqrt(1 - coverageCorr * coverageCorr);
-
-                        // Transform back to unit interval
-                        const double uy = gsl_cdf_ugaussian_P(yy);
-
-                        if (alpha < 0 || beta < 0)
-                            throw std::runtime_error("Gaussian copula: resulting alpha and beta parameters must be positive");
-
-                        // Get the final probability from Beta distribution
-                        probability = gsl_cdf_beta_Pinv(uy, alpha, beta);
+                        else // Gamma with CV=0
+                            probability = human.rng.beta(alpha, beta);
                     }
-                    else // Gamma with CV=0
-                        probability = human.rng.beta(alpha, beta);
+                    catch (const std::exception& e) {
+                        std::ostringstream oss;
+                        oss << "[Gaussian copula]: computing correlated intervention probability using Gaussian copula and Beta distribution: "
+                            << e.what()
+                            << ". Possible reason: coverage might be too high and/or population size might be too small.";
+                        throw std::runtime_error(oss.str());
+                    }
                 }
 
                 if( availability >= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(minAvailability) && availability <= Transmission::PerHostAnophParams::getEntoAvailabilityPercentile(maxAvailability) ) {

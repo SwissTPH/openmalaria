@@ -110,19 +110,25 @@ void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt
 
 void LognormalSampler::setMeanCV( double mean, double CV ){
     this->CV = CV;
+
+    // The distribution is "const"
     if( CV == 0.0 ){
         sigma = 0.0;
         // as a special case, we can support mean == CV == 0
-        if( mean == 0.0 ){
+        if( mean == 0.0 )
             mu = -numeric_limits<double>::infinity();
-        } else {
+        else if(mean > 0)
             mu = log(mean);
-        }
+        else
+            throw util::xml_scenario_error( "const: required mean >= 0" );
         return;
     }
-    if( !(mean > 0.0 && CV > 0.0) ){
-        throw util::xml_scenario_error( "log-normal: required mean > 0 and CV ≥ 0" );
-    }
+
+    // If the distirbution is not "const"
+    if( mean < 0 )
+        throw util::xml_scenario_error( "log-normal: required mean > 0" );
+    if( CV < 0 )
+        throw util::xml_scenario_error( "log-normal: required CV >= 0" );
     
     // The following formulae are derived from:
     // X ~ lognormal(μ, σ)
@@ -136,10 +142,11 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
 }
 
 void LognormalSampler::setMeanVariance( double mean, double variance ){
-    if( !(mean > 0.0) ){
+    if( mean <= 0 )
         throw util::xml_scenario_error( "log-normal: required mean > 0" );
-    }
-    
+    if( variance < 0 )
+        throw util::xml_scenario_error( "log-normal: required variance >= 0" );
+
     // The following formulae are derived from:
     // X ~ lognormal(μ, σ)
     // E(X) = exp(μ + σ² / 2)
@@ -152,6 +159,7 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
         sigma = 0.0;
         return;
     }
+
     const double CV = variance / mean;
     const double a = 1 + (CV * CV);
     mu = log( mean / sqrt(a) );
@@ -215,6 +223,11 @@ void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
 }
 
 void GammaSampler::setMeanCV( double mean, double CV ){
+    if( mean <= 0 )
+        throw util::xml_scenario_error( "gamma: required mean > 0" );
+    if( CV < 0 )
+        throw util::xml_scenario_error( "gamma: required CV >= 0" );
+
     mu = mean;
     this->CV = CV;
 
@@ -232,6 +245,11 @@ void GammaSampler::setMeanCV( double mean, double CV ){
 
 void GammaSampler::setMeanVariance( double mean, double variance ){
     mu = mean;
+
+    if( mean <= 0 )
+        throw util::xml_scenario_error( "gamma: required mean > 0" );
+    if( variance < 0 )
+        throw util::xml_scenario_error( "gamma: required variance >= 0" );
 
     if( variance == 0.0 )
         return;
