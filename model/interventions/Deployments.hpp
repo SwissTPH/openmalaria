@@ -172,10 +172,10 @@ protected:
         if(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present())
         {
             if(!(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present()))
-                throw std::runtime_error("Gaussian copula: both coverageCorr and coverageVar must be present");
+                throw std::runtime_error("[Gaussian copula]: both coverageCorr and coverageVar must be present");
 
             if(deploy.getCoverageVar().get() < 0)
-                throw std::runtime_error("Gaussian copula: negative variance is not allowed");
+                throw std::runtime_error("[Gaussian copula]: negative variance is not allowed");
             
             // if variance is 0, then no copula and fall back to probability = coverage
             if(deploy.getCoverageVar().get() > 0)
