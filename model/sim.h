@@ -46,8 +46,6 @@ inline int floorToInt( double x ){
 /// Internal use only
 // Required to avoid use-before-definition
 class SimData {
-    enum { DAYS_IN_YEAR = 365 };
-    
     static inline int interval;        // days per time step
     static inline size_t steps_per_year;
     static inline double years_per_step;
@@ -79,12 +77,12 @@ public:
     ///@brief Simulation constants
     //@{
     /// Number of days in a year; defined as 365 (leap years are not simulated).
-    enum { DAYS_IN_YEAR = 365 };
+    static const int DAYS_IN_YEAR = 365;
     
     ///@brief Conversions to other types/units
     //@{
     /// Convert to years
-    static inline double inYears(SimTime d) { return d * (1.0 / SimData::DAYS_IN_YEAR); }
+    static inline double inYears(SimTime d) { return d * (1.0 / DAYS_IN_YEAR); }
     
     /// Convert to time steps (rounding down)
     static inline int inSteps(SimTime d) { return d / SimData::interval; }
@@ -118,8 +116,8 @@ public:
     /** One day. */
     static inline SimTime oneDay(){ return SimTime(1); }
     
-    /** One year. See SimData::DAYS_IN_YEAR. */
-    static inline SimTime oneYear(){ return SimTime(SimData::DAYS_IN_YEAR); }
+    /** One year. See DAYS_IN_YEAR. */
+    static inline SimTime oneYear(){ return SimTime(DAYS_IN_YEAR); }
     
     /** One time step (currently either one or five days). */
     static inline SimTime oneTS(){ return SimTime(SimData::interval); }
@@ -135,12 +133,12 @@ public:
     
     /** Convert from a whole number of years. */
     static inline SimTime fromYearsI(int years){
-        return SimTime(SimData::DAYS_IN_YEAR * years);
+        return SimTime(DAYS_IN_YEAR * years);
     }
     
     /** Convert from years to nearest time step. */
     static inline SimTime fromYearsN(double years){
-        return roundToTSFromDays(SimData::DAYS_IN_YEAR * years);
+        return roundToTSFromDays(DAYS_IN_YEAR * years);
     }
     
     /** Convert from years, rounding down to the next time step. */
