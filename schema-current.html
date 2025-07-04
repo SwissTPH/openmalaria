@@ -7892,6 +7892,8 @@ those </p>
   [ vaccMaxCumDoses=int ]
   [ minAvailability=int ]
   [ maxAvailability=int ]
+  [ coverageCorr=double ]
+  [ coverageVar=double ]
     targetAgeYrs=double
   [ begin=string ]
   [ end=string ]
@@ -7941,6 +7943,21 @@ The percentile must be an integer value between 0 and 100. Percentile 99th repre
 <p>Maximum ento availability percentile. 
 This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
 The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
+<h4><a class="header" href="#coverage-1" id="coverage-1">Coverage</a></h4>
+<pre><code class="language-xml">coverageCorr=double
+</code></pre>
+<p><strong>Units:</strong> dimensionless
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>OpenMalaria uses a Gaussian Copula transformation to introduce a correlation between the availability of a host (drawn for one of the supported distributions for each species e.g. LogNormal, Gamma,...) and the coverage probability.
+Note that this is in fact the latent correlation in the copula transformation and not the direct correlation between availability rate and coverage probabilty.</p>
+<h4><a class="header" href="#coverage-2" id="coverage-2">Coverage</a></h4>
+<pre><code class="language-xml">coverageVar=double
+</code></pre>
+<p><strong>Units:</strong> dimensionless
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>This is the variance of the Beta distribution used in the Gaussian Copula transformation.</p>
 <h4><a class="header" href="#target-age" id="target-age">Target age</a></h4>
 <pre><code class="language-xml">targetAgeYrs=double
 </code></pre>
@@ -8055,6 +8072,8 @@ selecting people.</p>
   [ vaccMaxCumDoses=int ]
   [ minAvailability=int ]
   [ maxAvailability=int ]
+  [ coverageCorr=double ]
+  [ coverageVar=double ]
     time=string
   [ maxAge=double ]
   [ minAge=double ] DEFAULT VALUE 0
@@ -8063,7 +8082,7 @@ selecting people.</p>
   /&gt;
 </code></pre>
 <h3><a class="header" href="#attributes-199" id="attributes-199">Attributes</a></h3>
-<h4><a class="header" href="#coverage-1" id="coverage-1">Coverage</a></h4>
+<h4><a class="header" href="#coverage-3" id="coverage-3">Coverage</a></h4>
 <pre><code class="language-xml">coverage=double
 </code></pre>
 <p><strong>Units:</strong> dimensionless
@@ -8106,6 +8125,21 @@ The percentile must be an integer value between 0 and 100. Percentile 99th repre
 <p>Maximum ento availability percentile. 
 This option is meant to be used with heterogeneity of availability, which can be specified in the entomology section. Without heterogenity (default), all hosts have the same availability and this option will have no effect.
 The percentile must be an integer value between 0 and 100. Percentile 99th represents individuals who are more available than 99% of the population. Percentile 0 represents the least available individuals. 100 is equivalent for infinity.</p>
+<h4><a class="header" href="#coverage-4" id="coverage-4">Coverage</a></h4>
+<pre><code class="language-xml">coverageCorr=double
+</code></pre>
+<p><strong>Units:</strong> dimensionless
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>OpenMalaria uses a Gaussian Copula transformation to introduce a correlation between the availability of a host (drawn for one of the supported distributions for each species e.g. LogNormal, Gamma,...) and the coverage probability.
+Note that this is in fact the latent correlation in the copula transformation and not the direct correlation between availability rate and coverage probabilty.</p>
+<h4><a class="header" href="#coverage-5" id="coverage-5">Coverage</a></h4>
+<pre><code class="language-xml">coverageVar=double
+</code></pre>
+<p><strong>Units:</strong> dimensionless
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>This is the variance of the Beta distribution used in the Gaussian Copula transformation.</p>
 <h4><a class="header" href="#time-7" id="time-7">Time</a></h4>
 <pre><code class="language-xml">time=string
 </code></pre>
