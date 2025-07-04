@@ -125,7 +125,7 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
     }
 
     // If the distirbution is not "const"
-    if( mean < 0 )
+    if( mean <= 0 )
         throw util::xml_scenario_error( "log-normal: required mean > 0" );
     if( CV < 0 )
         throw util::xml_scenario_error( "log-normal: required CV >= 0" );
