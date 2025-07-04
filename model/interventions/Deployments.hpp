@@ -171,7 +171,7 @@ protected:
         // If coverageCorr or coverageVar is present, then the user is asking for the copula
         if(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present())
         {
-            if(!(deploy.getCoverageCorr().present() || deploy.getCoverageVar().present()))
+            if(!(deploy.getCoverageCorr().present() && deploy.getCoverageVar().present()))
                 throw std::runtime_error("[Gaussian copula]: both coverageCorr and coverageVar must be present");
 
             if(deploy.getCoverageVar().get() < 0)
