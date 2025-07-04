@@ -29,6 +29,7 @@ namespace OM { namespace util {
 double NormalSample::asNormal( double mu, double sigma )const{
     return sigma*x + mu;
 }
+
 double NormalSample::asLognormal( double mu, double sigma )const{
     return exp( sigma*x + mu );
 }
@@ -48,6 +49,7 @@ void NormalSampler::setParams( double m, double s ){
     mu = m;
     sigma = s;
 }
+
 void NormalSampler::setParams(const scnXml::SampledValueN& elt){
     mu = elt.getMean();
     if( elt.getDistr() == "const" ){
@@ -66,6 +68,7 @@ void NormalSampler::setParams(const scnXml::SampledValueN& elt){
     }
     sigma = elt.getSD().get();
 }
+
 double NormalSampler::sample(LocalRng& rng) const{
     if( sigma == 0.0 ){
         return mu;
@@ -107,19 +110,25 @@ void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt
 
 void LognormalSampler::setMeanCV( double mean, double CV ){
     this->CV = CV;
+
+    // The distribution is "const"
     if( CV == 0.0 ){
         sigma = 0.0;
         // as a special case, we can support mean == CV == 0
-        if( mean == 0.0 ){
+        if( mean == 0.0 )
             mu = -numeric_limits<double>::infinity();
-        } else {
+        else if(mean > 0)
             mu = log(mean);
-        }
+        else
+            throw util::xml_scenario_error( "const: required mean >= 0" );
         return;
     }
-    if( !(mean > 0.0 && CV > 0.0) ){
-        throw util::xml_scenario_error( "log-normal: required mean > 0 and CV ≥ 0" );
-    }
+
+    // If the distirbution is not "const"
+    if( mean <= 0 )
+        throw util::xml_scenario_error( "log-normal: required mean > 0" );
+    if( CV < 0 )
+        throw util::xml_scenario_error( "log-normal: required CV >= 0" );
     
     // The following formulae are derived from:
     // X ~ lognormal(μ, σ)
@@ -131,11 +140,13 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
     mu = log( mean / sqrt(a) );
     sigma = sqrt(log(a));
 }
+
 void LognormalSampler::setMeanVariance( double mean, double variance ){
-    if( !(mean > 0.0) ){
+    if( mean <= 0 )
         throw util::xml_scenario_error( "log-normal: required mean > 0" );
-    }
-    
+    if( variance < 0 )
+        throw util::xml_scenario_error( "log-normal: required variance >= 0" );
+
     // The following formulae are derived from:
     // X ~ lognormal(μ, σ)
     // E(X) = exp(μ + σ² / 2)
@@ -148,6 +159,7 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
         sigma = 0.0;
         return;
     }
+
     const double CV = variance / mean;
     const double a = 1 + (CV * CV);
     mu = log( mean / sqrt(a) );
@@ -157,9 +169,11 @@ void LognormalSampler::setMeanVariance( double mean, double variance ){
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);
 }
+
 double LognormalSampler::mean() const{
     return exp(mu + 0.5*sigma*sigma);
 }
+
 double LognormalSampler::sample(LocalRng& rng) const{
     if( sigma == 0.0 ){
         return exp( mu );
@@ -168,11 +182,19 @@ double LognormalSampler::sample(LocalRng& rng) const{
     }
 }
 
+double LognormalSampler::cdf(double x) const {
+    // 1) anything at or below 0 has CDF = 0
+    if (x <= 0.0)
+        return 0.0;
 
-// void GammaSampler::setParams( const scnXml::SampledValueLN& elt ){
-//     const double mean = elt.getMean();
-//     setParams( mean, elt );
-// }
+    // 2) Degenerate case
+    if (sigma == 0.0)
+    {
+        if(log(x) >= mu) return 1.0;
+        else return 0.0;
+    }
+    return gsl_cdf_lognormal_P(x, mu, sigma);
+}
 
 void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
     if( elt.getDistr() == "const" ){
@@ -201,8 +223,14 @@ void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
 }
 
 void GammaSampler::setMeanCV( double mean, double CV ){
+    if( mean <= 0 )
+        throw util::xml_scenario_error( "gamma: required mean > 0" );
+    if( CV < 0 )
+        throw util::xml_scenario_error( "gamma: required CV >= 0" );
+
     mu = mean;
-    
+    this->CV = CV;
+
     if( CV == 0.0 )
         return;
 
@@ -218,6 +246,11 @@ void GammaSampler::setMeanCV( double mean, double CV ){
 void GammaSampler::setMeanVariance( double mean, double variance ){
     mu = mean;
 
+    if( mean <= 0 )
+        throw util::xml_scenario_error( "gamma: required mean > 0" );
+    if( variance < 0 )
+        throw util::xml_scenario_error( "gamma: required variance >= 0" );
+
     if( variance == 0.0 )
         return;
 
@@ -231,14 +264,24 @@ void GammaSampler::setMeanVariance( double mean, double variance ){
     theta = mu / k;
 }
 
-void GammaSampler::scaleMean(double scalar){
+void GammaSampler::scaleMean(double scalar) {
+    if (scalar <= 0.0) {
+        // Invalid scalar, return without making changes
+        return;
+    }
+
+    // Scale the mean
     mu *= scalar;
-    // if(!isnan(this->variance))
-    // {
-    //     k = (mu*mu)/this->variance;
-    // }
-    if(!isnan(k))
-        theta = mu / k;
+
+    if (!std::isnan(this->CV) && this->CV > 0.0) {
+        this->variance = (mu * this->CV) * (mu * this->CV);
+    }
+
+    if (!std::isnan(this->variance) && this->variance > 0.0) {
+        // Recalculate k and theta based on the scaled mean and fixed variance
+        k = (mu * mu) / this->variance;  // Shape parameter
+        theta = this->variance / mu;    // Scale parameter
+    }
 }
 
 double GammaSampler::mean() const {
@@ -246,11 +289,26 @@ double GammaSampler::mean() const {
 }
 
 double GammaSampler::sample(LocalRng& rng) const{
-    if(isnan(theta))
+    if(isnan(theta)) // CV=0
         return mu;
     return rng.gamma(k, theta);
 }
 
+double GammaSampler::cdf(double x) const {
+    // 1) anything at or below 0 has CDF = 0
+    if (x <= 0.0)
+        return 0.0;
+
+    // 2) Degenerate case
+    if(isnan(theta)) // CV=0 or variance=0
+    {
+        if(x >= mu) return 1.0;
+        else return 0.0;
+    }
+
+    return gsl_cdf_gamma_P(x, k, theta);
+}
+        
 void BetaSampler::setParamsMV( double mean, double variance ){
     if( variance > 0.0 ){
         // double c = mean / (1.0 - mean);
@@ -277,6 +335,7 @@ void BetaSampler::setParamsMV( double mean, double variance ){
     else
         throw util::xml_scenario_error("BetaSampler::setParamsMV: require variance ≥ 0");
 }
+
 double BetaSampler::sample(LocalRng& rng) const{
     if( b == 0.0 ){
         return a;

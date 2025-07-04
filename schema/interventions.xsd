@@ -991,6 +991,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>units:percent;min:0;name:Maximum ento availability;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
+  <xs:attribute name="coverageCorr" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+           OpenMalaria uses a Gaussian Copula transformation to introduce a correlation between the availability of a host (drawn for one of the supported distributions for each species e.g. LogNormal, Gamma,...) and the coverage probability.
+
+          Note that this is in fact the latent correlation in the copula transformation and not the direct correlation between availability rate and coverage probabilty.
+        </xs:documentation>
+    <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="coverageVar" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
+          This is the variance of the Beta distribution used in the Gaussian Copula transformation.
+        </xs:documentation>
+    <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
  </xs:complexType>
  <xs:complexType name="MassDeployment">
   <xs:complexContent>

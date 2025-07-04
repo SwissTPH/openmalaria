@@ -54,7 +54,8 @@ set (OM_BOXTEST_NAMES
   TBV
   DecisionTree5DayDielmo
   HetVecDailyEIR
-  AvailabilityHeterogeneity
+  AvailabilityFilter
+  GaussianCopula
   InfectionOrigin
   ModelNameNoOverrides
   ModelNameParamOverrides
