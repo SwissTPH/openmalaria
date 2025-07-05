@@ -76,38 +76,6 @@ double NormalSampler::sample(LocalRng& rng) const{
     return rng.gauss( mu, sigma );
 }
 
-// void LognormalSampler::setParams( const scnXml::SampledValueLN& elt ){
-//     const double mean = elt.getMean();
-//     setParams( mean, elt );
-// }
-
-// void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
-//     if( elt.getDistr() == "const" ){
-//         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
-//             throw util::xml_scenario_error( "lognormal distr: attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
-//         }
-//         if( mean == 0.0 ){
-//             mu = -numeric_limits<double>::infinity();
-//         } else {
-//             mu = log(mean);
-//         }
-//         sigma = 0.0;
-//         return;
-//     }
-//     if( !elt.getCV().present() && !elt.getVariance().present())
-//         throw util::xml_scenario_error( "lognormal distr: attribute \"CV\" or \"variance\" required for sampled value when distr is not const" );
-//     if( elt.getCV().present() && elt.getVariance().present())
-//         throw util::xml_scenario_error( "lognormal distr: only one attribute \"CV\" or \"variance\" can be used for sampled value when distr is not const" );
-//     if( elt.getDistr() == "lognormal" ){
-//         if(elt.getCV().present())
-//             setMeanCV(mean, elt.getCV().get());
-//         else
-//             setMeanVariance(mean, elt.getVariance().get());
-//     }else{
-//         throw util::xml_scenario_error( "lognormal distr: expected distr to be one of \"const\", \"gamma\" (note: not all distributions are supported here)" );
-//     }
-// }
-
 unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanCV( double mean, double CV )
 {
     unique_ptr<LognormalSampler> sampler = std::make_unique<LognormalSampler>();
@@ -208,32 +176,6 @@ double LognormalSampler::cdf(double x) const {
     }
     return gsl_cdf_lognormal_P(x, mu, sigma);
 }
-
-// void GammaSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
-//     if( elt.getDistr() == "const" ){
-//         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
-//             throw util::xml_scenario_error( "gamma distr: attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
-//         }
-//         if( mean == 0.0 ){
-//             mu = -numeric_limits<double>::infinity();
-//         } else {
-//             mu = mean;
-//         }
-//         return;
-//     }
-//     if( !elt.getCV().present() && !elt.getVariance().present())
-//         throw util::xml_scenario_error( "gamma distr: attribute \"CV\" or \"variance\" required for sampled value when distr is not const" );
-//     if( elt.getCV().present() && elt.getVariance().present())
-//         throw util::xml_scenario_error( "gamma distr: only one attribute \"CV\" or \"variance\" can be used for sampled value when distr is not const" );
-//     if( elt.getDistr() == "gamma" ){
-//         if(elt.getCV().present())
-//             setMeanCV(mean, elt.getCV().get());
-//         else
-//             setMeanVariance(mean, elt.getVariance().get());
-//     }else{
-//         throw util::xml_scenario_error( "gamma distr: expected distr to be one of \"const\", \"gamma\" (note: not all distributions are supported here)" );
-//     }
-// }
 
 unique_ptr<util::GammaSampler> GammaSampler::fromMeanCV( double mean, double CV )
 {
