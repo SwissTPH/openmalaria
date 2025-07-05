@@ -115,7 +115,6 @@ unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanCV( double mean, do
     // The distribution is "const"
     if( CV == 0.0 )
     {
-        cout << "CV is 0" << endl;
         sampler->sigma = 0.0;
         // as a special case, we can support mean == CV == 0
         if( mean == 0.0 )
