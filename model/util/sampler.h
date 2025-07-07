@@ -259,86 +259,73 @@ namespace OM { namespace util {
         double CV       = std::numeric_limits<double>::signaling_NaN();
     };
 
-    inline unique_ptr<util::Sampler> createSampler(double mean, const scnXml::SampledValueCV& elt)
-    {
-        if( elt.getDistr() == "const" ){
-            if( elt.getCV().present() && elt.getCV().get() != 0.0 )
-                throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": attribute \"CV\" must be zero or omitted when distr=\"const\" or is omitted" );
-            if( elt.getVariance().present() && elt.getVariance().get() != 0.0 )
-                throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": attribute \"variance\" must be zero or omitted when distr=\"const\" or is omitted" );
-            
-            return LognormalSampler::fromMeanCV(mean, 0.0);
-        }
+    // Helpers
+    template <typename T> struct SamplerDistrName;
+    template <> struct SamplerDistrName<LognormalSampler> { static constexpr const char* value = "lognormal"; };
+    template <> struct SamplerDistrName<GammaSampler> { static constexpr const char* value = "gamma"; };
 
-        if( !elt.getCV().present() && !elt.getVariance().present())
-            throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": attribute \"CV\" or \"variance\" required when distr is not \"const\"" );
-        if( elt.getCV().present() && elt.getVariance().present())
-            throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": only one attribute \"CV\" or \"variance\" can be used when distr is not \"const\"" );
-        
-        if( elt.getDistr() == "lognormal" ){
-            if(elt.getCV().present())
-                return LognormalSampler::fromMeanCV(mean, elt.getCV().get());
-            else
-                return LognormalSampler::fromMeanVariance(mean, elt.getVariance().get());
-        }
-        else if(elt.getDistr() == "gamma" ){
-            if(elt.getCV().present())
-                return GammaSampler::fromMeanCV(mean, elt.getCV().get());
-            else
-                return GammaSampler::fromMeanVariance(mean, elt.getVariance().get());
-        }
-        else
-            throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": expected distr attribute to be one of \"const\", \"lognormal\" or \"gamma\" (note: not all distributions are supported here)" );
-    }
-
-    /* Specialized factories */
+    /** 
+     * Create a new <SamplerT> from a xml snippet. 
+     * 
+     * This function checks at runtime that the template parameter matches the request distribution.
+     * 
+     * This exists solely because the PkPD model code.
+     */
     template <typename SamplerT>
-    inline std::unique_ptr<SamplerT> createSampler(double mean, const scnXml::SampledValueCV& elt);
-
-    template <>
-    inline std::unique_ptr<LognormalSampler> createSampler<LognormalSampler>(double mean, const scnXml::SampledValueCV& elt)
+    inline unique_ptr<SamplerT> createSampler(double mean, const scnXml::SampledValueCV& elt)
     {
-        if( elt.getDistr() == "const" ){
-            if( elt.getCV().present() && elt.getCV().get() != 0.0 )
-                throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": attribute \"CV\" must be zero or omitted when distr=\"const\" or is omitted" );
-            if( elt.getVariance().present() && elt.getVariance().get() != 0.0 )
-                throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": attribute \"variance\" must be zero or omitted when distr=\"const\" or is omitted" );
-            return LognormalSampler::fromMeanCV(mean, 0.0);
-        }
-        else if( elt.getDistr() == "lognormal" ){
-            if(elt.getCV().present())
-                return LognormalSampler::fromMeanCV(mean, elt.getCV().get());
-            else if(elt.getVariance().present())
-                return LognormalSampler::fromMeanVariance(mean, elt.getVariance().get());
-            else
-                throw util::xml_scenario_error("LognormalSampler: CV or variance required");
-        }
-        else
-            throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": expected distr attribute to be one of \"const\" or \"lognormal\"" );
-    }
+        const std::string& d = elt.getDistr();
 
-    template <>
-    inline std::unique_ptr<GammaSampler> createSampler<GammaSampler>(double mean, const scnXml::SampledValueCV& elt)
-    {
-        if(elt.getDistr() == "gamma" )
+        // The "const" distribution is defined as a lognormal with CV = 0
+        if( d == "const" )
         {
-            if (elt.getCV().present())
-                return GammaSampler::fromMeanCV(mean, elt.getCV().get());
-            else if (elt.getVariance().present())
-                return GammaSampler::fromMeanVariance(mean, elt.getVariance().get());
-            else
-                throw util::xml_scenario_error("GammaSampler: CV or variance required");
+            if (SamplerDistrName<SamplerT>::value != "lognormal")
+                throw util::xml_scenario_error("\"distr=" + d + "\": expected \"" + SamplerDistrName<SamplerT>::value);
+
+            if( elt.getCV().present() && elt.getCV().get() != 0.0 )
+                throw util::xml_scenario_error( "\"distr="+d+"\": attribute \"CV\" must be zero or omitted when distr=\"const\" or is omitted" );
+            if( elt.getVariance().present() && elt.getVariance().get() != 0.0 )
+                throw util::xml_scenario_error( "\"distr="+d+"\": attribute \"variance\" must be zero or omitted when distr=\"const\" or is omitted" );
+            
+            return SamplerT::fromMeanCV(mean, 0.0);
         }
+
+        if (d != SamplerDistrName<SamplerT>::value)
+            throw util::xml_scenario_error("\"distr=" + d + "\": expected \"" + SamplerDistrName<SamplerT>::value);
+
+        if (!(elt.getCV().present() ^ elt.getVariance().present()))
+            throw util::xml_scenario_error("\"distr=" + d + "\": exactly one of attributes \"CV\" or \"variance\" must be specified");
+
+        if(elt.getCV().present())
+            return SamplerT::fromMeanCV(mean, elt.getCV().get());
         else
-            throw util::xml_scenario_error( "\"distr="+elt.getDistr()+"\": expected distr attribute to be \"gamma\"" );
+            return SamplerT::fromMeanVariance(mean, elt.getVariance().get());
     }
 
+    /**
+     * Create a Sampler based on the xml xnippet provided.
+     * 
+     * This returns a unique_ptr on the base Sampler class.
+     */
+    inline std::unique_ptr<util::Sampler> createSampler(double mean, const scnXml::SampledValueCV& elt)
+    {
+        const std::string& d = elt.getDistr();
+
+        if (d == "const" || d == "lognormal")
+            return createSampler<util::LognormalSampler>(mean, elt);
+        else if (d == "gamma")
+            return createSampler<util::GammaSampler>(mean,  elt);
+        else
+            throw util::xml_scenario_error("\"distr=" + d + "\": expected \"const\", \"lognormal\" or \"gamma\"");
+    }
+
+    // scnXml::SampledValueLN is a scnXml::SampledValueCV with an additional mean parameter
     template <typename SamplerT>
     inline std::unique_ptr<SamplerT> createSampler(const scnXml::SampledValueLN& elt)
     {
         return createSampler<SamplerT>(elt.getMean(), static_cast<const scnXml::SampledValueCV&>(elt));
     }
-    
+
     /** Sampler for the Beta distribution.
      *
      * Input may be alpha and beta or mean and variance. As a special case,
