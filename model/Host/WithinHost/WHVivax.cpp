@@ -84,7 +84,7 @@ private:
 // ———  parameters  ———
 
 // Set from the parameters block, or a default value is assumed.
-SimTime latentP = sim::never();       // attribute on <parameters> element.
+SimTime latentP = sim::never();
 
 // Set from <vivax .../> element:
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
@@ -581,21 +581,7 @@ double WHVivax::getCumulative_h() const{ throw TRACED_EXCEPTION( not_impl, util:
 double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model ){
-
-    // Default value to use if no <parameters> element is present in XML.
-    latentP = UnitParse::readShortDuration("15d", UnitParse::DAYS);
-    try
-    {
-        if (model.getParameters().present())
-        {
-            latentP = UnitParse::readShortDuration(
-                model.getParameters().get().getLatentp(), UnitParse::NONE);
-        }
-    }
-    catch( const util::format_error& e )
-    {
-            throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
-    }
+    latentP = parameters.GetLatentP();
 
     if( !model.getVivax().present() )
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );

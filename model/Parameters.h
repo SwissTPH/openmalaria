@@ -31,6 +31,7 @@
 #include "util/ModelNameProvider.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
+#include "util/UnitParse.h"
 
 namespace scnXml { class Parameters; }
 namespace OM {
@@ -202,6 +203,12 @@ public:
         return nameToValueMap.at(name).value();
     }
 
+    /*
+    * Returns length of pre-erythrocytic latent period.
+    * Outside of this class, this method should always be used to obtain the value of
+    * latentp, instead of reading it from the scenario.
+    */
+    SimTime GetLatentP() const { return latentp; }
 private:
 
     /*
@@ -252,6 +259,20 @@ private:
             }
 
             nameToValueMap[nameOfParamToSet] = paramValueFromXML;
+        }
+
+        // Set the value for the pre-erythrocytic latent period, to whatever value is written
+        // in XML.  This will override any value that may have been set previously.
+        try
+        {
+            // Passing UnitParse::NONE here makes any attempt by a user to specify a latent
+            // period without explicitly writing a time unit fail.  This strictness is
+            // intentional.  It serves the purpose making scenarios more readable.
+            latentp = UnitParse::readShortDuration(parameters.getLatentp(), UnitParse::NONE);
+        }
+        catch( const util::format_error& e )
+        {
+            throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
         }
     }
 
@@ -317,6 +338,10 @@ private:
         initParam( 27, 0 ); // Asexual immunity decay
         initParam( 28, 296.302437899999973 ); // Ystar0
         initParam( 30, 0.117383 ); // critical age for comorbidity
+
+        // This is where we define the default pre-erythrocyctic latent period, in days,
+        // for the base model.
+        latentp = UnitParse::readShortDuration("15d", UnitParse::DAYS);
     }
 
     /*
@@ -384,6 +409,9 @@ private:
     * given parameter among its preset values.
     */
     std::unordered_map<Parameter, std::optional<double>> nameToValueMap;
+
+    // The pre-erythrocyctic latent period, in days,
+    SimTime latentp;
 };
 
 }
