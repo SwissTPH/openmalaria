@@ -38,8 +38,6 @@
 #include <limits>
 #include <cmath>
 
-
-
 namespace OM {
 namespace WithinHost {
 
@@ -78,7 +76,7 @@ private:
 
 std::unique_ptr<HypnozoiteReleaseDistribution> createHypnozoiteReleaseDistribution(const scnXml::HypnozoiteReleaseDistribution& elt)
 {
-    return std::make_unique<HypnozoiteReleaseDistribution>(createSampler<LognormalSampler>(elt.getMean(), static_cast<const scnXml::SampledValueCV&>(elt)),  elt.getLatentRelapse());
+    return std::make_unique<HypnozoiteReleaseDistribution>(createSampler(elt),  elt.getLatentRelapse());
 }
 
 // ———  parameters  ———
