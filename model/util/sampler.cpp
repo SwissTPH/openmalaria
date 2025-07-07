@@ -229,26 +229,6 @@ unique_ptr<util::GammaSampler> GammaSampler::fromMeanVariance( double mean, doub
     return sampler;
 }
 
-void GammaSampler::scaleMean(double scalar) {
-    if (scalar <= 0.0) {
-        // Invalid scalar, return without making changes
-        return;
-    }
-
-    // Scale the mean
-    mu *= scalar;
-
-    if (!std::isnan(this->CV) && this->CV > 0.0) {
-        this->variance = (mu * this->CV) * (mu * this->CV);
-    }
-
-    if (!std::isnan(this->variance) && this->variance > 0.0) {
-        // Recalculate k and theta based on the scaled mean and fixed variance
-        k = (mu * mu) / this->variance;  // Shape parameter
-        theta = this->variance / mu;    // Scale parameter
-    }
-}
-
 double GammaSampler::mean() const {
     return mu;
 }

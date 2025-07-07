@@ -34,7 +34,6 @@ namespace OM { namespace util {
     public:
         virtual ~Sampler() = default;
         virtual double sample(LocalRng& rng) const = 0;
-        //virtual void scaleMean( double scalar ) = 0;
         virtual double mean() const = 0;
         virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
     };
@@ -229,12 +228,6 @@ namespace OM { namespace util {
          * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
          */
         static unique_ptr<util::GammaSampler> fromMeanVariance( double mean, double variance );
-
-        /** Scale the mean (i.e. multiply by a scalar).
-         * 
-         * Note that sigma (when specified via CV) is independent of the mean,
-         * so one can safely multiply the mean without affecting CV. */
-        void scaleMean( double scalar );
         
         /** Get the mean. */
         double mean() const;
