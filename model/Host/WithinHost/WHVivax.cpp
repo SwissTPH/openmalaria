@@ -71,6 +71,7 @@ struct HypnozoiteReleaseDistribution {
         return sim::roundToTSFromDays( delay + latentRelapse );
     }
     
+private:
     std::unique_ptr<util::LognormalSampler> sampler;
     double latentRelapse;   // days
 };
