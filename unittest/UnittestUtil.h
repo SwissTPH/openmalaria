@@ -237,7 +237,7 @@ namespace dummyXML{
     scnXml::AgeGroupValues modelHumanAvailMosq;
     scnXml::Human modelHuman( modelHumanAvailMosq );
     scnXml::ComputationParameters computationParams(0 /* iseed */);
-    scnXml::Parameters modelParams(0 /* interval*/, "dummy" /* latentP */);
+    scnXml::Parameters modelParams(0 /* interval*/, "15d" /* latentP */);
     scnXml::Model model(modelClinical, modelHuman, computationParams);
     
     scnXml::Scenario scenario(
