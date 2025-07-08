@@ -328,7 +328,7 @@ namespace OM { namespace util {
             throw util::xml_scenario_error("\"distr=" + d + "\": expected \"const\", \"lognormal\" or \"gamma\"");
     }
 
-    /** Create a LognornalSampler from a SampledValueLN xml snippet. */
+    /** Create a LognormalSampler from a SampledValueLN xml snippet. */
     inline std::unique_ptr<LognormalSampler> createSampler(const scnXml::SampledValueLN& elt)
     {
         return createSampler<LognormalSampler>(elt.getMean(), static_cast<const scnXml::SampledValueCV&>(elt));
