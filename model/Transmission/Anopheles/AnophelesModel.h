@@ -161,13 +161,13 @@ struct TrapParams {
     TrapParams(TrapParams&& o): relAvail(o.relAvail), availDecay(move(o.availDecay)) {}
     
     double relAvail; // Initial availability of a trap relative to an adult
-    unique_ptr<util::DecayFunction<util::Sampler>> availDecay; // Decay of availability
+    unique_ptr<util::DecayFunction> availDecay; // Decay of availability
 };
 
 struct TrapData {
     size_t instance; // index in trapParams
     double initialAvail; // initial availability (avail per trap * num traps)
-    unique_ptr<DecayFunction<util::Sampler>> availHet; // parameter for decay of availability
+    unique_ptr<DecayFunction> availHet; // parameter for decay of availability
     SimTime deployTime = sim::never(); // deploy time (for decay function)
     SimTime expiry = sim::never(); // date at which this intervention should be deleted
 };

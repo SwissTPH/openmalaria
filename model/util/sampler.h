@@ -29,16 +29,7 @@
 
 namespace OM { namespace util {
     
-    class Sampler
-    {
-    public:
-        virtual ~Sampler() = default;
-        virtual double sample(LocalRng& rng) const = 0;
-        virtual double mean() const = 0;
-        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
-    };
-
-    /** A normal sample, which can be turned into various log-normal samples.
+        /** A normal sample, which can be turned into various log-normal samples.
      * 
      * Allows generation of correlated log-normal samples with different sigma.
      */
@@ -66,7 +57,7 @@ namespace OM { namespace util {
     private:
         NormalSample( double variate ) : x(variate) {}
         
-        double x;	// variate (sampled from N(0,1))
+        double x;   // variate (sampled from N(0,1))
     };
     
     /** Sampler for normal values */
@@ -110,11 +101,26 @@ namespace OM { namespace util {
         double mu, sigma;
     };
     
+    class Sampler
+    {
+    public:
+        virtual ~Sampler() = default;
+        virtual std::unique_ptr<Sampler> clone() const = 0;
+        virtual double sample(LocalRng& rng) const = 0;
+        virtual double sample(NormalSample sample) const{ throw std::runtime_error("sample(NormalSample) not implemented for this distribution");}
+        virtual double mean() const = 0;
+        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
+    };
+    
     /** Sampler for log-normal values */
     class LognormalSampler : public Sampler {
     public:
         LognormalSampler() = default;
         LognormalSampler& operator=(const LognormalSampler&) = default;
+
+        std::unique_ptr<Sampler> clone() const override {
+            return std::make_unique<LognormalSampler>(*this);
+        }
 
         /**
          * Configure the log-normal distribution from a target mean and coefficient of variation.
@@ -163,6 +169,11 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        /** Create a log-normal sample from an existing normal sample. */
+        double sample(NormalSample sample) const{
+            return sample.asLognormal( mu, sigma );
+        }
+
         /**
          * Compute the cumulative distribution function (CDF) of this log-normal sampler.
          *
@@ -176,11 +187,6 @@ namespace OM { namespace util {
          * @return   P(X ≤ x), where X ~ LogNormal(mu, sigma²).
          */
         double cdf(double x) const;
-
-        /** Create a log-normal sample from an existing normal sample. */
-        inline double sample(NormalSample sample) const{
-            return sample.asLognormal( mu, sigma );
-        }
         
     private:
         // log-space parameters
@@ -194,6 +200,10 @@ namespace OM { namespace util {
     public:
         GammaSampler() = default;
         GammaSampler& operator=(const GammaSampler&) = default;
+
+        std::unique_ptr<Sampler> clone() const override {
+            return std::make_unique<GammaSampler>(*this);
+        }
 
         /**
          * Configure the gamma distribution from a target mean and coefficient of variation.

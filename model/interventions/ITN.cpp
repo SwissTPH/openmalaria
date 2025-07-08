@@ -508,8 +508,8 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     ripRate = util::createSampler(elt.getRipRate());
     ripRate->scaleMean( sim::yearsPerStep() );
     ripFactor = elt.getRipFactor().getValue();
-    insecticideDecay = DecayFunction<util::LognormalSampler>::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
-    attritionOfNets = DecayFunction<util::Sampler>::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
+    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
+    attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
     // assume usage modifier is 100% if none is specified
     double propUse;
     if (elt.getUsage().present()) {

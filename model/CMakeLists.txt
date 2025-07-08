@@ -75,6 +75,7 @@ set (Model_CPP
   util/DocumentLoader.cpp
   util/random.cpp
   util/UnitParse.cpp
+  util/DecayFunction.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp

@@ -35,7 +35,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
         const map<string,size_t>& species_name_map ) :
         Transmission::HumanVectorInterventionComponent(id)
 {
-    decay = DecayFunction<util::Sampler>::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
+    decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     // assume usage modifier is 100% if none is specified
     double propUse;
     if (elt.getUsage().present()) {
