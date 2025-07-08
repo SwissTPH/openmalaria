@@ -44,9 +44,12 @@ public:
     DecayFunction(bool increasing = false, double initialEfficacy = 1.0, double CV = 0.0) : 
         increasing(increasing), initialEfficacy(initialEfficacy), het(std::move(LognormalSampler::fromMeanCV(1.0, CV))) {}
 
+    DecayFunction(const DecayFunction& other) : 
+        increasing(other.increasing),
+        initialEfficacy(other.initialEfficacy),
+        het(other.het ? other.het->clone() : nullptr) {}
+
     virtual ~DecayFunction() {}
-    
-    DecayFunction(const DecayFunction& other) : het(other.het ? other.het->clone() : nullptr) {}
 
     /** Return a new decay function, constructed from an XML element.
      * 
