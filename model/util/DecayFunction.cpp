@@ -105,12 +105,10 @@ public:
     {}
     
     double compute(double effectiveAge) const{
-        // cout << "Linear " << effectiveAge << " " << invL << " " << hetFactor <<endl;
-        if( effectiveAge * invL * hetFactor < 1.0 ){
+        if( effectiveAge * invL * hetFactor < 1.0 )
             return 1.0 - effectiveAge * invL * hetFactor;
-        }else{
+        else
             return 0.0;
-        }
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -222,11 +220,10 @@ public:
     {}
 
     double compute(double effectiveAge) const{
-        if( effectiveAge * invL * hetFactor < 1.0 ){
+        if( effectiveAge * invL * hetFactor < 1.0 )
             return exp( k - k / (1.0 - pow(effectiveAge * invL * hetFactor, 2.0)) );
-        }else{
+        else
             return 0.0;
-        }
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -286,31 +283,30 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
 ){
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
-    if( func == "constant" ){
+    if( func == "constant" )
         return make_unique<ConstantDecayFunction>( elt );
-    }else if( func == "step" ){
+    else if( func == "step" )
         return make_unique<StepDecayFunction>( elt );
-    }else if( func == "linear" ){
+    else if( func == "linear" )
         return make_unique<LinearDecayFunction>( elt );
-    }else if( func == "exponential" ){
+    else if( func == "exponential" )
         return make_unique<ExponentialDecayFunction>( elt );
-    }else if( func == "weibull" ){
+    else if( func == "weibull" )
         return make_unique<WeibullDecayFunction>( elt );
-    }else if( func == "hill" ){
+    else if( func == "hill" )
         return make_unique<HillDecayFunction>( elt );
-    }else if( func == "smooth-compact" ){
+    else if( func == "smooth-compact" )
         return make_unique<SmoothCompactDecayFunction>( elt );
-    }else if( func == "plus" ){
+    else if( func == "plus" )
         return make_unique<OperatorDecayFunction<std::plus<double>>>( elt );
-    }else if( func == "minus" ){
+    else if( func == "minus" )
         return make_unique<OperatorDecayFunction<std::minus<double>>>( elt );
-    }else if( func == "divides" ){
+    else if( func == "divides" )
         return make_unique<OperatorDecayFunction<std::divides<double>>>( elt );
-    }else if( func == "multiplies" ){
+    else if( func == "multiplies" )
         return make_unique<OperatorDecayFunction<std::multiplies<double>>>( elt );
-    }else{
+    else
         throw xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
-    }
 }
 
 } }
