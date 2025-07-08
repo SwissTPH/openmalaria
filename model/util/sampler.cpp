@@ -76,9 +76,10 @@ double NormalSampler::sample(LocalRng& rng) const{
     return rng.gauss( mu, sigma );
 }
 
-unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanCV( double mean, double CV )
+unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanCV( double mean, double CV, std::optional<double> truncate )
 {
     unique_ptr<LognormalSampler> sampler = std::make_unique<LognormalSampler>();
+    sampler->truncate = truncate;
 
     // The distribution is "const"
     if( CV == 0.0 )
@@ -114,8 +115,9 @@ unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanCV( double mean, do
     return sampler;
 }
 
-unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanVariance( double mean, double variance ){
+unique_ptr<util::LognormalSampler> LognormalSampler::fromMeanVariance( double mean, double variance, std::optional<double> truncate ){
     unique_ptr<LognormalSampler> sampler = std::make_unique<LognormalSampler>();
+    sampler->truncate = truncate;
 
     // The distribution is "const"
     if( variance == 0.0)
@@ -156,11 +158,17 @@ double LognormalSampler::mean() const{
 }
 
 double LognormalSampler::sample(LocalRng& rng) const{
-    if( sigma == 0.0 ){
-        return exp( mu );
-    } else {
-        return rng.log_normal( mu, sigma );
-    }
+     double value;
+
+    if( sigma == 0.0 )
+        value = exp( mu );
+    else
+        value = rng.log_normal( mu, sigma );
+
+    if (truncate && value > *truncate)
+        return *truncate;
+
+    return value;
 }
 
 double LognormalSampler::cdf(double x) const {
@@ -177,7 +185,7 @@ double LognormalSampler::cdf(double x) const {
     return gsl_cdf_lognormal_P(x, mu, sigma);
 }
 
-unique_ptr<util::GammaSampler> GammaSampler::fromMeanCV( double mean, double CV )
+unique_ptr<util::GammaSampler> GammaSampler::fromMeanCV( double mean, double CV, std::optional<double> truncate )
 {
     if( mean <= 0 )
         throw util::xml_scenario_error( "gamma: required mean > 0" );
@@ -185,7 +193,7 @@ unique_ptr<util::GammaSampler> GammaSampler::fromMeanCV( double mean, double CV 
         throw util::xml_scenario_error( "gamma: required CV >= 0" );
 
     unique_ptr<GammaSampler> sampler = std::make_unique<GammaSampler>();
-    
+    sampler->truncate = truncate;
     sampler->mu = mean;
     sampler->CV = CV;
 
@@ -203,7 +211,7 @@ unique_ptr<util::GammaSampler> GammaSampler::fromMeanCV( double mean, double CV 
     return sampler;
 }
 
-unique_ptr<util::GammaSampler> GammaSampler::fromMeanVariance( double mean, double variance )
+unique_ptr<util::GammaSampler> GammaSampler::fromMeanVariance( double mean, double variance, std::optional<double> truncate )
 {
     if( mean <= 0 )
         throw util::xml_scenario_error( "gamma: required mean > 0" );
@@ -211,13 +219,13 @@ unique_ptr<util::GammaSampler> GammaSampler::fromMeanVariance( double mean, doub
         throw util::xml_scenario_error( "gamma: required variance >= 0" );
 
     unique_ptr<GammaSampler> sampler = std::make_unique<GammaSampler>();
-    
+    sampler->truncate = truncate;
     sampler->mu = mean;
+    sampler->variance = variance;
 
     if( variance == 0.0 )
         return sampler;
 
-    sampler->variance = variance;
     // sigma / mu = 1 / sqrt(k)
     // sqrt(k) = mu / sigma
     // k = mu^2 / variance
@@ -234,9 +242,17 @@ double GammaSampler::mean() const {
 }
 
 double GammaSampler::sample(LocalRng& rng) const{
-    if(isnan(theta)) // CV=0
-        return mu;
-    return rng.gamma(k, theta);
+    double value;
+
+    if (std::isnan(theta)) // CV=0
+        value = mu;
+    else
+        value = rng.gamma(k, theta);
+
+    if (truncate && value > *truncate)
+        return *truncate;
+
+    return value;
 }
 
 double GammaSampler::cdf(double x) const {

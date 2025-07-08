@@ -22,10 +22,12 @@
 #ifndef UTIL_SAMPLER
 #define UTIL_SAMPLER
 
+#include <limits>
+#include <optional>
+
 #include "Global.h"
 #include "util/random.h"
 #include "schema/util.h"
-#include <limits>
 
 namespace OM { namespace util {
     
@@ -138,7 +140,7 @@ namespace OM { namespace util {
          * @param CV    Desired coefficient of variation (must be ≥ 0).
          * @throws util::xml_scenario_error  If mean < 0 or CV < 0, or if mean > 0 but CV == 0 is invalid.
          */
-        static unique_ptr<util::LognormalSampler> fromMeanCV( double mean, double CV );
+        static unique_ptr<util::LognormalSampler> fromMeanCV( double mean, double CV, std::optional<double> truncate = std::nullopt);
 
         /**
          * Configure the log-normal distribution from a target mean and variance.
@@ -155,7 +157,7 @@ namespace OM { namespace util {
          * @param variance  Desired variance of X (must be ≥ 0).
          * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
          */
-        static unique_ptr<util::LognormalSampler> fromMeanVariance( double mean, double variance );
+        static unique_ptr<util::LognormalSampler> fromMeanVariance( double mean, double variance, std::optional<double> truncate = std::nullopt);
 
         /** Scale the mean (i.e. multiply by a scalar).
          * 
@@ -193,6 +195,7 @@ namespace OM { namespace util {
         double mu       = std::numeric_limits<double>::signaling_NaN(); 
         double sigma    = std::numeric_limits<double>::signaling_NaN();
         double CV       = std::numeric_limits<double>::signaling_NaN();
+        std::optional<double> truncate = std::nullopt;
     };
 
     /** Sampler for gamma values */
@@ -220,7 +223,7 @@ namespace OM { namespace util {
          * @param CV    Desired coefficient of variation (must be ≥ 0).
          * @throws util::xml_scenario_error  If mean ≤ 0 or CV < 0.
          */
-        static unique_ptr<util::GammaSampler> fromMeanCV( double mean, double CV );
+        static unique_ptr<util::GammaSampler> fromMeanCV( double mean, double CV, std::optional<double> truncate = std::nullopt);
 
         /**
          * Configure the gamma distribution from a target mean and variance.
@@ -237,7 +240,7 @@ namespace OM { namespace util {
          * @param variance  Desired variance of the distribution (must be ≥ 0).
          * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
          */
-        static unique_ptr<util::GammaSampler> fromMeanVariance( double mean, double variance );
+        static unique_ptr<util::GammaSampler> fromMeanVariance( double mean, double variance, std::optional<double> truncate = std::nullopt);
         
         /** Get the mean. */
         double mean() const;
@@ -267,6 +270,7 @@ namespace OM { namespace util {
         double theta    = std::numeric_limits<double>::signaling_NaN();
         double variance = std::numeric_limits<double>::signaling_NaN();
         double CV       = std::numeric_limits<double>::signaling_NaN();
+        std::optional<double> truncate = std::nullopt;
     };
 
     /** Create a new <SamplerT> from a xml snippet. */
@@ -311,11 +315,16 @@ namespace OM { namespace util {
         if (hasCV == hasVar)   // both present or both absent
             throw util::xml_scenario_error("\"distr=" + d + "\": exactly one of attributes \"CV\" or \"variance\" must be specified");
 
-        // 5. Build the sampler
+        // 5. Check for the optinal truncation parameter
+        std::optional<double> truncate = elt.getTruncate().present()
+            ? std::optional<double>{elt.getTruncate().get()}
+            : std::nullopt;
+
+        // 6. Build the sampler
         if(hasCV)
-            return SamplerT::fromMeanCV(mean, elt.getCV().get());
+            return SamplerT::fromMeanCV(mean, elt.getCV().get(), truncate);
         else
-            return SamplerT::fromMeanVariance(mean, elt.getVariance().get());
+            return SamplerT::fromMeanVariance(mean, elt.getVariance().get(), truncate);
     }
 
     /** Create a Sampler from a SampledValueCV xml snippet. */
