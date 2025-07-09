@@ -298,6 +298,9 @@ namespace OM { namespace util {
         }
 
         // 3. Check that XML 'distr' matches the compile‑time sampler type
+        if (expectedDistr == nullptr)
+            throw util::xml_scenario_error("createSampler<SamplerT>: expected SamplerT to be a valid Sampler");
+
         if (d != expectedDistr)
             throw util::xml_scenario_error("\"distr=" + d + "\": expected \"" + expectedDistr + "\" or \"const\"");
 
