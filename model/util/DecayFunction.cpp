@@ -19,22 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "util/DecayFunction.h"
-#include "util/errors.h"
-#include "util/StreamValidator.h"
-#include "util/random.h"
-#include "util/UnitParse.h"
 
-#include <cmath>
-#include <functional>
-#include <stdexcept>
+#include <limits>
+#include <memory>
+
+#include "Global.h"
+#include "util/sampler.h"
+#include "util/UnitParse.h"
+#include "util/DecayFunction.h"
 
 namespace OM {
 namespace util {
-
-double readLToDays( const scnXml::DecayFunction& elt ){
+    
+inline double readLToDays( const scnXml::DecayFunction& elt ){
     if( !elt.getL().present() ){
-        throw util::xml_scenario_error( "decay function: attribute L required" );
+        throw xml_scenario_error( "decay function: attribute L required" );
     }
     return UnitParse::durationToDays(elt.getL().get(), UnitParse::YEARS);
 }
@@ -58,9 +57,9 @@ public:
     }
 
     unique_ptr<DecayFunction> hetSample(double hetFactor) const {
-        unique_ptr<ConstantDecayFunction> copy = make_unique<ConstantDecayFunction>(*this);
+        unique_ptr<ConstantDecayFunction> copy = std::make_unique<ConstantDecayFunction>(*this);
         copy->hetFactor = hetFactor;
-        return move(copy);
+        return std::move(copy);
     }
 
 private:
@@ -106,12 +105,10 @@ public:
     {}
     
     double compute(double effectiveAge) const{
-        // cout << "Linear " << effectiveAge << " " << invL << " " << hetFactor <<endl;
-        if( effectiveAge * invL * hetFactor < 1.0 ){
+        if( effectiveAge * invL * hetFactor < 1.0 )
             return 1.0 - effectiveAge * invL * hetFactor;
-        }else{
+        else
             return 0.0;
-        }
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -223,11 +220,10 @@ public:
     {}
 
     double compute(double effectiveAge) const{
-        if( effectiveAge * invL * hetFactor < 1.0 ){
+        if( effectiveAge * invL * hetFactor < 1.0 )
             return exp( k - k / (1.0 - pow(effectiveAge * invL * hetFactor, 2.0)) );
-        }else{
+        else
             return 0.0;
-        }
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
@@ -251,10 +247,10 @@ public:
         DecayFunction(elt.getIncreasing(), elt.getInitialEfficacy(), elt.getCV()) {
         const scnXml::DecayFunction::DecaySequence &decaySequence = elt.getDecay();
         if(decaySequence.size() != 2)
-            throw util::xml_scenario_error("Operator decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
+            throw xml_scenario_error("Operator decay function expects two decay functions, " + to_string(decaySequence.size()) +"  were given.");
 
-        f1 = makeObject(decaySequence[0], "Operator::f1");
-        f2 = makeObject(decaySequence[1], "Operator::f2");
+        f1 = DecayFunction::makeObject(decaySequence[0], "Operator::f1");
+        f2 = DecayFunction::makeObject(decaySequence[1], "Operator::f2");
     }
 
     OperatorDecayFunction(const OperatorDecayFunction &copy, unique_ptr<DecayFunction> f1, unique_ptr<DecayFunction> f2) : 
@@ -282,37 +278,35 @@ private:
 };
 
 // -----  interface / static functions  -----
-
 unique_ptr<DecayFunction> DecayFunction::makeObject(
     const scnXml::DecayFunction& elt, const char* eltName
 ){
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
-    if( func == "constant" ){
-        return unique_ptr<DecayFunction>(new ConstantDecayFunction( elt ));
-    }else if( func == "step" ){
-        return unique_ptr<DecayFunction>(new StepDecayFunction( elt ));
-    }else if( func == "linear" ){
-        return unique_ptr<DecayFunction>(new LinearDecayFunction( elt ));
-    }else if( func == "exponential" ){
-        return unique_ptr<DecayFunction>(new ExponentialDecayFunction( elt ));
-    }else if( func == "weibull" ){
-        return unique_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
-    }else if( func == "hill" ){
-        return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
-    }else if( func == "smooth-compact" ){
-        return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
-    }else if( func == "plus" ){
-        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::plus<double>>( elt ));
-    }else if( func == "minus" ){
-        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::minus<double>>( elt ));
-    }else if( func == "divides" ){
-        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::divides<double>>( elt ));
-    }else if( func == "multiplies" ){
-        return unique_ptr<DecayFunction>(new OperatorDecayFunction<std::multiplies<double>>( elt ));
-    }else{
-        throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
-    }
+    if( func == "constant" )
+        return make_unique<ConstantDecayFunction>( elt );
+    else if( func == "step" )
+        return make_unique<StepDecayFunction>( elt );
+    else if( func == "linear" )
+        return make_unique<LinearDecayFunction>( elt );
+    else if( func == "exponential" )
+        return make_unique<ExponentialDecayFunction>( elt );
+    else if( func == "weibull" )
+        return make_unique<WeibullDecayFunction>( elt );
+    else if( func == "hill" )
+        return make_unique<HillDecayFunction>( elt );
+    else if( func == "smooth-compact" )
+        return make_unique<SmoothCompactDecayFunction>( elt );
+    else if( func == "plus" )
+        return make_unique<OperatorDecayFunction<std::plus<double>>>( elt );
+    else if( func == "minus" )
+        return make_unique<OperatorDecayFunction<std::minus<double>>>( elt );
+    else if( func == "divides" )
+        return make_unique<OperatorDecayFunction<std::divides<double>>>( elt );
+    else if( func == "multiplies" )
+        return make_unique<OperatorDecayFunction<std::multiplies<double>>>( elt );
+    else
+        throw xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
 }
 
 } }

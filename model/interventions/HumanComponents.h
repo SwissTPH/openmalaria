@@ -24,6 +24,7 @@
 
 #include "Global.h"
 #include "interventions/Interfaces.hpp"
+#include "util/sampler.h"
 #include "util/DecayFunction.h"
 
 namespace OM {

@@ -65,7 +65,6 @@ set (Model_CPP
   mon/misc.cpp
   mon/Continuous.cpp
   
-  util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
   util/ModelOptions.cpp
@@ -76,6 +75,7 @@ set (Model_CPP
   util/DocumentLoader.cpp
   util/random.cpp
   util/UnitParse.cpp
+  util/DecayFunction.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp

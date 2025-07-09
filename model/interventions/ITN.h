@@ -207,8 +207,8 @@ private:
     };
 
     NormalSampler initialInsecticide;
-    LognormalSampler holeRate;	// holes per step
-    LognormalSampler ripRate;	// rips per hole per step
+    unique_ptr<LognormalSampler> holeRate;	// holes per step
+    unique_ptr<LognormalSampler> ripRate;	// rips per hole per step
     double maxInsecticide;		// maximum initial insecticide
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
     unique_ptr<DecayFunction> insecticideDecay;

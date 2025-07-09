@@ -29,17 +29,7 @@
 
 namespace OM { namespace util {
     
-    class Sampler
-    {
-    public:
-        virtual ~Sampler() = default;
-        virtual double sample(LocalRng& rng) const = 0;
-        virtual void scaleMean( double scalar ) = 0;
-        virtual double mean() const = 0;
-        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
-    };
-
-    /** A normal sample, which can be turned into various log-normal samples.
+        /** A normal sample, which can be turned into various log-normal samples.
      * 
      * Allows generation of correlated log-normal samples with different sigma.
      */
@@ -67,7 +57,7 @@ namespace OM { namespace util {
     private:
         NormalSample( double variate ) : x(variate) {}
         
-        double x;	// variate (sampled from N(0,1))
+        double x;   // variate (sampled from N(0,1))
     };
     
     /** Sampler for normal values */
@@ -111,33 +101,61 @@ namespace OM { namespace util {
         double mu, sigma;
     };
     
+    class Sampler
+    {
+    public:
+        virtual ~Sampler() = default;
+        virtual std::unique_ptr<Sampler> clone() const = 0;
+        virtual double sample(LocalRng& rng) const = 0;
+        virtual double sample(NormalSample sample) const{ throw std::runtime_error("sample(NormalSample) not implemented for this distribution");}
+        virtual double mean() const = 0;
+        virtual double cdf(double x) const { throw std::runtime_error("cdf() not implemented for this distribution"); }
+    };
+    
     /** Sampler for log-normal values */
     class LognormalSampler : public Sampler {
     public:
-        LognormalSampler() :
-            mu( numeric_limits<double>::signaling_NaN() ),
-            sigma( numeric_limits<double>::signaling_NaN() ),
-            CV( numeric_limits<double>::signaling_NaN() )
-        {}
+        LognormalSampler() = default;
+        LognormalSampler& operator=(const LognormalSampler&) = default;
 
-        LognormalSampler(double mean, const scnXml::SampledValueCV& elt) :
-            mu( numeric_limits<double>::signaling_NaN() ),
-            sigma( numeric_limits<double>::signaling_NaN() )
-        {
-            setParams(mean, elt);
+        std::unique_ptr<Sampler> clone() const override {
+            return std::make_unique<LognormalSampler>(*this);
         }
-        
-        /// Set specified mean and CV from XML element
-        void setParams( const scnXml::SampledValueLN& elt );
 
-        /// Set specified mean and CV from XML element
-        void setParams( double mean, const scnXml::SampledValueCV& elt );
+        /**
+         * Configure the log-normal distribution from a target mean and coefficient of variation.
+         *
+         * For CV > 0, this computes the underlying normal parameters μ and σ such that
+         *  E[X] = exp(μ + σ²/2) = mean
+         *  CV   = √(exp(σ²) − 1)
+         *
+         * If CV == 0, the distribution collapses to a point mass:
+         *  - σ is set to 0
+         *  - μ is set to ln(mean), or –∞ if mean == 0
+         *  - sampling and CDF methods treat X == exp(μ)
+         *
+         * @param mean  Desired mean of X (must be ≥ 0; if mean == 0 then CV must be 0).
+         * @param CV    Desired coefficient of variation (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean < 0 or CV < 0, or if mean > 0 but CV == 0 is invalid.
+         */
+        static unique_ptr<util::LognormalSampler> fromMeanCV( double mean, double CV );
 
-        /** Set log-normal parameters from mean and CV. */
-        void setMeanCV( double mean, double CV );
-
-        /** Set log-normal parameters from mean and variance. */
-        void setMeanVariance( double mean, double CV );
+        /**
+         * Configure the log-normal distribution from a target mean and variance.
+         *
+         * For variance > 0, this computes the equivalent CV = variance/mean and then
+         * derives μ and σ via the same formulas as in setMeanCV.
+         *
+         * If variance == 0, the distribution collapses to a point mass:
+         *  - σ is set to 0
+         *  - μ is set to ln(mean)
+         *  - sampling and CDF methods treat X == exp(μ)
+         *
+         * @param mean      Desired mean of X (must be > 0).
+         * @param variance  Desired variance of X (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
+         */
+        static unique_ptr<util::LognormalSampler> fromMeanVariance( double mean, double variance );
 
         /** Scale the mean (i.e. multiply by a scalar).
          * 
@@ -151,6 +169,11 @@ namespace OM { namespace util {
         /** Sample a value. */
         double sample(LocalRng& rng) const;
         
+        /** Create a log-normal sample from an existing normal sample. */
+        double sample(NormalSample sample) const{
+            return sample.asLognormal( mu, sigma );
+        }
+
         /**
          * Compute the cumulative distribution function (CDF) of this log-normal sampler.
          *
@@ -164,50 +187,57 @@ namespace OM { namespace util {
          * @return   P(X ≤ x), where X ~ LogNormal(mu, sigma²).
          */
         double cdf(double x) const;
-
-        /** Create a log-normal sample from an existing normal sample. */
-        inline double sample(NormalSample sample) const{
-            return sample.asLognormal( mu, sigma );
-        }
-        
-        /** Return true if and only if parameters have been set. */
-        inline bool isSet() const{
-            return mu == mu;    // mu is NaN iff not set
-        }
         
     private:
         // log-space parameters
-        double mu, sigma;
-        double CV;
+        double mu       = std::numeric_limits<double>::signaling_NaN(); 
+        double sigma    = std::numeric_limits<double>::signaling_NaN();
+        double CV       = std::numeric_limits<double>::signaling_NaN();
     };
 
     /** Sampler for gamma values */
     class GammaSampler : public Sampler {
     public:
-        GammaSampler(const scnXml::SampledValueCV& elt) :
-            mu( 1.0 ),
-            k( numeric_limits<double>::signaling_NaN() ),
-            theta( numeric_limits<double>::signaling_NaN() ),
-            variance( numeric_limits<double>::signaling_NaN() ),
-            CV( numeric_limits<double>::signaling_NaN() )
-        {
-            setParams(mu, elt);
+        GammaSampler() = default;
+        GammaSampler& operator=(const GammaSampler&) = default;
+
+        std::unique_ptr<Sampler> clone() const override {
+            return std::make_unique<GammaSampler>(*this);
         }
-        
-        /// Set specified mean and CV from XML element
-        void setParams( double mean, const scnXml::SampledValueCV& elt );
-        
-        /** Set gamma parameters from mean and CV. */
-        void setMeanCV( double mean, double CV );
 
-        /** Set gamma parameters from mean and variance. */
-        void setMeanVariance( double mean, double variance );
+        /**
+         * Configure the gamma distribution from a target mean and coefficient of variation.
+         *
+         * Computes the shape (k) and scale (θ) parameters so that
+         *  mean = k * θ
+         *  CV   = 1 / √k
+         *
+         * If CV == 0, the distribution collapses to a point mass; in this case
+         *  - k and θ are set to NaN
+         *  - sampling and CDF methods treat this as a degenerate distribution.
+         *
+         * @param mean  Desired mean of the distribution (must be > 0).
+         * @param CV    Desired coefficient of variation (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or CV < 0.
+         */
+        static unique_ptr<util::GammaSampler> fromMeanCV( double mean, double CV );
 
-        /** Scale the mean (i.e. multiply by a scalar).
-         * 
-         * Note that sigma (when specified via CV) is independent of the mean,
-         * so one can safely multiply the mean without affecting CV. */
-        void scaleMean( double scalar );
+        /**
+         * Configure the gamma distribution from a target mean and variance.
+         *
+         * Computes the shape (k) and scale (θ) parameters so that
+         *  mean     = k * θ
+         *  variance = k * θ²
+         *
+         * If variance == 0, the distribution collapses to a point mass; in this case
+         *  - k and θ are set to NaN
+         *  - sampling and CDF methods treat this as a degenerate distribution at `mean`.
+         *
+         * @param mean      Desired mean of the distribution (must be > 0).
+         * @param variance  Desired variance of the distribution (must be ≥ 0).
+         * @throws util::xml_scenario_error  If mean ≤ 0 or variance < 0.
+         */
+        static unique_ptr<util::GammaSampler> fromMeanVariance( double mean, double variance );
         
         /** Get the mean. */
         double mean() const;
@@ -223,8 +253,8 @@ namespace OM { namespace util {
          *  - If CV == 0 or variance == 0, the distribution collapses to a point mass,
          * so returns 1 if x ≥ mu, else 0.
          *  - Otherwise uses gsl_cdf_gamma_P(x, k, theta) where
-         *      • k     = shape parameter
-         *      • theta = scale parameter
+         *      k     = shape parameter
+         *      theta = scale parameter
          *
          * @param x  The point at which to evaluate the CDF (must be a real number).
          * @return   P(X ≤ x), where X ~ Gamma(k, θ).
@@ -232,11 +262,81 @@ namespace OM { namespace util {
         double cdf(double x) const;
         
     private:
-        double mu, k, theta;
-        double variance;
-        double CV;
+        double mu       = std::numeric_limits<double>::signaling_NaN();
+        double k        = std::numeric_limits<double>::signaling_NaN();
+        double theta    = std::numeric_limits<double>::signaling_NaN();
+        double variance = std::numeric_limits<double>::signaling_NaN();
+        double CV       = std::numeric_limits<double>::signaling_NaN();
     };
-    
+
+    /** Create a new <SamplerT> from a xml snippet. */
+    template <typename SamplerT>
+    inline unique_ptr<SamplerT> createSampler(double mean, const scnXml::SampledValueCV& elt)
+    {
+        // 1.  Compile‑time identify which concrete sampler we are handling ─────
+        constexpr bool isLognormal = std::is_same_v<SamplerT, LognormalSampler>;
+        constexpr bool isGamma     = std::is_same_v<SamplerT, GammaSampler>;
+        constexpr const char* expectedDistr =
+            isLognormal ? "lognormal" :
+            isGamma     ? "gamma"
+                        : nullptr;
+
+        const std::string& d = elt.getDistr();
+
+        // 2. Special handling for the “const” alias (lognormal with CV = 0)
+        if( d == "const" )
+        {
+            if constexpr (!isLognormal) // only allowed for lognormal
+                throw util::xml_scenario_error("\"distr=\"const\": expected \"lognormal\"");
+
+            if( elt.getCV().present() && elt.getCV().get() != 0.0 )
+                throw util::xml_scenario_error( "\"distr="+d+"\": attribute \"CV\" must be zero or omitted when distr=\"const\" or is omitted" );
+            if( elt.getVariance().present() && elt.getVariance().get() != 0.0 )
+                throw util::xml_scenario_error( "\"distr="+d+"\": attribute \"variance\" must be zero or omitted when distr=\"const\" or is omitted" );
+            
+            return SamplerT::fromMeanCV(mean, 0.0);
+        }
+
+        // 3. Check that XML 'distr' matches the compile‑time sampler type
+        if (expectedDistr == nullptr)
+            throw util::xml_scenario_error("createSampler<SamplerT>: expected SamplerT to be a valid Sampler");
+
+        if (d != expectedDistr)
+            throw util::xml_scenario_error("\"distr=" + d + "\": expected \"" + expectedDistr + "\" or \"const\"");
+
+        // 4. Exactly one of CV / variance must be supplied
+        const bool hasCV  = elt.getCV().present();
+        const bool hasVar = elt.getVariance().present();
+
+        if (hasCV == hasVar)   // both present or both absent
+            throw util::xml_scenario_error("\"distr=" + d + "\": exactly one of attributes \"CV\" or \"variance\" must be specified");
+
+        // 5. Build the sampler
+        if(hasCV)
+            return SamplerT::fromMeanCV(mean, elt.getCV().get());
+        else
+            return SamplerT::fromMeanVariance(mean, elt.getVariance().get());
+    }
+
+    /** Create a Sampler from a SampledValueCV xml snippet. */
+    inline std::unique_ptr<util::Sampler> createSampler(double mean, const scnXml::SampledValueCV& elt)
+    {
+        const std::string& d = elt.getDistr();
+
+        if (d == "const" || d == "lognormal")
+            return createSampler<util::LognormalSampler>(mean, elt);
+        else if (d == "gamma")
+            return createSampler<util::GammaSampler>(mean,  elt);
+        else
+            throw util::xml_scenario_error("\"distr=" + d + "\": expected \"const\", \"lognormal\" or \"gamma\"");
+    }
+
+    /** Create a LognormalSampler from a SampledValueLN xml snippet. */
+    inline std::unique_ptr<LognormalSampler> createSampler(const scnXml::SampledValueLN& elt)
+    {
+        return createSampler<LognormalSampler>(elt.getMean(), static_cast<const scnXml::SampledValueCV&>(elt));
+    }
+
     /** Sampler for the Beta distribution.
      *
      * Input may be alpha and beta or mean and variance. As a special case,
