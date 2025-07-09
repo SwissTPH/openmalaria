@@ -382,6 +382,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
+    <xs:attribute name="truncate" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Optional maximum value for sampled values.
+
+          When set, this attribute enforces an upper limit on samples,
+          which can help avoid unrealistically high values, especially
+          when using lognormal or gamma distributions with high variance
+          or coefficient of variation (CV).
+
+          If not specified, samples will not be truncated.
+        </xs:documentation>
+        <xs:appinfo>name:Maximum value of samples;units:unitless;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
  </xs:complexType>
  <xs:complexType name="SampledValueLN">
   <xs:annotation>
