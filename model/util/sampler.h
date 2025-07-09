@@ -315,7 +315,7 @@ namespace OM { namespace util {
         if (hasCV == hasVar)   // both present or both absent
             throw util::xml_scenario_error("\"distr=" + d + "\": exactly one of attributes \"CV\" or \"variance\" must be specified");
 
-        // 5. Check for the optinal truncation parameter
+        // 5. Check for the optional truncation parameter
         std::optional<double> truncate = elt.getTruncate().present()
             ? std::optional<double>{elt.getTruncate().get()}
             : std::nullopt;
