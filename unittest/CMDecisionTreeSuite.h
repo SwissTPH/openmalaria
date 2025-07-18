@@ -119,26 +119,26 @@ public:
         // test that dt.exec chooses to treat 80% and no action 20% of the time:
 	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt ), 0.8, LIM );
     }
-    
+
     void testUC2Test () {
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
         scnXml::DecisionTree simpleTreat;
         simpleTreat.getTreatPKPD().push_back( treat1 );
         scnXml::DecisionTree noAction;
         noAction.setNoTreatment( scnXml::DTNoTreatment() );
-        
+
         scnXml::DTCaseType ct( simpleTreat,  // first line: simple treatment
                             noAction );     // second line: no action
         scnXml::DecisionTree dt;
         dt.setCaseType( ct );
-        
-	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
-	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
-	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA |
-                Episode::SECOND_CASE );
-	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
+
+        hd->pgState = Episode::MALARIA;
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
+
+        hd->pgState = static_cast<Episode::State>( Episode::MALARIA | Episode::SECOND_CASE );
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
     }
-    
+
     void testParasiteTest () {
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
         scnXml::DecisionTree simpleTreat;
