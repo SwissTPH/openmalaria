@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-
 
 #include <limits>
 #include <memory>

@@ -22,7 +22,7 @@
 #define Hmod_XoshiroSuite
 
 #include <cxxtest/TestSuite.h>
-#include "util/xoshiro.hpp"
+#include "util/xoshiro.h"
 
 class XoshiroSuite : public CxxTest::TestSuite
 {
