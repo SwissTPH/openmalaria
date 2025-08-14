@@ -35,11 +35,6 @@ artifacts:
 deploy:
   force_update: true
   provider: GitHub
-  description: |
-    Release of OpenMalaria.
-    
-    Updates: https://github.com/SwissTPH/openmalaria/wiki/SchemaUpdateGuide
-    Changelog: https://github.com/SwissTPH/openmalaria/wiki/Changelog
   auth_token:
     secure: H6XDjpkpbS8cfYxfGwOwEDBQEuAqnIeDtnG3eHuqTf6gdOjge80AFM2h5iaqTLcw
   artifact: openMalaria-windows.zip
