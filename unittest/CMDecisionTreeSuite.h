@@ -132,10 +132,12 @@ public:
         scnXml::DecisionTree dt;
         dt.setCaseType( ct );
 
-        hd->pgState = Episode::MALARIA;
+        using Underlying = std::underlying_type_t<Pathogenesis::State>;
+        hd->pgState = static_cast<Episode::State>( static_cast<Underlying>(Pathogenesis::STATE_MALARIA) );
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
 
-        hd->pgState = static_cast<Episode::State>( Episode::MALARIA | Episode::SECOND_CASE );
+        hd->pgState = static_cast<Episode::State>( static_cast<Underlying>(Pathogenesis::STATE_MALARIA) | Episode::SECOND_CASE );
+
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
     }
 
