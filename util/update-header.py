@@ -116,4 +116,8 @@ def recursive_traversal(dir, copyright):
 
 cright = open("util/licence-template.txt","r+").read()
 recursive_traversal("model", cright)
+recursive_traversal("unittest", cright)
+
+print('Remember to update the text for --version in model/CommandLine.cpp!')
+
 exit()
