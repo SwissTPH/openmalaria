@@ -1,6 +1,6 @@
 OpenMalaria
 ============
- 
+
 This git-repository contains source-code for OpenMalaria, a simulator program
 for studying malaria epidemiology and the impacts of interventions against
 malaria.

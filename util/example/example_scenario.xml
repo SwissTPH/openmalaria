@@ -1,24 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- This file is part of OpenMalaria.
-Copyright © 2005-2025 Swiss Tropical and Public Health Institute
-Copyright © 2005-2015 Liverpool School Of Tropical Medicine
-Copyright © 2020-2025 University of Basel
-Copyright © 2025 The Kids Research Institute Australia
-
-OpenMalaria is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public Licence as published by
-the Free Software Foundation; either version 2 of the Licence, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public Licence for more details.
-
-You should have received a copy of the GNU General Public Licence
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor,
-Boston, MA 02110-1301, USA. -->
 <om:scenario xmlns:om="http://openmalaria.org/schema/scenario_48" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="example" schemaVersion="48" xsi:schemaLocation="http://openmalaria.org/schema/scenario_48 scenario_48.xsd">
     <!-- This is an example scenario.
     More information is available in the official documentation: https://swisstph.github.io/openmalaria/schema-latest.html

@@ -1,25 +1,23 @@
-/* This file is part of OpenMalaria.
- * 
- * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
- * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2025 University of Basel
- * Copyright (C) 2025 The Kids Research Institute Australia
- *
- * OpenMalaria is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
- * your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
-
+/*
+ This file is part of OpenMalaria.
+ 
+ Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
+ 
+ OpenMalaria is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or (at
+ your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+*/
 // Unittest for the EventScheduler case management
 
 #ifndef Hmod_CMDecisionTreeSuite
@@ -121,28 +119,26 @@ public:
         // test that dt.exec chooses to treat 80% and no action 20% of the time:
 	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt ), 0.8, LIM );
     }
-
+    
     void testUC2Test () {
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
         scnXml::DecisionTree simpleTreat;
         simpleTreat.getTreatPKPD().push_back( treat1 );
         scnXml::DecisionTree noAction;
         noAction.setNoTreatment( scnXml::DTNoTreatment() );
-
+        
         scnXml::DTCaseType ct( simpleTreat,  // first line: simple treatment
                             noAction );     // second line: no action
         scnXml::DecisionTree dt;
         dt.setCaseType( ct );
-
-        using Underlying = std::underlying_type_t<Pathogenesis::State>;
-        hd->pgState = static_cast<Episode::State>( static_cast<Underlying>(Pathogenesis::STATE_MALARIA) );
-        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
-
-        hd->pgState = static_cast<Episode::State>( static_cast<Underlying>(Pathogenesis::STATE_MALARIA) | Episode::SECOND_CASE );
-
-        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
+        
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA |
+                Episode::SECOND_CASE );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
     }
-
+    
     void testParasiteTest () {
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
         scnXml::DecisionTree simpleTreat;
