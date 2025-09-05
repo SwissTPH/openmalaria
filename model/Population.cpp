@@ -81,8 +81,6 @@ void Population::update()
 {
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // size is assumed to be the _actual and exact_ population size by other code.
-    //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (size * exp( AgeStructure::rho * sim::ts1().inSteps() ));
     int cumPop = 0;
 
     for (auto it = humans.begin(); it != humans.end();) {

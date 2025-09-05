@@ -73,7 +73,6 @@ namespace OM
         static vector<double> ageGroupBounds;
 	static vector<double> ageGroupPercent;
         //@}
-        static double initialRho;
         /** Parameters defining smooth curve of target age-distribution.
         *
         * Set by estimateRemovalRates() (via setDemoParameters()) and used by
@@ -83,7 +82,8 @@ namespace OM
 	static double mu1;
 	static double alpha0;
 	static double alpha1;
-	static double rho;
+        // rho is growth rate of human population.
+	constexpr static double rho = 0.0;
         //@}
 	//END
 	

@@ -36,12 +36,10 @@ namespace OM {
 vector<double> AgeStructure::ageGroupBounds;
 vector<double> AgeStructure::ageGroupPercent;
 
-double AgeStructure::initialRho = 0.0;
 double AgeStructure::mu0;
 double AgeStructure::mu1;
 double AgeStructure::alpha0;
 double AgeStructure::alpha1;
-double AgeStructure::rho;
 
 vector<double> AgeStructure::cumAgeProp;
 
@@ -137,14 +135,6 @@ void AgeStructure::estimateRemovalRates( const scnXml::Demography& demography ){
     for(size_t i = 0;i < ngroups; i++) {
 	ageGroupPercent[i]  = ageGroupPercent[i] * sumperc;
     }
-    /*
-    RSS between observed and predicted log percentage of population in age groups
-    is minimised for values of mu1 and alpha1
-    calls setDemoParameters to calculate the RSS
-    */
-    if( demography.getGrowthRate().present() ){
-        initialRho = demography.getGrowthRate().get();
-    }
 
     /* NOTE: unused --- why?
     double tol = 0.00000000001;
@@ -160,14 +150,6 @@ void AgeStructure::estimateRemovalRates( const scnXml::Demography& demography ){
 // Static method used by estimateRemovalRates
 double AgeStructure::setDemoParameters (double param1, double param2)
 {
-    rho = initialRho;
-
-    rho = rho * (0.01 * sim::yearsPerStep());
-    if (rho != 0.0)
-	// Issue: in this case the total population size differs from populationSize,
-	// however, some code currently uses this as the total population size.
-	throw util::xml_scenario_error ("Population growth rate provided.");
-    
     const double IMR = 0.1;
     double M_inf = -log (1 - IMR);
     
