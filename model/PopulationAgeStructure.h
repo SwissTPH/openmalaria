@@ -71,19 +71,19 @@ namespace OM
         * setDemoParameters()). */
         //@{
         static vector<double> ageGroupBounds;
-	static vector<double> ageGroupPercent;
+        static vector<double> ageGroupPercent;
         //@}
         /** Parameters defining smooth curve of target age-distribution.
         *
         * Set by estimateRemovalRates() (via setDemoParameters()) and used by
         * setupPyramid(). */
         //@{
-	static double mu0;
-	static double mu1;
-	static double alpha0;
-	static double alpha1;
+        static double mu0;
+        static double mu1;
+        static double alpha0;
+        static double alpha1;
         // rho is growth rate of human population.
-	constexpr static double rho = 0.0;
+        constexpr static double rho = 0.0;
         //@}
 	//END
 	
