@@ -218,7 +218,6 @@ an error is thrown. Use SchemaTranslator to update xml files.</p>
     name=string
     popSize=int
     maximumAgeYrs=double
-  [ growthRate=double ]
   &gt;
 IN THIS ORDER:
 |   &lt;ageGroup ... /&gt; 
@@ -248,14 +247,6 @@ IN THIS ORDER:
 <strong>Min:</strong> 0
 <strong>Max:</strong> 100</p>
 <p>Maximum age of simulated humans in years</p>
-<h4><a class="header" href="#growth-rate-of-human-population" id="growth-rate-of-human-population">Growth rate of human population</a></h4>
-<pre><code class="language-xml">growthRate=double
-</code></pre>
-<p><strong>Units:</strong> Number
-<strong>Min:</strong> 0
-<strong>Max:</strong> 0</p>
-<p>Growth rate of human population.
-(we should be able to implement this with non-zero values)</p>
 <h2><a class="header" href="#a-nameelt-agegroupa-age-groups" id="a-nameelt-agegroupa-age-groups"><a name="elt-ageGroup"></a> Age groups</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-demography">demography</a> → <a href="#elt-ageGroup">ageGroup</a></p>
 <pre><code class="language-xml">&lt;ageGroup
