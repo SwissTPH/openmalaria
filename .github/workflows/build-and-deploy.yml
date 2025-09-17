@@ -72,7 +72,7 @@ jobs:
       - name: Install - MacOS
         if: startsWith(matrix.os,'macos')
         run: |
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install git coreutils gcc gsl xerces-c xsd || true
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install coreutils gsl xerces-c xsd || true
           HOMEBREW_NO_AUTO_UPDATE=1 brew link --overwrite xsd
       
       - name: Infos
