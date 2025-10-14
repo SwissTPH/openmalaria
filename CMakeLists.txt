@@ -41,12 +41,6 @@ set (OM_STD_LIBS)
 # Note that is doe snot use auto_ptr in the generated code, only in the library headers
 
 if (NOT MSVC)
-  # Enable builds on Raspberry pi (although without optimizations)
-  if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-  else (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -msse2 -mfpmath=sse")
-  endif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
   # We almost always want optimisations enabled:
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2")
 endif (NOT MSVC)

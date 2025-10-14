@@ -51,30 +51,33 @@ jobs:
             compiler: g++
             target: Linux
 
+          - os: ubuntu-24.04-arm
+            compiler: g++
+            target: Linux
+
           - os: macos-15
             compiler: clang
-          
+
           - os: macos-14
             compiler: clang
 
           - os: macos-13
             compiler: clang
-          
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Install - Ubuntu
         if: startsWith(matrix.os,'ubuntu')
         run: |
           sudo apt update
           sudo apt install -y build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx || true
-      
+
       - name: Install - MacOS
         if: startsWith(matrix.os,'macos')
         run: |
           HOMEBREW_NO_AUTO_UPDATE=1 brew install coreutils gsl xerces-c xsd || true
           HOMEBREW_NO_AUTO_UPDATE=1 brew link --overwrite xsd
-      
+
       - name: Infos
         run: |
           echo "Event: ${{ github.event_name }}"
