@@ -1,4 +1,4 @@
-name: Build & Publish OpenMalaria Image
+name: Build & Publish OpenMalaria Docker Image
 
 on:
   workflow_dispatch:
@@ -7,120 +7,19 @@ on:
         description: "Base Docker tag (e.g. 48.0)"
         required: true
         default: "48.0"
-
       push_to_dockerhub:
-        description: "Push images to Docker Hub?"
+        description: "Push multi-arch image to Docker Hub?"
         type: boolean
         required: true
         default: false
-
-      build_amd64:
-        description: "Build AMD64 image?"
-        type: boolean
-        required: true
-        default: false
-
-      build_arm64:
-        description: "Build ARM64 image?"
-        type: boolean
-        required: true
-        default: true
-
-      build_multi:
-        description: "Build multi-arch (requires both builds)?"
-        type: boolean
-        required: true
-        default: false
-
 
 jobs:
 
   # ===========================
-  # INPUT VALIDATION JOB
-  # ===========================
-  validate_inputs:
-    runs-on: ubuntu-latest
-    outputs:
-      amd64: ${{ steps.eval.outputs.amd64 }}
-      arm64: ${{ steps.eval.outputs.arm64 }}
-      multi: ${{ steps.eval.outputs.multi }}
-    steps:
-    - id: eval
-      run: |
-        echo "build_amd64=${{ github.event.inputs.build_amd64 }}"
-        echo "build_arm64=${{ github.event.inputs.build_arm64 }}"
-        echo "build_multi=${{ github.event.inputs.build_multi }}"
-
-        # Convert to shell booleans
-        AMD64=${{ github.event.inputs.build_amd64 == 'true' && 'true' || 'false' }}
-        ARM64=${{ github.event.inputs.build_arm64 == 'true' && 'true' || 'false' }}
-        MULTI=${{ github.event.inputs.build_multi == 'true' && 'true' || 'false' }}
-
-        # 1. Multi-arch overrides everything else
-        if [ "$MULTI" = "true" ]; then
-          echo "multi=true" >> $GITHUB_OUTPUT
-          echo "amd64=true" >> $GITHUB_OUTPUT
-          echo "arm64=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # 2. AMD64-only
-        if [ "$AMD64" = "true" ] && [ "$ARM64" = "false" ]; then
-          echo "amd64=true" >> $GITHUB_OUTPUT
-          echo "arm64=false" >> $GITHUB_OUTPUT
-          echo "multi=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # 3. ARM64-only
-        if [ "$AMD64" = "false" ] && [ "$ARM64" = "true" ]; then
-          echo "amd64=false" >> $GITHUB_OUTPUT
-          echo "arm64=true" >> $GITHUB_OUTPUT
-          echo "multi=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        echo "::error::Invalid architecture selection. Choose ONE of: {amd64 only, arm64 only} OR set multi=true."
-        exit 1
-
-
-  # ===========================
-  # AMD64 BUILD
-  # ===========================
-  build_amd64:
-    needs: validate_inputs
-    if: ${{ needs.validate_inputs.outputs.amd64 == 'true' }}
-    runs-on: ubuntu-22.04
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Docker login (if pushing)
-      if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build AMD64 image (native)
-      run: |
-        docker build \
-          -t swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64 \
-          -f docker/Dockerfile \
-          docker/
-
-    - name: Push AMD64 image
-      if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
-      run: docker push swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64
-
-
-  # ===========================
-  # ARM64 BUILD
+  # ARM64 BUILD (always runs)
   # ===========================
   build_arm64:
-    needs: validate_inputs
-    if: ${{ needs.validate_inputs.outputs.arm64 == 'true' }}
-    runs-on: ubuntu-22.04-arm64
+    runs-on: ubuntu-22.04-arm64  # more stable than ubuntu-latest-arm64
 
     steps:
     - uses: actions/checkout@v4
@@ -132,24 +31,51 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build ARM64 image (native)
+    - name: Build ARM64 image
       run: |
         docker build \
           -t swisstph/openmalaria:${{ github.event.inputs.tag }}-arm64 \
           -f docker/Dockerfile \
           docker/
 
-    - name: Push ARM64 image
+    - name: Push ARM64
       if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
       run: docker push swisstph/openmalaria:${{ github.event.inputs.tag }}-arm64
 
 
   # ===========================
-  # MANIFEST
+  # AMD64 BUILD (only when pushing)
+  # ===========================
+  build_amd64:
+    if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Docker login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build AMD64 image
+      run: |
+        docker build \
+          -t swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64 \
+          -f docker/Dockerfile \
+          docker/
+
+    - name: Push AMD64
+      run: docker push swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64
+
+
+  # ===========================
+  # MANIFEST BUILD (pushing only)
   # ===========================
   manifest:
-    needs: [validate_inputs, build_amd64, build_arm64]
-    if: ${{ needs.validate_inputs.outputs.multi == 'true' && github.event.inputs.push_to_dockerhub == 'true' }}
+    needs: [build_amd64, build_arm64]
+    if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -159,7 +85,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Create and push manifest
+    - name: Create and push multi-arch manifest
       run: |
         docker manifest create swisstph/openmalaria:${{ github.event.inputs.tag }} \
           --amend swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64 \
