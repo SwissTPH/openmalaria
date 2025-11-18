@@ -7,25 +7,90 @@ on:
         description: "Base Docker tag (e.g. 48.0)"
         required: true
         default: "48.0"
+
       push_to_dockerhub:
         description: "Push images to Docker Hub?"
         type: boolean
         required: true
         default: false
-      multi_arch:
-        description: "Build multi-arch (amd64 + arm64)?"
+
+      build_amd64:
+        description: "Build AMD64 image?"
         type: boolean
         required: true
         default: false
 
+      build_arm64:
+        description: "Build ARM64 image?"
+        type: boolean
+        required: true
+        default: true
+
+      build_multi:
+        description: "Build multi-arch (requires both builds)?"
+        type: boolean
+        required: true
+        default: false
+
+
 jobs:
 
   # ===========================
-  # AMD64 BUILD (native runner)
+  # INPUT VALIDATION JOB
+  # ===========================
+  validate_inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      amd64: ${{ steps.eval.outputs.amd64 }}
+      arm64: ${{ steps.eval.outputs.arm64 }}
+      multi: ${{ steps.eval.outputs.multi }}
+    steps:
+    - id: eval
+      run: |
+        echo "build_amd64=${{ github.event.inputs.build_amd64 }}"
+        echo "build_arm64=${{ github.event.inputs.build_arm64 }}"
+        echo "build_multi=${{ github.event.inputs.build_multi }}"
+
+        # Convert to shell booleans
+        AMD64=${{ github.event.inputs.build_amd64 == 'true' && 'true' || 'false' }}
+        ARM64=${{ github.event.inputs.build_arm64 == 'true' && 'true' || 'false' }}
+        MULTI=${{ github.event.inputs.build_multi == 'true' && 'true' || 'false' }}
+
+        # 1. Multi-arch overrides everything else
+        if [ "$MULTI" = "true" ]; then
+          echo "multi=true" >> $GITHUB_OUTPUT
+          echo "amd64=true" >> $GITHUB_OUTPUT
+          echo "arm64=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # 2. AMD64-only
+        if [ "$AMD64" = "true" ] && [ "$ARM64" = "false" ]; then
+          echo "amd64=true" >> $GITHUB_OUTPUT
+          echo "arm64=false" >> $GITHUB_OUTPUT
+          echo "multi=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # 3. ARM64-only
+        if [ "$AMD64" = "false" ] && [ "$ARM64" = "true" ]; then
+          echo "amd64=false" >> $GITHUB_OUTPUT
+          echo "arm64=true" >> $GITHUB_OUTPUT
+          echo "multi=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        echo "::error::Invalid architecture selection. Choose ONE of: {amd64 only, arm64 only} OR set multi=true."
+        exit 1
+
+
+  # ===========================
+  # AMD64 BUILD
   # ===========================
   build_amd64:
-    if: ${{ github.event.inputs.multi_arch == 'true' }}
-    runs-on: ubuntu-latest  # native AMD64
+    needs: validate_inputs
+    if: ${{ needs.validate_inputs.outputs.amd64 == 'true' }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -50,10 +115,12 @@ jobs:
 
 
   # ===========================
-  # ARM64 BUILD (native runner)
+  # ARM64 BUILD
   # ===========================
   build_arm64:
-    runs-on: ubuntu-latest-arm64  # native ARM64
+    needs: validate_inputs
+    if: ${{ needs.validate_inputs.outputs.arm64 == 'true' }}
+    runs-on: ubuntu-latest-arm64
 
     steps:
     - uses: actions/checkout@v4
@@ -78,11 +145,11 @@ jobs:
 
 
   # ===========================
-  # MULTI-ARCH MANIFEST (only if requested)
+  # MANIFEST
   # ===========================
   manifest:
-    needs: [build_amd64, build_arm64]
-    if: ${{ github.event.inputs.multi_arch == 'true' && github.event.inputs.push_to_dockerhub == 'true' }}
+    needs: [validate_inputs, build_amd64, build_arm64]
+    if: ${{ needs.validate_inputs.outputs.multi == 'true' && github.event.inputs.push_to_dockerhub == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
