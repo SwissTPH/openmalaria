@@ -90,7 +90,7 @@ jobs:
   build_amd64:
     needs: validate_inputs
     if: ${{ needs.validate_inputs.outputs.amd64 == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -120,7 +120,7 @@ jobs:
   build_arm64:
     needs: validate_inputs
     if: ${{ needs.validate_inputs.outputs.arm64 == 'true' }}
-    runs-on: ubuntu-latest-arm64
+    runs-on: ubuntu-22.04-arm64
 
     steps:
     - uses: actions/checkout@v4
