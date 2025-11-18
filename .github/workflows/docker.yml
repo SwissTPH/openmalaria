@@ -19,7 +19,7 @@ jobs:
   # ARM64 BUILD (always runs)
   # ===========================
   build_arm64:
-    runs-on: ubuntu-22.04-arm64  # more stable than ubuntu-latest-arm64
+    runs-on: ubuntu-latest-arm64  # more stable than ubuntu-latest-arm64
 
     steps:
     - uses: actions/checkout@v4
