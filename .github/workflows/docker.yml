@@ -19,7 +19,7 @@ jobs:
   # ARM64 BUILD (always runs)
   # ===========================
   build_arm64:
-    runs-on: ubuntu-latest-arm64  # more stable than ubuntu-latest-arm64
+    runs-on: ubuntu-24.04-arm
 
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
   # AMD64 BUILD (only when pushing)
   # ===========================
   build_amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
   manifest:
     needs: [build_amd64, build_arm64]
     if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Docker login
