@@ -1,12 +1,13 @@
 FROM ubuntu:jammy AS builder
 WORKDIR /
+
+ARG OM_BRANCH=main
+
+# schema-48.0 release does not have changes required to build OM on linux/arm64.
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential ca-certificates git libz-dev python3 cmake libgsl-dev libxerces-c-dev xsdcxx libboost-dev \
   && rm -rf /var/lib/apt/lists/* \
-  #&& git clone --depth 1 --branch schema-48.0 https://github.com/SwissTPH/openmalaria.git \
-  # schema-48.0 release does not have changes required to build OM on linux/arm64.
-  # Hence, main is used below.
-  && git clone --depth 1 --branch main https://github.com/SwissTPH/openmalaria.git \
+  && git clone --depth 1 --branch ${OM_BRANCH} https://github.com/SwissTPH/openmalaria.git \
   && cd openmalaria \
   && mkdir build \
   && cd build \
