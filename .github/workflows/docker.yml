@@ -47,7 +47,6 @@ jobs:
   # AMD64 BUILD (only when pushing)
   # ===========================
   build_amd64:
-    if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -67,6 +66,7 @@ jobs:
           docker/
 
     - name: Push AMD64
+      if: ${{ github.event.inputs.push_to_dockerhub == 'true' }}
       run: docker push swisstph/openmalaria:${{ github.event.inputs.tag }}-amd64
 
 
