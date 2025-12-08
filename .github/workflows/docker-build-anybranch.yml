@@ -1,4 +1,4 @@
-name: Build & Publish OpenMalaria Docker Image
+name: Build & Publish OpenMalaria Docker Images
 
 on:
   workflow_dispatch:
