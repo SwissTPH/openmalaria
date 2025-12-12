@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Schema for OpenMalaria input documents
-Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+<!-- This file is part of OpenMalaria.
+Copyright © 2005-2025 Swiss Tropical and Public Health Institute
+Copyright © 2005-2015 Liverpool School Of Tropical Medicine
+Copyright © 2020-2025 University of Basel
+Copyright © 2025 The Kids Research Institute Australia
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_47" xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_48" xmlns:om="http://openmalaria.org/schema/scenario_48" xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <!-- Component and TriggeredDeployments would be in interventions.xsd, except
     that they are needed from healthSystem.xsd -->
  <xs:complexType name="Component">
@@ -382,6 +385,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
+    <xs:attribute name="truncate" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Optional maximum value for sampled values.
+
+          When set, this attribute enforces an upper limit on samples,
+          which can help avoid unrealistically high values, especially
+          when using lognormal or gamma distributions with high variance
+          or coefficient of variation (CV).
+
+          If not specified, samples will not be truncated.
+        </xs:documentation>
+        <xs:appinfo>name:Maximum value of samples;units:unitless;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
  </xs:complexType>
  <xs:complexType name="SampledValueLN">
   <xs:annotation>

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@
 
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
-#include "interventions/InterventionManager.hpp"
+#include "interventions/InterventionManager.h"
 #include "util/errors.h"
 #include "util/checkpoint.h"
 
@@ -36,22 +37,10 @@ vector<PerHostAnophParams> PerHostAnophParams::params;
 vector<double> PerHostAnophParams::entoAvailabilityPercentiles;
 
 PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
-    const string &distr = mosq.getAvailability().getDistr();
-    if(distr == "const")
-        entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
-    else
-    {
-        if(util::ModelOptions::option(NEGATIVE_BINOMIAL_MASS_ACTION) || util::ModelOptions::option(LOGNORMAL_MASS_ACTION) || util::ModelOptions::option(COMORB_TRANS_HET))
-            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): ModelOptions NEGATIVE_BINOMIAL_MASS_ACTION, LOGNORMAL_MASS_ACTION, COMORB_TRANS_HET are not compatible with ento-availability heterogeneity distributions other than \"const\"");
+    if(mosq.getAvailability().getDistr() != "const" && (util::ModelOptions::option(NEGATIVE_BINOMIAL_MASS_ACTION) || util::ModelOptions::option(LOGNORMAL_MASS_ACTION) || util::ModelOptions::option(COMORB_TRANS_HET)))
+        throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): ModelOptions NEGATIVE_BINOMIAL_MASS_ACTION, LOGNORMAL_MASS_ACTION, COMORB_TRANS_HET are not compatible with ento-availability heterogeneity distributions other than \"const\"");
 
-        if(distr == "lognormal")
-            entoAvailability = make_unique<util::LognormalSampler>(1.0, mosq.getAvailability());
-        else if(distr == "gamma")
-            entoAvailability = make_unique<util::GammaSampler>(mosq.getAvailability());
-        else
-            throw util::xml_scenario_error( "PerHostAnophParams::PerHostAnophParams(): unknown distribution "+distr);
-    }
-
+    entoAvailability = util::createSampler(1.0, mosq.getAvailability());
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
@@ -78,7 +67,7 @@ void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
 
     for(size_t i = 0; i < PerHostAnophParams::numSpecies(); ++i) {
         const PerHostAnophParams& base = PerHostAnophParams::get(i);
-        anophEntoAvailabilityRaw[i] = base.entoAvailability->sample(rng);//std::min(base.entoAvailability->sample(rng), 25.0);
+        anophEntoAvailabilityRaw[i] = base.entoAvailability->sample(rng);
         anophEntoAvailability[i] = base.entoAvailabilityFactor * anophEntoAvailabilityRaw[i] * availabilityFactor;
         anophProbMosqBiting[i] = base.probMosqBiting.sample(rng);
         auto pRest1 = base.probMosqFindRestSite.sample(rng);

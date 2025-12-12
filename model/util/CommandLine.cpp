@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -216,13 +217,16 @@ namespace OM { namespace util {
 		<<"For more information, see https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
 		<<"\tschema version: \t"   <<SCHEMA_VERSION<<endl
 		<<"\tprogram version:\t" << util::semantic_version <<endl<<endl
-		<<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute"<<endl
-		<<"and Liverpool School Of Tropical Medicine."<<endl
+		<<"\tCopyright © 2005-2025 Swiss Tropical and Public Health Institute"<<endl
+		<<"\tCopyright © 2005-2015 Liverpool School Of Tropical Medicine"<<endl
+		<<"\tCopyright © 2020-2025 University of Basel"<<endl
+		<<"\tCopyright © 2025 The Kids Research Institute Australia"<<endl<<endl
 		<<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl<<endl
 		<<"are welcome to redistribute it under certain conditions. See the file COPYING"<<endl
 		<<"or http://www.gnu.org/licenses/gpl-2.0.html for details of warranty or terms of"<<endl
 		<<"redistribution."<<endl<<endl;
 	}
+
 	if (cloHelp || cloError) {
 		cerr << "Usage: " << argv[0] << " [options]" << endl << endl
 		<< "Options:"<<endl

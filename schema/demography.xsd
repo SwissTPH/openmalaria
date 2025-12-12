@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Schema for OpenMalaria input documents
-Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+<!-- This file is part of OpenMalaria.
+Copyright © 2005-2025 Swiss Tropical and Public Health Institute
+Copyright © 2005-2015 Liverpool School Of Tropical Medicine
+Copyright © 2020-2025 University of Basel
+Copyright © 2025 The Kids Research Institute Australia
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_47"
-           xmlns:om="http://openmalaria.org/schema/scenario_47"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_48"
+           xmlns:om="http://openmalaria.org/schema/scenario_48"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!---HumanPopulationStructure-->
   <xs:complexType name="Demography">
@@ -37,15 +40,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Maximum age of simulated humans in years
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="growthRate" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          Growth rate of human population.
-            (we should be able to implement this with non-zero values)
-        </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

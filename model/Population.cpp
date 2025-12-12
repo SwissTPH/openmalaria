@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +81,6 @@ void Population::update()
 {
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // size is assumed to be the _actual and exact_ population size by other code.
-    //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (size * exp( AgeStructure::rho * sim::ts1().inSteps() ));
     int cumPop = 0;
 
     for (auto it = humans.begin(); it != humans.end();) {

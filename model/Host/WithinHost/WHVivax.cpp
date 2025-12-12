@@ -1,10 +1,10 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
  * Copyright (C) 2025 The Kids Research Institute Australia
- * 
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -38,23 +38,16 @@
 #include <limits>
 #include <cmath>
 
-
-
 namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
 
-struct HypnozoiteReleaseDistribution: private LognormalSampler {
-    HypnozoiteReleaseDistribution() :
-        latentRelapse( numeric_limits<double>::signaling_NaN() )
+struct HypnozoiteReleaseDistribution {
+    HypnozoiteReleaseDistribution(std::unique_ptr<util::LognormalSampler> sampler, double latentRelapse) :
+        sampler(std::move(sampler)),
+        latentRelapse(latentRelapse)
         {}
-    
-    /// Set parameters from XML element
-    void setParams( const scnXml::HypnozoiteReleaseDistribution& elt ) {
-        LognormalSampler::setParams( elt );
-        latentRelapse = elt.getLatentRelapse();
-    };
     
     /// Sample the time until next release
     SimTime sampleReleaseDelay(LocalRng& rng) const {
@@ -64,7 +57,7 @@ struct HypnozoiteReleaseDistribution: private LognormalSampler {
         int maxcount = 1e3;
         
         do{
-            delay = LognormalSampler::sample(rng);
+            delay = sampler->sample(rng);
             count += 1;
             
             if( count >= maxcount ){
@@ -77,9 +70,14 @@ struct HypnozoiteReleaseDistribution: private LognormalSampler {
     }
     
 private:
+    std::unique_ptr<util::LognormalSampler> sampler;
     double latentRelapse;   // days
 };
 
+std::unique_ptr<HypnozoiteReleaseDistribution> createHypnozoiteReleaseDistribution(const scnXml::HypnozoiteReleaseDistribution& elt)
+{
+    return std::make_unique<HypnozoiteReleaseDistribution>(createSampler(elt),  elt.getLatentRelapse());
+}
 
 // ———  parameters  ———
 
@@ -90,7 +88,7 @@ SimTime latentP = sim::never();       // attribute on <parameters> element.
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
-HypnozoiteReleaseDistribution latentRelapse1st, latentRelapse2nd;
+std::unique_ptr<HypnozoiteReleaseDistribution> latentRelapse1st, latentRelapse2nd;
 double pSecondRelease = numeric_limits<double>::signaling_NaN();
 SimTime bloodStageProtectionLatency = sim::never();
 WeibullSampler bloodStageLength;    // units: days
@@ -153,9 +151,9 @@ SimTime sampleReleaseDelay(LocalRng& rng){
     }
     
     if (isFirstRelease){
-        return latentRelapse1st.sampleReleaseDelay(rng);
+        return latentRelapse1st->sampleReleaseDelay(rng);
     } else {
-        return latentRelapse2nd.sampleReleaseDelay(rng);
+        return latentRelapse2nd->sampleReleaseDelay(rng);
     }
 }
 
@@ -604,9 +602,9 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     maxNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getMax();
     baseNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getBase();
     const scnXml::HypnozoiteRelease& hr = elt.getHypnozoiteRelease();
-    latentRelapse1st.setParams(hr.getFirstReleaseDays());
+    latentRelapse1st = createHypnozoiteReleaseDistribution(hr.getFirstReleaseDays());
     if(hr.getSecondReleaseDays().present()){
-        latentRelapse2nd.setParams(hr.getSecondReleaseDays().get());
+        latentRelapse2nd = createHypnozoiteReleaseDistribution(hr.getSecondReleaseDays().get());
         pSecondRelease = hr.getPSecondRelease();
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     } // else pSecondRelease is NaN and other values don't get used

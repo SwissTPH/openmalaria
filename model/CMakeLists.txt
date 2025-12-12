@@ -1,6 +1,25 @@
 # CMake configuration for all code in this dir and below
-# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
+# This file is part of OpenMalaria.
+# 
+# Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
+# Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
+# Copyright (C) 2020-2025 University of Basel
+# Copyright (C) 2025 The Kids Research Institute Australia
+#
+# OpenMalaria is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 # Configure this file
 file(STRINGS ${CMAKE_SOURCE_DIR}/version.txt OM_VERSION)
@@ -65,7 +84,6 @@ set (Model_CPP
   mon/misc.cpp
   mon/Continuous.cpp
   
-  util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
   util/ModelOptions.cpp
@@ -76,6 +94,7 @@ set (Model_CPP
   util/DocumentLoader.cpp
   util/random.cpp
   util/UnitParse.cpp
+  util/DecayFunction.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp

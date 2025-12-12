@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2025 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * Copyright (C) 2020-2022 University of Basel
+ * Copyright (C) 2020-2025 University of Basel
+ * Copyright (C) 2025 The Kids Research Institute Australia
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +23,12 @@
 #ifndef Hmod_DecayFunction
 #define Hmod_DecayFunction
 
-#include "Global.h"
-#include "util/sampler.h"
 #include <limits>
 #include <memory>
+
+#include "Global.h"
+#include "util/sampler.h"
+#include "util/UnitParse.h"
 
 namespace OM {
 namespace util {
@@ -40,12 +43,15 @@ class DecayFunction
 {
 public:
     DecayFunction(bool increasing = false, double initialEfficacy = 1.0, double CV = 0.0) : 
-        increasing(increasing), initialEfficacy(initialEfficacy) {
-        het.setMeanCV( 1.0, CV );
-    }
+        increasing(increasing), initialEfficacy(initialEfficacy), het(std::move(LognormalSampler::fromMeanCV(1.0, CV))) {}
+
+    DecayFunction(const DecayFunction& other) : 
+        increasing(other.increasing),
+        initialEfficacy(other.initialEfficacy),
+        het(other.het ? other.het->clone() : nullptr) {}
 
     virtual ~DecayFunction() {}
-    
+
     /** Return a new decay function, constructed from an XML element.
      * 
      * @param elt XML element specifying which function to use and parameters
@@ -60,13 +66,13 @@ public:
      * Note that a DecayFunction is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual unique_ptr<DecayFunction> hetSample(LocalRng& rng) const {
-        return hetSample(het.sample(rng));
+    unique_ptr<DecayFunction> hetSample(LocalRng& rng) const {
+        return hetSample(het->sample(rng));
     }
     
     /** Generate a DecayFunction value from an existing sample. */
-    virtual unique_ptr<DecayFunction> hetSample(NormalSample sample) const {
-        return hetSample(het.sample(sample));
+    std::unique_ptr<DecayFunction> hetSample(NormalSample sample) const {
+        return hetSample(het->sample(sample));
     }
     
     /** Generate a DecayFunction value from an existing sample. */
@@ -100,7 +106,7 @@ public:
 private:
     bool increasing;
     double initialEfficacy;
-    LognormalSampler het;
+    std::unique_ptr<util::Sampler> het;
 };
 
 } }

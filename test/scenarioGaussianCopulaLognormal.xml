@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_47" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="example" schemaVersion="47" xsi:schemaLocation="http://openmalaria.org/schema/scenario_47 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_48" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="example" schemaVersion="48" xsi:schemaLocation="http://openmalaria.org/schema/scenario_48 scenario_current.xsd">
     <!-- This is an example scenario.
     More information is available in the official documentation: https://swisstph.github.io/openmalaria/schema-latest.html
     And in the wiki: https://github.com/SwissTPH/openmalaria/wiki 
@@ -176,7 +176,7 @@
                     <mosqLaidEggsSameDayProportion value="0.313"/>
                     <mosqSeekingDuration value="0.33"/>
                     <mosqSurvivalFeedingCycleProbability value="0.623"/>
-                    <availability distr="gamma"  variance="0.15"/>
+                    <availability distr="lognormal" CV="1.5" truncate="25.0"/>
                     <mosqProbBiting mean="0.95" variance="0"/>
                     <mosqProbFindRestSite mean="0.95" variance="0"/>
                     <mosqProbResting mean="0.99" variance="0"/>
