@@ -606,18 +606,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Identifier for this anopheles species;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
-  <xs:attribute name="propInfected" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>Initial guess of the proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t). Only used as a starting value.</xs:documentation>
-    <xs:appinfo>units:Proportion;min:0;max:1;name:Initial estimate of proportion of mosquitoes infected (ρ_O);exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
-  <xs:attribute name="propInfectious" type="xs:double" use="required">
-   <xs:annotation>
-    <xs:documentation>Initial estimate of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
-    <xs:appinfo>units:Proportion;min:0;max:1;name:Initial estimate of proportion of mosquitoes infectious (ρ_S);exposed:false;</xs:appinfo>
-   </xs:annotation>
-  </xs:attribute>
  </xs:complexType>
  <xs:complexType name="MosqStage">
   <xs:annotation>
