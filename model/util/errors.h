@@ -27,6 +27,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+    
+#include <source_location>
 
 using namespace std;
 
@@ -53,7 +55,20 @@ using namespace std;
 
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
-    
+
+    inline void errno_check(const std::source_location& loc = std::source_location::current())
+    {
+        if (errno != 0)
+        {
+            char msg[256];
+            snprintf(msg, sizeof(msg),
+                    "%s:%u",
+                    loc.file_name(), loc.line());
+            std::perror(msg);
+            errno = 0;
+        }
+    }
+
     /** Different exit codes which may be used.
      * 
      * These are intended to categorise errors, not diagnose them. Always use
