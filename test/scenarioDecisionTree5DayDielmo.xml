@@ -149,7 +149,7 @@
   <!-- IMPORTANT: forced transmission because the EIR was recorded during the study -->
   <entomology mode="forced" name="Ndiop Senegal 1993" scaledAnnualEIR = "42">
     <vector>
-      <anopheles mosquito="dummy_vector" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="dummy_vector">
         <seasonality annualEIR="21" input = "EIR">
           <monthlyValues smoothing="fourier"> 
             <value>0</value>

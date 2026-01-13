@@ -160,7 +160,7 @@
         forced: the EIR will always be equal to the scaledAnnualEIR. -->
     <entomology mode="dynamic" name="Namawala" scaledAnnualEIR="20">
         <vector>
-            <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+            <anopheles mosquito="gambiae_ss">
                 <!-- Seasonality can be passed as fourier coefficients or monthly values.
                 Note that if monthly values are used, OpenMalaria will anyway smooth the values
                 using fourier coefficients. -->

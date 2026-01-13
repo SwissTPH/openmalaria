@@ -103,7 +103,7 @@
   </healthSystem>
   <entomology mode="forced" name="Navrongo">
     <vector>
-	  <anopheles mosquito="dummy_vector" propInfected="0.078" propInfectious="0.021">
+	  <anopheles mosquito="dummy_vector">
         <seasonality annualEIR="1" input="EIR">
           <dailyValues>
               <value>0.6731</value>

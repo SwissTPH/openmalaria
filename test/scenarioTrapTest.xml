@@ -178,7 +178,7 @@ For simulating Rusinga
   </healthSystem>
   <entomology mode="dynamic" name="Namawala">
     <vector>
-      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="gambiae_ss">
         <seasonality annualEIR="3.82" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="-0.2072" b="0.8461"/>
@@ -199,7 +199,7 @@ For simulating Rusinga
           <mosqHumanBloodIndex value="0.939"/>
         </mosq>
       </anopheles>
-      <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="funestus">
         <seasonality annualEIR="11.84" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="0.4943" b="0.6127"/>
@@ -220,7 +220,7 @@ For simulating Rusinga
           <mosqHumanBloodIndex value="0.98"/>
         </mosq>
       </anopheles>
-      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="arabiensis">
         <seasonality annualEIR="34.37" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="-0.2072" b="0.8461"/>

@@ -169,7 +169,7 @@
   <entomology mode="dynamic" name="P.falciparum cases in Bataraza, Brooke's Point and Rizal in 2015" scaledAnnualEIR="1">
     <!-- "scaledAnnualEIR" -->
     <vector>
-      <anopheles mosquito="flavirostris" propInfected="0.078" propInfectious="0.000021">
+      <anopheles mosquito="flavirostris">
         <!-- Standard values -->
         <seasonality annualEIR="1.000" input="EIR">
           <!-- "annualEIR_flavirostris" -->
@@ -189,7 +189,7 @@
             <value>107</value>
           </monthlyValues>
         </seasonality>
-        <mosq minInfectedThreshold="0.001">
+        <mosq minInfectedThreshold="0">
           <!-- Standard value -->
           <mosqRestDuration value="2"/>
           <!-- Catangui 1971 desrcibes 3 days, but early morning cattle baited trap catches (maybe emptied in the early morning) were counted as 3 days if e.g. collected on the morning of the 8th and eggs were observed on the morning of the 10th, whereas this spans 48 hours. Note that Catangui 1985 Bionomics of malaria vectors in The Philippines states: "The gonotrophic cylce is 48 hours" (!) -->

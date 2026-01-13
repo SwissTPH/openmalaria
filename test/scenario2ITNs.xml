@@ -236,7 +236,7 @@
   </healthSystem>
   <entomology mode="dynamic" name="Nyanza">
     <vector>
-      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.015">
+      <anopheles mosquito="gambiae_ss">
         <seasonality annualEIR=".6" input="EIR">
           <monthlyValues smoothing="fourier">
             <value>0.076</value>

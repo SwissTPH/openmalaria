@@ -170,7 +170,7 @@
   <entomology mode="dynamic" name="P.falciparum cases in Bataraza, Brooke's Point and Rizal in 2015" scaledAnnualEIR="1">
     <!-- "scaledAnnualEIR" -->
     <vector>
-      <anopheles mosquito="flavirostris" propInfected="0.078" propInfectious="0.000021">
+      <anopheles mosquito="flavirostris">
         <!-- Standard values -->
         <seasonality annualEIR="1.000" input="EIR">
           <!-- "annualEIR_flavirostris" -->
