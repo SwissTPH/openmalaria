@@ -199,7 +199,7 @@ Boston, MA 02110-1301, USA. -->
                         <coeffic a="0.0906" b="-0.0425"/>
                     </fourierSeries>
                 </seasonality>
-                <mosq minInfectedThreshold="0.001">
+                <mosq>
                     <mosqRestDuration value="3"/>
                     <extrinsicIncubationPeriod value="11"/>
                     <mosqLaidEggsSameDayProportion value="0.313"/>
@@ -227,7 +227,7 @@ Boston, MA 02110-1301, USA. -->
                         <coeffic a="-0.2386" b="-0.2851"/>
                     </fourierSeries>
                 </seasonality>
-                <mosq minInfectedThreshold="0.001">
+                <mosq>
                     <mosqRestDuration value="3"/>
                     <extrinsicIncubationPeriod value="11"/>
                     <mosqLaidEggsSameDayProportion value="0.616"/>
@@ -255,7 +255,7 @@ Boston, MA 02110-1301, USA. -->
                         <coeffic a="0.0906" b="-0.0425"/>
                     </fourierSeries>
                 </seasonality>
-                <mosq minInfectedThreshold="0.001">
+                <mosq>
                     <mosqRestDuration value="3"/>
                     <extrinsicIncubationPeriod value="11"/>
                     <mosqLaidEggsSameDayProportion value="0.313"/>
