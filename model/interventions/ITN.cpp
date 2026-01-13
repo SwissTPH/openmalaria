@@ -681,6 +681,7 @@ void HumanITN::update(Host::Human& human){
         util::errno_check();
         holeIndex += newHoles + params.ripFactor * human.rng.poisson( nHoles * ripRate );
         util::errno_check();
+        cout << nHoles * ripRate << " " << human.rng.poisson( nHoles * ripRate ) << " " << newHoles << " " << params.ripFactor << endl;
     }
 }
 
