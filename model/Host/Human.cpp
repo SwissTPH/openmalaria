@@ -238,6 +238,8 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     // monitoringAgeGroup is the group for the start of the time step.
     human.monitoringAgeGroup.update( age0 );
 
+    human.updateCohortSet();
+
     // Age at  the end of the update period. In most cases
     // the difference between this and age at the start is not especially
     // important in the model design, but since we parameterised with

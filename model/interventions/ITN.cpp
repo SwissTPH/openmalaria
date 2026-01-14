@@ -669,8 +669,6 @@ void HumanITN::redeploy(LocalRng& rng, const OM::Transmission::HumanVectorInterv
 void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     if( deployTime != sim::never() ){
-        util::errno_check();
-
         // First use is at age 0 relative to ts0()
         if( sim::ts0() >= disposalTime ){
             deployTime = sim::never();
@@ -688,8 +686,6 @@ void HumanITN::update(Host::Human& human){
         double lambda = nHoles * ripRate;
         if (lambda > 0)
             holeIndex += params.ripFactor * human.rng.poisson( lambda );
-
-        util::errno_check();
     }
 }
 

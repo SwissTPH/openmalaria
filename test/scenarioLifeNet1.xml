@@ -166,7 +166,7 @@
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>
   </healthSystem>
-  <entomology mode="dynamic" name="P.falciparum cases in Bataraza, Brooke's Point and Rizal in 2015" scaledAnnualEIR="1">
+  <entomology mode="dynamic" name="P.falciparum cases in Bataraza, Brooke's Point and Rizal in 2015" scaledAnnualEIR="10">
     <!-- "scaledAnnualEIR" -->
     <vector>
       <anopheles mosquito="flavirostris">
