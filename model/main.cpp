@@ -60,6 +60,17 @@ void print_progress(int lastPercent, SimTime &estEndTime)
     }
 }
 
+void print_errno()
+{
+    if( errno != 0 )
+    {
+       char err[256];
+       sprintf(err, "t = %d Please report! Error: ", int(sim::now()));
+       std::perror(err);
+       errno = 0;
+    }
+}
+
 // Internal simulation loop
 void run(Population &population, TransmissionModel &transmission, SimTime humanWarmupLength, SimTime &endTime, SimTime &estEndTime, bool surveyOnlyNewEp, string phase)
 {
@@ -69,16 +80,12 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
 
     while (sim::now() < endTime)
     {
-        util::errno_check();
-        
         if (util::CommandLine::option(util::CommandLine::VERBOSE) && sim::intervDate() > 0)
             cout << "Time step: " << sim::now() / sim::oneTS() << ", internal days: " << sim::now() << " | " << estEndTime << ", Intervention Date: " << sim::intervDate() << endl;
 
         // Monitoring. sim::now() gives time of end of last step,
         // and is when reporting happens in our time-series.
         Continuous.update( population );
-        util::errno_check();
-
         if( sim::intervDate() == mon::nextSurveyDate() ){
             for(Host::Human &human : population.humans)
                 Host::summarize(human, surveyOnlyNewEp);
@@ -88,8 +95,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         
         // Deploy interventions, at time sim::now().
         InterventionManager::deploy( population.humans, transmission );
-        util::errno_check();
-
+        
         // Time step updates. Time steps are mid-day to mid-day.
         // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
         sim::start_update();
@@ -97,8 +103,7 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
         // This should be called before humans contract new infections in the simulation step.
         // This needs the whole population (it is an approximation before all humans are updated).
         transmission.vectorUpdate(population.humans);
-        util::errno_check();
-
+        
         // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
         // (until humans old enough to be pregnate get updated and can be infected).
         Host::NeonatalMortality::update (population.humans);
@@ -108,23 +113,19 @@ void run(Population &population, TransmissionModel &transmission, SimTime humanW
             if (human.getDOB() + sim::maxHumanAge() >= humanWarmupLength) // this is last time of possible update
                 Host::update(human, transmission);
         }
-        util::errno_check();
        
         population.update();
-        util::errno_check();
-
+        
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
         transmission.updateKappa(population.humans);
         transmission.surveyEIR();
-        util::errno_check();
 
         sim::end_update();
 
         if (util::CommandLine::option(util::CommandLine::PROGRESS))
             print_progress(lastPercent, estEndTime);
-
-        util::errno_check();
+        print_errno();
     }
 
     if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing " << phase << "..." << endl;

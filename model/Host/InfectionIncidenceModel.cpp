@@ -193,8 +193,8 @@ double NegBinomMAII::getModelExpectedInfections (LocalRng& rng, double effective
       effectiveEIR * susceptibility() / inf_rate_shape_param);
 }
 double LogNormalMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
-  // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
-    if (effectiveEIR <= 0.0)
+    // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
+    if (effectiveEIR < 1e-10)
         return 0.0;
     double meanlog = log(effectiveEIR * susceptibility()) - inf_rate_offset;
     return rng.log_normal(meanlog, inf_rate_shape_param);
@@ -219,14 +219,15 @@ double InfectionIncidenceModel::susceptibility () {
 
 double InfectionIncidenceModel::expectedNumNewInfections(OM::Host::Human& human, double effectiveEIR)
 {
-    double expectedNumInfections = getModelExpectedInfections (human.rng, effectiveEIR, human.perHostTransmission);
     // error check (should be OK if kappa is checked, for nonVector model):
     if( !(std::isfinite)(effectiveEIR) ){
         ostringstream out;
         out << "effectiveEIR is not finite: " << effectiveEIR << endl;
         throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
     }
-  
+
+    double expectedNumInfections = getModelExpectedInfections (human.rng, effectiveEIR, human.perHostTransmission);    
+    
     // Only to be consistent with old simulation runs when set to false
     // Setting this option to true will only affect reporting
     if(opt_vaccine_genotype == false)
@@ -234,14 +235,14 @@ double InfectionIncidenceModel::expectedNumNewInfections(OM::Host::Human& human,
         expectedNumInfections *= human.vaccine.getFactor( interventions::Vaccine::PEV );
   
     //Update pre-erythrocytic immunity
-    m_cumulativeEIRa+=effectiveEIR;
+    m_cumulativeEIRa += effectiveEIR;
 
     m_pInfected = 1.0 - exp(-expectedNumInfections) * (1.0-m_pInfected);
     if (m_pInfected < 0.0)
         m_pInfected = 0.0;
     else if (m_pInfected > 1.0)
         m_pInfected = 1.0;
-
+    
     return expectedNumInfections;
 }
 
@@ -249,11 +250,12 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double expectedNumI
 { 
   if (expectedNumInfections > 0.0000001){
     int n = human.rng.poisson(expectedNumInfections);
-    if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
+
+    if( n > WithinHost::WHInterface::MAX_INFECTIONS )
         n = WithinHost::WHInterface::MAX_INFECTIONS;
-    }
     return n;
   }
+  
   if ( (std::isnan)(expectedNumInfections) ){	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
       throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );

@@ -224,8 +224,6 @@ void summarize(Human &human, bool surveyOnlyNewEp) {
 
 void update(Human &human, Transmission::TransmissionModel& transmission)
 {
-    util::errno_check();
-
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = human.age(sim::ts0());
     if (human.clinicalModel->isDead(age0)) {
@@ -234,10 +232,10 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     }
     
     util::streamValidate( age0 );
-    
+
     // monitoringAgeGroup is the group for the start of the time step.
     human.monitoringAgeGroup.update( age0 );
-
+    
     human.updateCohortSet();
 
     // Age at  the end of the update period. In most cases
@@ -246,12 +244,9 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     // age1 we should stick with it.
     double age1 = sim::inYears(human.age(sim::ts1()));
 
-    util::errno_check();
-
     // age1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
     vector<double> EIR_per_genotype_i, EIR_per_genotype_l;
     transmission.getEIR(human, age0, age1, EIR_per_genotype_i, EIR_per_genotype_l);
-    util::errno_check();
 
     double EIR_i = util::vectors::sum(EIR_per_genotype_i);
     double EIR_l = util::vectors::sum(EIR_per_genotype_l);
@@ -265,22 +260,18 @@ void update(Human &human, Transmission::TransmissionModel& transmission)
     double expectedNNewInfs = human.infIncidence->expectedNumNewInfections( human, EIR);
     double expectedNNewInfs_i = x * expectedNNewInfs;
     double expectedNNewInfs_l = (1.0-x) * expectedNNewInfs;
-    util::errno_check();
 
     // One more rng call if imported infection
     int nNewInfs_l = human.infIncidence->numNewInfections( human, expectedNNewInfs_l);
     int nNewInfs_i = human.infIncidence->numNewInfections( human, expectedNNewInfs_i);
-    util::errno_check();
 
     // age1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
     human.withinHostModel->update(human, human.rng, nNewInfs_i, nNewInfs_l, EIR_per_genotype_i, EIR_per_genotype_l, age1);
     human.infIncidence->reportNumNewInfections(human, nNewInfs_i, nNewInfs_l);
-    util::errno_check();
-    
+
     // age1 used to get case fatality and sequelae probabilities, determine pathogenesis
     human.clinicalModel->update( human, age1, age0 == sim::zero() );
     human.clinicalModel->updateInfantDeaths( age0 );
-    util::errno_check();
 }
 
 } }
