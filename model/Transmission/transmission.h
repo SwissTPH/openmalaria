@@ -27,7 +27,7 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/Anopheles/SimpleMPDAnophelesModel.h"
-#include "Transmission/Anopheles/AnophelesModelFitter.h"
+#include "Transmission/Anopheles/EmergenceRateEstimator.h"
 
 #include <vector>
 
@@ -327,7 +327,7 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
     initialisationEIR.assign(sim::stepsPerYear(), 0.0);
 
     vector<std::unique_ptr<Anopheles::AnophelesModel>> species;
-    vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFitters;
+    vector<std::unique_ptr<Anopheles::EmergenceRateEstimator>> emergenceRateEstimators;
     map<string, size_t> speciesIndex;
 
     size_t numSpecies = anophelesList.size();
@@ -344,10 +344,11 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
         PerHostAnophParams::init(anoph.getMosq());
 
         Anopheles::AnophelesModel *anophModel = createAnophelesModel(i, anoph, initialisationEIR, populationSize, interventionMode);
-        Anopheles::AnophelesModelFitter *fitter = new Anopheles::AnophelesModelFitter(*anophModel);
+        // Anopheles::EmergenceRateAdaptiveFitter *estimator = new Anopheles::EmergenceRateAdaptiveFitter(*anophModel);
+        Anopheles::EmergenceRateRootFindingSolver *estimator = new Anopheles::EmergenceRateRootFindingSolver(*anophModel, populationSize);
 
         species.push_back(std::unique_ptr<Anopheles::AnophelesModel>(anophModel));
-        speciesFitters.push_back(std::unique_ptr<Anopheles::AnophelesModelFitter>(fitter));
+        emergenceRateEstimators.push_back(std::unique_ptr<Anopheles::EmergenceRateEstimator>(estimator));
         speciesIndex[anophModel->mosq.name] = i;
     }
 
@@ -359,7 +360,7 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
         // speciesIndex.clear();
     }
 
-    return new VectorModel(initialisationEIR, interventionMode, std::move(species), std::move(speciesFitters), speciesIndex, populationSize);
+    return new VectorModel(initialisationEIR, interventionMode, std::move(species), std::move(emergenceRateEstimators), speciesIndex, populationSize);
 }
 
 ///@brief Creation, destruction and checkpointing
