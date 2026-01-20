@@ -117,7 +117,7 @@
   </healthSystem>
   <entomology mode="dynamic" name="Vector">
     <vector>
-      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="gambiae_ss">
         <seasonality annualEIR="100" input="EIR">
         <fourierSeries EIRRotateAngle="0">
         <coeffic a="0" b="0"/>

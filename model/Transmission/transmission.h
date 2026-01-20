@@ -300,9 +300,11 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         nhh.name = xmlNNH.getName();
         nhhs.push_back(nhh);
     }
-
-    double propInfectious = anoph.getPropInfectious();
-    double propInfected = anoph.getPropInfected();
+    
+    // Initial estimate of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.
+    double propInfectious = 0.021;
+    // Initial guess of the proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t). Only used as a starting value.
+    double propInfected = 0.078;
 
     anophModel->initialise(i, mosqParams);
     anophModel->initAvailability(i, nhhs, populationSize);

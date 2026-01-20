@@ -123,7 +123,7 @@
   </healthSystem>
   <entomology mode="dynamic" name="Namawala, single vector">
     <vector>
-      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="arabiensis">
         <seasonality annualEIR="328.9472181764958" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="-0.2072" b="0.8461"/>

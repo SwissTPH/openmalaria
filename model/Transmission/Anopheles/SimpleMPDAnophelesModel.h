@@ -140,7 +140,7 @@ public:
         nOvipositingDelayed[util::mod_nn(d1, developmentDuration)] = nOvipositing;
         quinquennialOvipositing[util::mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
         
-        if (emergence < 0)
+        if (sim::intervTime() > 0 && emergence < 0)
         {
             std::ostringstream oss;
             oss << "Error: SimpleMPD model: negative emergence at t=" << d0 << ": " << emergence << ". ";

@@ -191,7 +191,7 @@
     </healthSystem>
     <entomology mode="dynamic" name="Kenya Lowlands" scaledAnnualEIR="20">
         <vector>
-            <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+            <anopheles mosquito="gambiae_ss">
         <seasonality annualEIR="24.826144381650714" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="1.0" b="0.8461"/>
@@ -219,7 +219,7 @@
           <mosqProbResting value="0.99"/>
         </nonHumanHosts>
       </anopheles>
-      <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="funestus">
         <seasonality annualEIR="77.00628873180102" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="1.0" b="0.6127"/>
@@ -247,7 +247,7 @@
           <mosqProbResting value="0.99"/>
         </nonHumanHosts>
       </anopheles>
-      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+      <anopheles mosquito="arabiensis">
         <seasonality annualEIR="223.38512656454782" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="1.0" b="0.8461"/>

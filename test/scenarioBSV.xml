@@ -150,7 +150,7 @@
     </healthSystem>
     <entomology mode="dynamic" name="Namawala" scaledAnnualEIR="5">  <!-- site specific - pre intervention EIR -->
         <vector>
-            <anopheles mosquito="gambiae_ss_outdoor" propInfected="0.078" propInfectious="0.021">
+            <anopheles mosquito="gambiae_ss_outdoor">
                 <seasonality annualEIR="1" input="EIR">     
                     <fourierSeries EIRRotateAngle="0">
                         <coeffic a="0" b="0"/>

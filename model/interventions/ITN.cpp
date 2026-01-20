@@ -676,9 +676,16 @@ void HumanITN::update(Host::Human& human){
             return;
         }
         
-        int newHoles = human.rng.poisson( holeRate );
+        int newHoles = 0;
+        if( holeRate > 0)
+            newHoles = human.rng.poisson( holeRate );
+
         nHoles += newHoles;
-        holeIndex += newHoles + params.ripFactor * human.rng.poisson( nHoles * ripRate );
+        holeIndex += newHoles;
+
+        double lambda = nHoles * ripRate;
+        if (lambda > 0)
+            holeIndex += params.ripFactor * human.rng.poisson( lambda );
     }
 }
 
