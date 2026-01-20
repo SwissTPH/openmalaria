@@ -8300,8 +8300,6 @@ IN THIS ORDER:
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a></p>
 <pre><code class="language-xml">&lt;anopheles
     mosquito=string
-    propInfected=double
-    propInfectious=double
   &gt;
 IN THIS ORDER:
 |   &lt;seasonality ... /&gt; 
@@ -8327,20 +8325,6 @@ to the ln of the EIR during the burn in period</p>
 <pre><code class="language-xml">mosquito=string
 </code></pre>
 <p>Identifier for this anopheles species</p>
-<h4><a class="header" href="#initial-estimate-of-proportion-of-mosquitoes-infected-ρ_o" id="initial-estimate-of-proportion-of-mosquitoes-infected-ρ_o">Initial estimate of proportion of mosquitoes infected (ρ_O)</a></h4>
-<pre><code class="language-xml">propInfected=double
-</code></pre>
-<p><strong>Units:</strong> Proportion
-<strong>Min:</strong> 0
-<strong>Max:</strong> 1</p>
-<p>Initial guess of the proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t). Only used as a starting value.</p>
-<h4><a class="header" href="#initial-estimate-of-proportion-of-mosquitoes-infectious-ρ_s" id="initial-estimate-of-proportion-of-mosquitoes-infectious-ρ_s">Initial estimate of proportion of mosquitoes infectious (ρ_S)</a></h4>
-<pre><code class="language-xml">propInfectious=double
-</code></pre>
-<p><strong>Units:</strong> Proportion
-<strong>Min:</strong> 0
-<strong>Max:</strong> 1</p>
-<p>Initial estimate of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</p>
 <h2><a class="header" href="#a-nameelt-seasonalitya-seasonality-of-transmission" id="a-nameelt-seasonalitya-seasonality-of-transmission"><a name="elt-seasonality"></a> Seasonality of transmission</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a> → <a href="#elt-seasonality">seasonality</a></p>
 <pre><code class="language-xml">&lt;seasonality
