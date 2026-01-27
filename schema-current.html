@@ -8482,7 +8482,7 @@ IN THIS ORDER:
 <h2><a class="header" href="#a-nameelt-mosqa-mosquito-feeding-cycle-parameters" id="a-nameelt-mosqa-mosquito-feeding-cycle-parameters"><a name="elt-mosq"></a> Mosquito feeding cycle parameters</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a> → <a href="#elt-mosq">mosq</a></p>
 <pre><code class="language-xml">&lt;mosq
-    minInfectedThreshold=double
+  [ minInfectedThreshold=double ] DEFAULT VALUE 0
   &gt;
 IN ANY ORDER:
 |   &lt;mosqRestDuration ... /&gt; 
@@ -8519,6 +8519,7 @@ mosquito interaction of a single species of anopheles mosquito.</p>
 <pre><code class="language-xml">minInfectedThreshold=double
 </code></pre>
 <p><strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> 0</p>
 <p>If less than this many mosquitoes remain infected, transmission is interrupted.</p>
 <h2><a class="header" href="#a-nameelt-mosqrestdurationa-duration-of-the-resting-period-of-the-vector" id="a-nameelt-mosqrestdurationa-duration-of-the-resting-period-of-the-vector"><a name="elt-mosqRestDuration"></a> Duration of the resting period of the vector</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entomology">entomology</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles-4">anopheles</a> → <a href="#elt-mosq">mosq</a> → <a href="#elt-mosqRestDuration">mosqRestDuration</a></p>
